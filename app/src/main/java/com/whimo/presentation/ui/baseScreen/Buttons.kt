@@ -24,6 +24,7 @@ package com.whimo.presentation.ui.baseScreen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -113,6 +114,7 @@ fun GoogleButton(
     isEnabled: Boolean = true,
     isLoading: Boolean = false,
     onClick: () -> Unit = {},
+    onLongClick: () -> Unit = {},
 ) {
     var enabled = isEnabled
     if (isLoading) enabled = false
@@ -123,6 +125,7 @@ fun GoogleButton(
         backgroundColor = MaterialTheme.colorScheme.surface,
         borderColor = MaterialTheme.colorScheme.outline,
         onClick = onClick,
+        onLongClick = onLongClick,
     ) {
         if (isLoading) {
             CircularProgressIndicator(modifier = Modifier.size(24.dp))
@@ -244,6 +247,7 @@ private fun BaseButton1(
     disabledBackgroundColor: Color = backgroundColor,
     disabledBorderColor: Color = disabledBackgroundColor,
     onClick: () -> Unit = {},
+    onLongClick: () -> Unit = {},
     content: @Composable BoxScope.() -> Unit = {},
 ) {
     Surface(
@@ -258,7 +262,11 @@ private fun BaseButton1(
                     shape = RoundedCornerShape(8.dp)
                 )
                 .border(1.dp, if (isEnabled) borderColor else disabledBorderColor, RoundedCornerShape(8.dp))
-                .clickable(isEnabled) { onClick() },
+                .combinedClickable(
+                    enabled = isEnabled,
+                    onClick = { onClick() },
+                    onLongClick = { onLongClick() }
+                ),
             contentAlignment = Alignment.Center,
             content = content,
         )

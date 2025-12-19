@@ -21,6 +21,8 @@
  */
 package com.whimo.presentation.settings
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -36,8 +38,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.whimo.BuildConfig
 import com.whimo.R
 import com.whimo.base.ObserveEffects
 import com.whimo.extensions.findActivity
@@ -125,6 +129,24 @@ fun SettingsScreen(
             title = stringResource(R.string.language),
         ) {
             SettingsActivity.openLanguage(navController.context)
+        }
+
+        SettingsItem(
+            iconRes = R.drawable.ic_chat,
+            title = stringResource(R.string.feedback),
+        ) {
+
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                selector = Intent(Intent.ACTION_SENDTO, "mailto:".toUri())
+                putExtra(Intent.EXTRA_EMAIL, arrayOf(BuildConfig.FEEDBACK_EMAIL))
+                putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.whimo_app_feedback))
+            }
+
+            try {
+                context.startActivity(Intent.createChooser(intent, context.getString(R.string.send_email)))
+            } catch (e: ActivityNotFoundException) {
+                Toast.makeText(context, context.getString(R.string.no_email_app_is_installed), Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

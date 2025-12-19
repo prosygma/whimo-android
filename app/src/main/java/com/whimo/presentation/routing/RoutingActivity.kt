@@ -101,12 +101,6 @@ fun SplashScreen() {
         verticalArrangement = Arrangement.SpaceEvenly,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Icon(
-            modifier = Modifier.size(112.dp),
-            painter = painterResource(id = R.drawable.ic_logo),
-            contentDescription = null,
-            tint = Color.Unspecified
-        )
 
         Column {
             Text(
@@ -120,7 +114,5 @@ fun SplashScreen() {
                 color = ColorMidnightBlue
             )
         }
-
-        Spacer(modifier = Modifier.size(112.dp))
     }
 }

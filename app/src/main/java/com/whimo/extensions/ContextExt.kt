@@ -57,6 +57,30 @@ fun Context.getFileParams(uri: Uri): MFile {
     return mFile
 }
 
+fun Context.getContactEmail(uri: Uri): String? {
+    var email: String? = null
+
+    val cursor = contentResolver.query(
+        /* uri = */ uri,
+        /* projection = */ arrayOf(ContactsContract.CommonDataKinds.Email.ADDRESS),
+        /* selection = */ null,
+        /* selectionArgs = */ null,
+        /* sortOrder = */ null
+    )
+
+    cursor?.use {
+        if (it.moveToFirst()) {
+            val emailIndex = it.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS)
+
+            if (emailIndex != -1)  {
+                email = it.getString(emailIndex)
+            }
+        }
+    }
+
+    return email
+}
+
 fun Context.getContactPhone(uri: Uri): String? {
     var phone: String? = null
 

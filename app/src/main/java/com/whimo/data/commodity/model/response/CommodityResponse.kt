@@ -41,19 +41,7 @@ data class Commodity(
     val code: String,
     val name: String,
     val unit: String,
+    val has_recipe: Boolean,
     val group: CommodityGroup?,
     val balance: Float?,
-)
-
-data class CommoditiesBalancesResponse(
-    val success: Boolean,
-    val pagination: Pagination,
-    val data: List<CommodityBalance>,
-    val message: String
-)
-
-data class CommodityBalance(
-    val id: String,
-    val volume: Float,
-    val commodity: Commodity,
 )

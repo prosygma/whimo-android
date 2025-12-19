@@ -25,12 +25,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.whimo.domain.commodity.models.CommodityGroupModel
+import com.whimo.domain.commodity.models.CommodityModel
+import com.whimo.domain.commodity.models.ConvertRecipeModel
 import com.whimo.navigation.Screens
 import com.whimo.presentation.balances.CommodityGroupBalancesScreen
-import com.whimo.presentation.settings.language.LanguageScreen
+import com.whimo.presentation.balances.convert.ConvertCommodityScreen
+import com.whimo.presentation.balances.convert.ConvertRecipesScreen
+import com.whimo.utils.fromJsonArgs
 
 @Composable
 fun CommodityBalancesNavGraph(
@@ -48,6 +54,40 @@ fun CommodityBalancesNavGraph(
                 modifier = modifier.fillMaxSize(),
                 navController = navController,
                 commodityGroup = commodityGroup,
+            )
+        }
+        composable(
+            route = Screens.ConvertRecipes.route,
+            arguments = listOf(
+                navArgument(Screens.ARG_KEY_JSON) {
+                    type = NavType.StringType
+                    nullable = false
+                }
+            )
+        ) {
+            val json = it.arguments?.getString(Screens.ARG_KEY_JSON)
+
+            ConvertRecipesScreen(
+                modifier = modifier.fillMaxSize(),
+                navController = navController,
+                commodityModel = json?.fromJsonArgs<CommodityModel>(),
+            )
+        }
+        composable(
+            route = Screens.ConvertCommodity.route,
+            arguments = listOf(
+                navArgument(Screens.ARG_KEY_JSON) {
+                    type = NavType.StringType
+                    nullable = false
+                }
+            )
+        ) {
+            val json = it.arguments?.getString(Screens.ARG_KEY_JSON)
+
+            ConvertCommodityScreen(
+                modifier = modifier.fillMaxSize(),
+                navController = navController,
+                recipe = json?.fromJsonArgs<ConvertRecipeModel>(),
             )
         }
     }

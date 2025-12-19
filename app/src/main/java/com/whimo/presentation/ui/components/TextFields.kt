@@ -249,6 +249,7 @@ fun EmailField(
     keyboardActions: KeyboardActions = KeyboardActions.Default,
 
     onValueChange: (String) -> Unit = {},
+    onContactsClicked: (() -> Unit)? = null,
 ) {
     BaseTextField(
         modifier = modifier,
@@ -275,6 +276,21 @@ fun EmailField(
                 contentDescription = null,
                 tint = ColorGray50
             )
+        },
+
+        trailingIcon = if (onContactsClicked != null) {
+            {
+                Icon(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable { onContactsClicked() },
+                    painter = painterResource(id = R.drawable.ic_contacts),
+                    contentDescription = null,
+                    tint = ColorGray50
+                )
+            }
+        } else {
+            null
         },
 
         onValueChange = onValueChange,

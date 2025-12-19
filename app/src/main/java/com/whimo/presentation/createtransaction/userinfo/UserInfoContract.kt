@@ -52,7 +52,8 @@ object UserInfoContract {
         data class OnPhoneRegionChanged(val phoneRegion: PhoneNumberUtils.PhoneRegion) : Event()
         data class OnPhoneNumberChanged(val phoneNumber: String) : Event()
 
-        data class OnContactsClicked(val context: Context) : Event()
+        data class OnEmailContactsClicked(val context: Context) : Event()
+        data class OnPhoneContactsClicked(val context: Context) : Event()
         data class OnContactsPermissionResult(val context: Context, val result: ActivityResult) : Event()
 
         data object OnConfirm : Event()
@@ -67,10 +68,13 @@ object UserInfoContract {
         data class ToggleLoader(val isLoading: Boolean) : Effect()
         data class ShowMessage(val message: String): Effect()
         data object ShowUserExist : Effect()
+        data object ShowEmailNotExist : Effect()
+        data object ShowPhoneNotExist : Effect()
 
         data class ConvertToDownstream(val userInfo: UserInfoModel?) : Effect()
 
-        data object OpenContacts : Effect()
+        data object OpenEmailContacts : Effect()
+        data object OpenPhoneContacts : Effect()
         data object RequestLocationPermission: Effect()
         data object RequestContactsPermission : Effect()
 

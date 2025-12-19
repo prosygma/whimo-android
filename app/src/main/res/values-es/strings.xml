@@ -31,10 +31,7 @@
     <string name="no_data_available">No hay datos disponibles</string>
     <string name="transactions">Transacciones</string>
     <string name="invalid_email">El correo electrónico no es válido</string>
-    <string name="check_creds">Por favor, verifica tus credenciales</string>
     <string name="enter_email">Ingresa el correo electrónico</string>
-    <string name="enter_email_phone_id">Ingresa correo, número de teléfono o ID de usuario</string>
-    <string name="enter_email_or_phone">Ingresa correo electrónico o número de teléfono</string>
     <string name="username">Nombre de usuario</string>
     <string name="enter_password">Ingresa la contraseña</string>
 
@@ -42,7 +39,6 @@
     <string name="connection_error">Error de conexión al servidor, verifica tu conexión a internet</string>
     <string name="network_error">Sin conexión a internet</string>
     <string name="unexpected_network_error">Error de red</string>
-    <string name="welcome_description">Registra tiempo en proyectos sin perder el enfoque\nde tus metas.</string>
     <string name="log_in_instructions">Ingresa tus datos para iniciar sesión. Puedes usar correo o número de teléfono.</string>
     <string name="forgot_pass_instructions_email">Ingresa tu correo electrónico y te enviaremos un código de recuperación para restaurar el acceso a tu cuenta.</string>
     <string name="forgot_pass_instructions_phone">Ingresa tu número de teléfono y te enviaremos un código de recuperación para restaurar el acceso a tu cuenta.</string>
@@ -55,13 +51,11 @@
     <string name="back_to_login">Volver a iniciar sesión</string>
     <string name="continue_with_phone_number">Continuar con número de teléfono</string>
     <string name="continue_with_email">Continuar con correo</string>
-    <string name="invalid_username">Nombre de usuario no válido</string>
     <string name="invalid_phone">Número de teléfono no válido</string>
     <string name="invalid_password">La contraseña debe tener al menos 8 caracteres, incluida una letra mayúscula y un número.</string>
     <string name="invalid_confirm_password">Las contraseñas no coinciden</string>
     <string name="create_account">Registrarse</string>
     <string name="create_account_instructions">Ingresa correo electrónico o número de teléfono o ambos para crear tu cuenta</string>
-    <string name="enter_phone">Ingresa número de teléfono</string>
     <string name="phone_digits">000 000 000</string>
     <string name="phone">Número de teléfono</string>
     <string name="create_password">Crear contraseña</string>
@@ -69,8 +63,6 @@
     <string name="confirm_new_password">Confirmar nueva contraseña</string>
     <string name="create_new_password">Crear nueva contraseña</string>
     <string name="language">Idioma</string>
-    <string name="filter_by">Filtrar por</string>
-    <string name="clear_all">Borrar todo</string>
     <string name="login_with_email">Iniciar sesión con correo</string>
     <string name="login_with_phone">Iniciar sesión con teléfono</string>
     <string name="confirm">Confirmar</string>
@@ -312,5 +304,28 @@
     <string name="saved">Guardado</string>
     <string name="you">"%s (Usted)"</string>
     <string name="what_transaction_are_you_creating">¿Qué transacción estás creando?</string>
+    <string name="whimo_app_feedback">Comentarios de la aplicación WHIMO</string>
+    <string name="send_email">Enviar correo</string>
+    <string name="no_email_app_is_installed">No hay ninguna aplicación de correo instalada</string>
+    <string name="feedback">Comentarios</string>
+    <string name="terms_accept_text">Acepto los %1$s</string>
+    <string name="terms_and_conditions">Términos y Condiciones</string>
+
+    <string name="from">De</string>
+    <string name="to">A</string>
+    <string name="convert_commodity">Convertir producto</string>
+    <string name="convert_commodity_info">La información se presenta utilizando equivalencias estandarizadas. Puedes editarla según sea necesario.</string>
+    <string name="no_recipes">Sin recetas</string>
+    <string name="convert_commodity_text">Por favor, selecciona cómo deseas convertir este tipo de mercancía.</string>
+    <string name="convert">Convertir</string>
+    <string name="convert_commodity_dialog_title">¿Convertir producto?</string>
+    <string name="convert_commodity_dialog_description">¿Está seguro de que desea convertir el producto? Revise los datos cuidadosamente. Esta acción no se puede deshacer.</string>
+
+    <string name="supplier_s_username">Nombre de usuario del proveedor</string>
+    <string name="buyer_s_username">Nombre de usuario del comprador</string>
+    <string name="user_not_exist">El usuario no existe</string>
+    <string name="continue_anyway">Continuar de todas formas</string>
+    <string name="user_email_not_exist">El usuario con este correo electrónico no existe.</string>
+    <string name="user_phone_not_exist">El usuario con este número de teléfono no existe.</string>
 
 </resources>

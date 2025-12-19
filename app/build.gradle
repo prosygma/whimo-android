@@ -24,7 +24,7 @@ android {
         applicationId "com.whimo"
         minSdk 26
         targetSdk 36
-        versionCode 39
+        versionCode 50
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -61,7 +61,7 @@ android {
             props.load(new FileInputStream(propsFile))
 
             release {
-                minifyEnabled true
+                minifyEnabled false
                 proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
                 signingConfig signingConfigs.release
 
@@ -69,6 +69,9 @@ android {
                 buildConfigField "String", "DEFAULT_COUNTRY_CODE", props['release_default_country_code']
                 buildConfigField "double", "DEFAULT_LOCATION_LATITUDE", props['release_default_location_latitude']
                 buildConfigField "double", "DEFAULT_LOCATION_LONGITUDE", props['release_default_location_longitude']
+
+                buildConfigField "String", "TERMS_AND_CONDITIONS", props['release_terms_and_conditions']
+                buildConfigField "String", "FEEDBACK_EMAIL", props['release_feedback_email']
             }
             debug {
                 minifyEnabled false
@@ -79,6 +82,9 @@ android {
                 buildConfigField "String", "DEFAULT_COUNTRY_CODE", props['debug_default_country_code']
                 buildConfigField "double", "DEFAULT_LOCATION_LATITUDE", props['debug_default_location_latitude']
                 buildConfigField "double", "DEFAULT_LOCATION_LONGITUDE", props['debug_default_location_longitude']
+
+                buildConfigField "String", "TERMS_AND_CONDITIONS", props['debug_terms_and_conditions']
+                buildConfigField "String", "FEEDBACK_EMAIL", props['debug_feedback_email']
             }
         }
     }

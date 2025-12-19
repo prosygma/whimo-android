@@ -56,7 +56,7 @@ val createTransactionsModule = module {
 
     // Interactors
     factory<CreateTransactionInteractor> { CreateTransactionInteractorImpl(repository = get(), context = androidContext()) }
-    factory<UserInfoInteractor> { UserInfoInteractorImpl(repository = get()) }
+    factory<UserInfoInteractor> { UserInfoInteractorImpl(repository = get(), context = androidContext()) }
 
     // ViewModels
     viewModel { SharedTransactionViewModel() }

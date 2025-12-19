@@ -21,6 +21,9 @@
  */
 package com.whimo.presentation.balances
 
+import android.app.Activity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -49,6 +52,7 @@ import com.whimo.presentation.main.components.EmptyState
 import com.whimo.presentation.main.components.Toolbar
 import com.whimo.presentation.ui.baseScreen.MainIconButton
 import com.whimo.presentation.ui.theme.WhimoTheme
+import com.whimo.utils.setResult
 import org.koin.androidx.compose.koinViewModel
 
 @Preview
@@ -74,6 +78,16 @@ fun CommodityGroupsScreen(
     val binding = viewModel?.observeViewBinding() ?: CommodityGroupsContract.Binding()
 
     val context = LocalContext.current
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult(),
+        onResult = { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                navController.setResult(Screens.Home.route, "createTransactionResult", true)
+                navController.popBackStack(Screens.Home.route, false, false)
+            }
+        }
+    )
 
     var isLoading by remember { mutableStateOf(false) }
 
@@ -104,7 +118,7 @@ fun CommodityGroupsScreen(
                 modifier = Modifier.fillMaxHeight(),
                 sections = binding.commodities!!,
                 onSelect = {
-                    CommodityGroupBalancesActivity.openCommodityGroupBalances(context, it)
+                    CommodityGroupBalancesActivity.openCommodityGroupBalances(context, launcher, it)
                 }
             )
         } else {

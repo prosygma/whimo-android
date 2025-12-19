@@ -104,6 +104,10 @@ object PhoneNumberUtils {
     }
 
     fun parsePhone(phone: String): Pair<PhoneRegion, Long> {
+        if (phone.startsWith("0")) {
+            return getDefaultPhoneRegion() to phone.removePrefix("0").toLong()
+        }
+
         val phoneUtil = PhoneNumberUtil.getInstance()
         var numberProto: PhoneNumber?
         try {

@@ -21,7 +21,6 @@
  */
 package com.whimo.data.commodity.service
 
-import com.whimo.data.commodity.model.response.CommoditiesBalancesResponse
 import com.whimo.data.commodity.model.response.CommoditiesGroupsResponse
 import retrofit2.Response
 import retrofit2.http.GET
@@ -35,13 +34,4 @@ interface CommodityService {
         @Query("page") page: Int?,
         @Query("page_size") pageSize: Int?,
     ): Response<CommoditiesGroupsResponse>
-
-    @GET("commodities/balances/")
-    suspend fun getCommoditiesBalances(
-        @Query("search") search: String?,
-        @Query("page") page: Int?,
-        @Query("page_size") pageSize: Int?,
-        @Query("group_id") groupId: String?,
-        @Query("commodity_id") commodityId: String?,
-    ): Response<CommoditiesBalancesResponse>
 }

@@ -19,27 +19,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.whimo.domain.createtransaction
+package com.whimo.data.commodity.model.mappers
 
-import android.content.Context
-import com.whimo.data.base.common.BaseResult
-import com.whimo.data.createtransaction.repository.UserInfoRepository
-import com.whimo.extensions.isNetworkAvailable
+import com.whimo.data.commodity.model.response.ConvertCommodityResponse
+import com.whimo.data.commodity.model.response.ConvertQuantity
+import com.whimo.data.commodity.model.response.ConvertRecipe
+import com.whimo.domain.commodity.models.ConvertQuantityModel
+import com.whimo.domain.commodity.models.ConvertRecipeModel
 
-interface UserInfoInteractor {
-    suspend fun checkUserExist(identifier: String, defaultResult: Boolean): BaseResult<Boolean>
+fun ConvertCommodityResponse.toDomain(): List<ConvertRecipeModel> {
+    return data.map { it.toDomain() }
 }
 
-class UserInfoInteractorImpl(
-    private val repository: UserInfoRepository,
-    private val context: Context,
-) : UserInfoInteractor {
+fun ConvertRecipe.toDomain(): ConvertRecipeModel {
+    return ConvertRecipeModel(
+        id = id,
+        name = name,
+        inputs = inputs.map { it.toDomain() },
+        outputs = outputs.map { it.toDomain() },
+    )
+}
 
-    override suspend fun checkUserExist(identifier: String, defaultResult: Boolean): BaseResult<Boolean> {
-        return if (context.isNetworkAvailable()) {
-            repository.checkUserExist(identifier)
-        } else {
-            BaseResult.Success(defaultResult)
-        }
-    }
+fun ConvertQuantity.toDomain(): ConvertQuantityModel {
+    return ConvertQuantityModel(
+        id = id,
+        commodity = commodity,
+        quantity = quantity,
+    )
 }

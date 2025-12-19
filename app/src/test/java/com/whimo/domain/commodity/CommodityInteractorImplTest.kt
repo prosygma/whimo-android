@@ -23,14 +23,13 @@ package com.whimo.domain.commodity
 
 import com.whimo.data.base.common.BaseResult
 import com.whimo.data.commodity.repository.CommodityRepository
-import com.whimo.domain.commodity.models.CommodityBalanceFilter
-import com.whimo.domain.commodity.models.CommodityBalanceModel
 import com.whimo.domain.commodity.models.CommodityFilter
 import com.whimo.domain.commodity.models.CommodityGroupModel
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -150,68 +149,6 @@ class CommodityInteractorImplTest {
     }
 
     @Test
-    fun `getCommoditiesBalances calls repository with correct parameters`() = runTest {
-        // Given
-        val filter = CommodityBalanceFilter(
-            query = "test",
-            groupId = "group1",
-            commodityId = "commodity1"
-        )
-        val expectedBalances = listOf(
-            CommodityBalanceModel(
-                id = "1",
-                volume = 100f,
-                commodity = mockk()
-            )
-        )
-        val expectedResult = BaseResult.Success(expectedBalances)
-
-        coEvery { 
-            repository.getCommoditiesBalances(
-                search = "test",
-                page = 1,
-                pageSize = 1000,
-                groupId = "group1",
-                commodityId = "commodity1"
-            ) 
-        } returns expectedResult
-
-        // When
-        val result = commodityInteractor.getCommoditiesBalances(filter)
-
-        // Then
-        assertEquals(expectedResult, result)
-    }
-
-    @Test
-    fun `getCommoditiesBalances with null parameters calls repository correctly`() = runTest {
-        // Given
-        val filter = CommodityBalanceFilter(
-            query = null,
-            groupId = null,
-            commodityId = null
-        )
-        val expectedBalances = emptyList<CommodityBalanceModel>()
-        val expectedResult = BaseResult.Success(expectedBalances)
-
-        coEvery { 
-            repository.getCommoditiesBalances(
-                search = null,
-                page = 1,
-                pageSize = 1000,
-                groupId = null,
-                commodityId = null
-            ) 
-        } returns expectedResult
-
-        // When
-        val result = commodityInteractor.getCommoditiesBalances(filter)
-
-        // Then
-        assertEquals(expectedResult, result)
-    }
-
-    @Test
     fun `getCommodities handles repository error correctly`() = runTest {
         // Given
         val filter = CommodityFilter(query = "test")
@@ -228,31 +165,6 @@ class CommodityInteractorImplTest {
 
         // When
         val result = commodityInteractor.getCommodities(filter)
-
-        // Then
-        assertTrue(result is BaseResult.Error)
-        assertEquals(exception, (result as BaseResult.Error).exception)
-    }
-
-    @Test
-    fun `getCommoditiesBalances handles repository error correctly`() = runTest {
-        // Given
-        val filter = CommodityBalanceFilter(query = "test")
-        val exception = RuntimeException("Network error")
-        val expectedResult = BaseResult.Error(exception)
-
-        coEvery { 
-            repository.getCommoditiesBalances(
-                search = "test",
-                page = 1,
-                pageSize = 1000,
-                groupId = null,
-                commodityId = null
-            ) 
-        } returns expectedResult
-
-        // When
-        val result = commodityInteractor.getCommoditiesBalances(filter)
 
         // Then
         assertTrue(result is BaseResult.Error)

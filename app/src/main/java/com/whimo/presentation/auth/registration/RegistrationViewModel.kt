@@ -73,6 +73,7 @@ class RegistrationViewModel(
             is RegistrationContract.Event.OnPasswordChanged -> onPasswordChanged(event.password)
             is RegistrationContract.Event.OnConfirmPasswordChanged -> onConfirmPasswordChanged(event.confirmPassword)
             is RegistrationContract.Event.OnTermsAcceptanceChange -> onTermsAcceptanceChange(event.termsAccepted)
+            is RegistrationContract.Event.OnTermsClick -> onTermsClick()
             is RegistrationContract.Event.OnRegisterClick -> onRegisterClick()
             is RegistrationContract.Event.OnEmailVerificationMethodChosen -> onEmailVerificationMethodChosen()
             is RegistrationContract.Event.OnPhoneVerificationMethodChosen -> onPhoneVerificationMethodChosen()
@@ -155,6 +156,10 @@ class RegistrationViewModel(
     private fun onTermsAcceptanceChange(termsAccepted: Boolean) {
         this.termsAccepted = termsAccepted
         updateView()
+    }
+
+    private fun onTermsClick() {
+        setEffect(RegistrationContract.Effect.NavigateTerms)
     }
 
     private fun onRegisterClick() {

@@ -23,52 +23,52 @@ package com.whimo.data.commodity.repository
 
 import com.whimo.data.base.common.BaseResult
 import com.whimo.data.commodity.model.mappers.toDomain
-import com.whimo.data.commodity.model.mappers.toEntity
-import com.whimo.data.commodity.service.CommodityGroupsDao
-import com.whimo.data.commodity.service.CommodityService
-import com.whimo.domain.commodity.models.CommodityGroupModel
+import com.whimo.data.commodity.model.request.ConvertCommodityRequest
+import com.whimo.data.commodity.service.ConvertCommodityService
+import com.whimo.data.transactions.model.mappers.toDomain
+import com.whimo.domain.commodity.models.ConvertRecipeModel
+import com.whimo.domain.transactions.models.BaseModel
 import com.whimo.network.handleResponse
 import com.whimo.network.mapResult
 
-interface CommodityRepository {
-    suspend fun getCommodities(
+interface ConvertCommodityRepository {
+    suspend fun getRecipes(
         search: String?,
+        commodityId: String?,
         page: Int,
         pageSize: Int,
-    ): BaseResult<List<CommodityGroupModel>>
+    ): BaseResult<List<ConvertRecipeModel>>
 
-    suspend fun getCommoditiesFromDB(): List<CommodityGroupModel>
-
-    suspend fun updateCommoditiesDB(items: List<CommodityGroupModel>?)
+    suspend fun convertCommodity(
+        request: ConvertCommodityRequest,
+    ): BaseResult<BaseModel>
 }
 
-class CommodityRepositoryImpl(
-    private val service: CommodityService,
-    private val dao: CommodityGroupsDao,
-) : CommodityRepository {
+class ConvertCommodityRepositoryImpl(
+    private val service: ConvertCommodityService,
+) : ConvertCommodityRepository {
 
-    override suspend fun getCommodities(
+    override suspend fun getRecipes(
         search: String?,
+        commodityId: String?,
         page: Int,
         pageSize: Int,
-    ): BaseResult<List<CommodityGroupModel>> {
+    ): BaseResult<List<ConvertRecipeModel>> {
         return handleResponse {
-            service.getCommodities(
+            service.getRecipes(
                 search = search,
+                commodityId = commodityId,
                 page = page,
                 pageSize = pageSize,
             )
         }.mapResult { it?.toDomain() }
     }
 
-    override suspend fun getCommoditiesFromDB(): List<CommodityGroupModel> {
-        return dao.getAll().map { it.toDomain() }
-    }
-
-    override suspend fun updateCommoditiesDB(items: List<CommodityGroupModel>?) {
-        dao.clearAll()
-        if (items != null) {
-            dao.insertAll(items.map { it.toEntity() })
-        }
+    override suspend fun convertCommodity(
+        request: ConvertCommodityRequest,
+    ): BaseResult<BaseModel> {
+        return handleResponse {
+            service.convertCommodity(request)
+        }.mapResult { it?.toDomain() }
     }
 }

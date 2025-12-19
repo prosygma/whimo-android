@@ -40,10 +40,7 @@ object SuppliersHistoryContract {
     ) : CoreViewBinding
 
     sealed class Event : CoreViewEvent {
-        data class OnCreate(
-            val transactionModel: TransactionModel,
-            val isInitial: Boolean = true,
-        ) : Event()
+        data class OnCreate(val transactionModel: TransactionModel, val isInitial: Boolean = true) : Event()
 
         data object Refresh : Event()
         data object NextPage : Event()

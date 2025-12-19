@@ -115,9 +115,9 @@ class TransactionDetailsViewModel(
                         if (statusUpdated) {
                             statusUpdated = false
                             setEffect(TransactionDetailsContract.Effect.RefreshHistory(it))
-                            getTransactionTraceability()
-
                         }
+
+                        getTransactionTraceability()
 
                         updateView()
                     }
@@ -129,7 +129,9 @@ class TransactionDetailsViewModel(
     }
 
     private fun getTransactionTraceability() {
-        if (transactionModel?.traceability != null && transactionModel?.status != TransactionStatus.Pending) {
+        if (transactionModel?.traceability != null
+            && (transactionModel?.status == TransactionStatus.Accepted
+                    || transactionModel?.status == TransactionStatus.Recorded)) {
             launch {
                 interactor.getTransactionTraceability(transactionId)
                     .onSuccess {
@@ -190,7 +192,7 @@ class TransactionDetailsViewModel(
         updateBinding { b ->
             b.chartItems = chartItems.filter { it.value > 0 }
 
-            b.downloadEnabled = transactionModel?.traceability != null && transactionModel?.status != TransactionStatus.Pending
+            b.downloadEnabled = transactionModel?.traceability != null && transactionModel?.status == TransactionStatus.Accepted
             b.dialogDescription = resourceProvider.getString(
                 R.string.downloading_transaction_details,
                 chartItems.sumOf { it.value })

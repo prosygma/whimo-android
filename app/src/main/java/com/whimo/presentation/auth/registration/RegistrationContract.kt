@@ -75,6 +75,8 @@ object RegistrationContract {
         data class ToggleLoader(val isLoading: Boolean) : Effect()
         data class ShowMessage(val message: String): Effect()
 
+        data object NavigateTerms : Effect()
+
         data object NavigateLogin : Effect()
 
         data class NavigateMainActivity(val call: Boolean?) : Effect()

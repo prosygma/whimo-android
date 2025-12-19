@@ -21,6 +21,7 @@
  */
 package com.whimo.presentation.auth.registration
 
+import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -53,10 +54,12 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.whimo.BuildConfig
 import com.whimo.R
 import com.whimo.base.ObserveEffects
 import com.whimo.extensions.findActivity
@@ -67,8 +70,10 @@ import com.whimo.presentation.main.components.Toolbar3
 import com.whimo.presentation.ui.baseScreen.GoogleButton
 import com.whimo.presentation.ui.baseScreen.LoadingButton
 import com.whimo.presentation.ui.components.EmailField
+import com.whimo.presentation.ui.components.LinkSpec
 import com.whimo.presentation.ui.components.PasswordField
 import com.whimo.presentation.ui.components.PhoneNumberField
+import com.whimo.presentation.ui.components.RichTextWithLinks
 import com.whimo.presentation.ui.components.bottomsheets.LanguagesBottomSheet
 import com.whimo.presentation.ui.components.bottomsheets.VerificationMethodBottomSheet
 import com.whimo.presentation.ui.components.dialogs.PhoneRegionDialog
@@ -118,6 +123,14 @@ fun RegistrationScreen(
                 }
                 is RegistrationContract.Effect.ShowMessage -> {
                     Toast.makeText(context, effect.message, Toast.LENGTH_LONG).show()
+                }
+                is RegistrationContract.Effect.NavigateTerms -> {
+                    context.startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            BuildConfig.TERMS_AND_CONDITIONS.toUri()
+                        )
+                    )
                 }
                 is RegistrationContract.Effect.NavigateLogin -> {
                     navController.popBackStack()
@@ -238,19 +251,18 @@ fun RegistrationScreen(
                     )
                 )
 
-                Text(
-                    text = "I accept ",
-                    style = TextStyleBodyM,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                val termsTag = "TERMS"
+                val termsText = stringResource(R.string.terms_and_conditions)
+                val fullText = stringResource(R.string.terms_accept_text, termsText)
 
-                Text(
-                    modifier = Modifier.clickable {
-                        viewModel?.setEvent(RegistrationContract.Event.OnTermsClick)
-                    },
-                    text = "Terms & Conditions",
-                    style = TextStyleButtonM,
-                    color = MaterialTheme.colorScheme.primary,
+                RichTextWithLinks(
+                    fullText = fullText,
+                    linkSpecs = listOf(LinkSpec(text = termsText, tag = termsTag)),
+                    onLinkClick = { tag ->
+                        if (tag == termsTag) {
+                            viewModel?.setEvent(RegistrationContract.Event.OnTermsClick)
+                        }
+                    }
                 )
             }
 

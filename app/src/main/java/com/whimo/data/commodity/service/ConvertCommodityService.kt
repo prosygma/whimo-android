@@ -19,6 +19,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.whimo.data.commodity.model.request
+package com.whimo.data.commodity.service
 
-//data class TransactionsRequest()
+import com.whimo.data.commodity.model.request.ConvertCommodityRequest
+import com.whimo.data.commodity.model.response.ConvertCommodityResponse
+import com.whimo.data.transactions.model.response.BaseResponse
+import retrofit2.Response
+import retrofit2.http.Body
+import retrofit2.http.GET
+import retrofit2.http.POST
+import retrofit2.http.Query
+
+interface ConvertCommodityService {
+
+    @GET("transactions/conversion/")
+    suspend fun getRecipes(
+        @Query("search") search: String?,
+        @Query("commodity_id") commodityId: String?,
+        @Query("page") page: Int?,
+        @Query("page_size") pageSize: Int?,
+    ): Response<ConvertCommodityResponse>
+
+    @POST("transactions/conversion/")
+    suspend fun convertCommodity(
+        @Body request: ConvertCommodityRequest
+    ): Response<BaseResponse>
+}

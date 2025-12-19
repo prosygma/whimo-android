@@ -24,6 +24,7 @@ package com.whimo.presentation.balances.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,14 +34,13 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -67,6 +67,7 @@ private fun Preview() {
                     code = "1701",
                     name = "Type1",
                     unit = "kg",
+                    hasRecipe = true,
                     group = null,
                     balance = 1.5f,
                 ),
@@ -75,6 +76,7 @@ private fun Preview() {
                     code = "1702",
                     name = "Type2",
                     unit = "kg",
+                    hasRecipe = true,
                     group = null,
                     balance = 1.5f,
                 ),
@@ -89,6 +91,7 @@ private fun Preview() {
                     code = "1801",
                     name = "Cocoa beans, whole or broken, raw or roasted",
                     unit = "kg",
+                    hasRecipe = true,
                     group = null,
                     balance = 1.5f,
                 ),
@@ -97,6 +100,7 @@ private fun Preview() {
                     code = "1802",
                     name = "Cocoa shells, husks, skins and other cocoa waste",
                     unit = "kg",
+                    hasRecipe = true,
                     group = null,
                     balance = 1.5f,
                 ),
@@ -105,6 +109,7 @@ private fun Preview() {
                     code = "1803",
                     name = "Cocoa paste, whether or not defatted",
                     unit = "kg",
+                    hasRecipe = true,
                     group = null,
                     balance = 1.5f,
                 ),
@@ -113,6 +118,7 @@ private fun Preview() {
                     code = "1804",
                     name = "Cocoa butter, fat and oil",
                     unit = "kg",
+                    hasRecipe = false,
                     group = null,
                     balance = 1.5f,
                 ),
@@ -121,6 +127,7 @@ private fun Preview() {
                     code = "1805",
                     name = "Cocoa powder, not containing added sugar or other sweetening matter",
                     unit = "kg",
+                    hasRecipe = false,
                     group = null,
                     balance = 1.5f,
                 ),
@@ -129,6 +136,7 @@ private fun Preview() {
                     code = "1806",
                     name = "Chocolate and other food preparations containing cocoa",
                     unit = "kg",
+                    hasRecipe = false,
                     group = null,
                     balance = 1.5f,
                 ),
@@ -143,6 +151,7 @@ private fun Preview() {
                     code = "1901",
                     name = "Coffee beans",
                     unit = "kg",
+                    hasRecipe = false,
                     group = null,
                     balance = 1.5f,
                 ),
@@ -194,6 +203,7 @@ fun CommodityGroupList(
 @Composable
 fun CommodityBalancesList(
     modifier: Modifier = Modifier,
+    networkAvailable: Boolean = true,
     commodities: List<CommodityModel>,
     onSelect: (CommodityModel) -> Unit = {},
 ) {
@@ -204,6 +214,7 @@ fun CommodityBalancesList(
     ) {
         itemsIndexed(commodities) { index, commodity ->
             CommodityItem(
+                isEnabled = networkAvailable,
                 commodity = commodity,
                 onSelect = { onSelect(commodity) }
             )
@@ -273,13 +284,13 @@ fun CommoditySectionItem(
 
 @Composable
 fun CommodityItem(
+    isEnabled: Boolean = true,
     commodity: CommodityModel,
-    onSelect: () -> Unit
+    onSelect: () -> Unit,
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onSelect() }
             .background(color = MaterialTheme.colorScheme.surface)
             .padding(16.dp),
         verticalAlignment = Alignment.Top,
@@ -303,5 +314,22 @@ fun CommodityItem(
             style = TextStyleMediumS,
             color = MaterialTheme.colorScheme.onSurface
         )
+
+        Box(
+            modifier = Modifier
+                .padding(start = 18.dp)
+                .size(20.dp)
+                .alpha(if (isEnabled) 1f else 0.5f),
+        ) {
+            if (commodity.hasRecipe) {
+                Icon(
+                    modifier = Modifier.size(20.dp)
+                        .clickable(isEnabled) { onSelect() },
+                    painter = painterResource(id = R.drawable.ic_convert),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+            }
+        }
     }
 }

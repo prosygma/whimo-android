@@ -74,6 +74,7 @@ class LoginViewModel(
             is LoginContract.Event.OnForgotPasswordClick -> onForgotPasswordClick()
             is LoginContract.Event.OnLoginClick -> onLoginClick()
             is LoginContract.Event.OnGoogleClick -> onGoogleClick(event.activity)
+            is LoginContract.Event.OnGoogleLongClick -> onGoogleLongClick(event.activity)
             is LoginContract.Event.OnRegisterClick -> onRegisterClick()
             is LoginContract.Event.OnChangeLanguage -> onChangeLanguage(event.context, event.languageCode)
             is LoginContract.Event.OnOtpSuccess -> onOtpSuccess(event.username)
@@ -199,6 +200,15 @@ class LoginViewModel(
     private fun onGoogleClick(activity: Activity) {
         launch {
             val idToken = GoogleSignInHelper.signIn(activity)
+            if (idToken != null) {
+                authGoogle(idToken)
+            }
+        }
+    }
+
+    private fun onGoogleLongClick(activity: Activity) {
+        launch {
+            val idToken = GoogleSignInHelper.signIn(activity, false)
             if (idToken != null) {
                 authGoogle(idToken)
             }

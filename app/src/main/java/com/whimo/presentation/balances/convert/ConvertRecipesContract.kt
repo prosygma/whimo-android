@@ -19,27 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.whimo.domain.createtransaction
+package com.whimo.presentation.balances.convert
 
-import android.content.Context
-import com.whimo.data.base.common.BaseResult
-import com.whimo.data.createtransaction.repository.UserInfoRepository
-import com.whimo.extensions.isNetworkAvailable
+import com.whimo.base.CoreViewBinding
+import com.whimo.base.CoreViewEvent
+import com.whimo.base.CoreViewSideEffect
+import com.whimo.domain.commodity.models.CommodityModel
+import com.whimo.domain.commodity.models.ConvertRecipeModel
 
-interface UserInfoInteractor {
-    suspend fun checkUserExist(identifier: String, defaultResult: Boolean): BaseResult<Boolean>
-}
+object ConvertRecipesContract {
+    data class Binding(
+        var query: String? = null,
+        var recipes: List<ConvertRecipeModel>? = null,
+    ) : CoreViewBinding
 
-class UserInfoInteractorImpl(
-    private val repository: UserInfoRepository,
-    private val context: Context,
-) : UserInfoInteractor {
+    sealed class Event : CoreViewEvent {
+        data class OnCreate(
+            var commodity: CommodityModel?,
+        ) : Event()
+    }
 
-    override suspend fun checkUserExist(identifier: String, defaultResult: Boolean): BaseResult<Boolean> {
-        return if (context.isNetworkAvailable()) {
-            repository.checkUserExist(identifier)
-        } else {
-            BaseResult.Success(defaultResult)
-        }
+    sealed class Effect : CoreViewSideEffect {
+        data class ToggleLoader(val isLoading: Boolean): Effect()
+        data class ShowMessage(val message: String): Effect()
     }
 }

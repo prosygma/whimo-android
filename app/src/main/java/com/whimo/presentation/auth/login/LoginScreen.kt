@@ -49,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -107,6 +108,8 @@ fun LoginScreen(
     var isLoading by remember { mutableStateOf(false) }
     var showLanguageBottomSheet by remember { mutableStateOf(false) }
     var showPhoneRegionDialog by remember { mutableStateOf(false) }
+
+    val clipboardManager = LocalClipboardManager.current
 
     if (viewModel != null) {
         ObserveEffects(viewModel) { effect ->
@@ -267,11 +270,17 @@ fun LoginScreen(
 
             GoogleButton(
                 modifier = Modifier.fillMaxWidth(),
-            ) {
-                viewModel?.setEvent(
-                    LoginContract.Event.OnGoogleClick(context.findActivity())
-                )
-            }
+                onClick = {
+                    viewModel?.setEvent(
+                        LoginContract.Event.OnGoogleClick(context.findActivity())
+                    )
+                },
+                onLongClick = {
+                    viewModel?.setEvent(
+                        LoginContract.Event.OnGoogleLongClick(context.findActivity())
+                    )
+                }
+            )
 
             Row(
                 modifier = Modifier.fillMaxWidth(),

@@ -34,15 +34,23 @@ import com.whimo.BuildConfig.GOOGLE_AUTH_CLIENT_ID
 import java.security.SecureRandom
 
 object GoogleSignInHelper {
-    suspend fun signIn(activity: Activity): String? {
+
+    suspend fun signIn(
+        activity: Activity,
+        enableNonce: Boolean = true
+    ): String? {
         val nonce = generateNonce()
 
-        val googleIdOption = GetGoogleIdOption.Builder()
+        val googleIdOptionBuilder = GetGoogleIdOption.Builder()
             .setServerClientId(GOOGLE_AUTH_CLIENT_ID)
             .setFilterByAuthorizedAccounts(false)
-            .setNonce(nonce)
             .setAutoSelectEnabled(false)
-            .build()
+
+        if (enableNonce) {
+            googleIdOptionBuilder.setNonce(nonce)
+        }
+
+        val googleIdOption = googleIdOptionBuilder.build()
 
         val request = GetCredentialRequest.Builder()
             .addCredentialOption(googleIdOption)
@@ -70,5 +78,4 @@ object GoogleSignInHelper {
         SecureRandom().nextBytes(bytes)
         return Base64.encodeToString(bytes, Base64.URL_SAFE or Base64.NO_PADDING or Base64.NO_WRAP)
     }
-
 }

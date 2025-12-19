@@ -24,14 +24,20 @@ package com.whimo.di
 import com.whimo.data.AppDatabase
 import com.whimo.data.commodity.repository.CommodityRepository
 import com.whimo.data.commodity.repository.CommodityRepositoryImpl
+import com.whimo.data.commodity.repository.ConvertCommodityRepository
+import com.whimo.data.commodity.repository.ConvertCommodityRepositoryImpl
 import com.whimo.data.commodity.service.CommodityService
+import com.whimo.data.commodity.service.ConvertCommodityService
 import com.whimo.domain.commodity.CommodityInteractor
 import com.whimo.domain.commodity.CommodityInteractorImpl
+import com.whimo.domain.commodity.ConvertCommodityInteractor
+import com.whimo.domain.commodity.ConvertCommodityInteractorImpl
 import com.whimo.presentation.balances.CommodityGroupsViewModel
 import com.whimo.presentation.balances.CommodityGroupBalancesViewModel
+import com.whimo.presentation.balances.convert.ConvertCommodityViewModel
+import com.whimo.presentation.balances.convert.ConvertRecipesViewModel
 import com.whimo.presentation.createtransaction.commodity.CommodityTypesViewModel
 import com.whimo.presentation.createtransaction.commodity.CommodityVolumeViewModel
-import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 import retrofit2.Retrofit
@@ -39,19 +45,24 @@ import retrofit2.Retrofit
 val commodityModule = module {
     // Services
     single { get<Retrofit>(AUTHORISED).create(CommodityService::class.java) }
+    single { get<Retrofit>(AUTHORISED).create(ConvertCommodityService::class.java) }
 
     // DB
     single { get<AppDatabase>().commodityGroupsDao() }
 
     // Repositories
     factory<CommodityRepository> { CommodityRepositoryImpl(service = get(), dao = get()) }
+    factory<ConvertCommodityRepository> { ConvertCommodityRepositoryImpl(service = get()) }
 
     // Interactors
     factory<CommodityInteractor> { CommodityInteractorImpl(repository = get()) }
+    factory<ConvertCommodityInteractor> { ConvertCommodityInteractorImpl(repository = get(), commodityRepository = get()) }
 
     // ViewModels
     viewModel { CommodityTypesViewModel(interactor = get(), errorHandler = get()) }
     viewModel { CommodityVolumeViewModel(interactor = get(), errorHandler = get(), resourceProvider = get()) }
     viewModel { CommodityGroupsViewModel(interactor = get(), errorHandler = get()) }
     viewModel { CommodityGroupBalancesViewModel(interactor = get(), errorHandler = get()) }
+    viewModel { ConvertRecipesViewModel(interactor = get(), errorHandler = get()) }
+    viewModel { ConvertCommodityViewModel(interactor = get(), errorHandler = get()) }
 }

@@ -23,8 +23,6 @@ package com.whimo.domain.commodity
 
 import com.whimo.data.base.common.BaseResult
 import com.whimo.data.commodity.repository.CommodityRepository
-import com.whimo.domain.commodity.models.CommodityBalanceFilter
-import com.whimo.domain.commodity.models.CommodityBalanceModel
 import com.whimo.domain.commodity.models.CommodityFilter
 import com.whimo.domain.commodity.models.CommodityGroupModel
 
@@ -32,7 +30,6 @@ interface CommodityInteractor {
     suspend fun getCommodities(filter: CommodityFilter): BaseResult<List<CommodityGroupModel>>
     suspend fun getCommoditiesFromDB(): List<CommodityGroupModel>
     suspend fun updateCommoditiesDB(items: List<CommodityGroupModel>?)
-    suspend fun getCommoditiesBalances(filter: CommodityBalanceFilter): BaseResult<List<CommodityBalanceModel>>
 }
 
 class CommodityInteractorImpl(
@@ -53,16 +50,6 @@ class CommodityInteractorImpl(
 
     override suspend fun updateCommoditiesDB(items: List<CommodityGroupModel>?) {
         repository.updateCommoditiesDB(items)
-    }
-
-    override suspend fun getCommoditiesBalances(filter: CommodityBalanceFilter): BaseResult<List<CommodityBalanceModel>> {
-        return repository.getCommoditiesBalances(
-            search = filter.query,
-            page = FIRST_PAGE,
-            pageSize = DEFAULT_PAGE_SIZE,
-            groupId = filter.groupId,
-            commodityId = filter.commodityId,
-        )
     }
 
     companion object {

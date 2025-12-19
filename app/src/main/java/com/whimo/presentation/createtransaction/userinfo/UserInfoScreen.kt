@@ -107,6 +107,8 @@ fun UserInfoScreen(
     var requestContactsPermission by remember { mutableStateOf(false) }
     var showPhoneRegionDialog by remember { mutableStateOf(false) }
     var showUserExistDialog by remember { mutableStateOf(false) }
+    var showEmailNotExistDialog by remember { mutableStateOf(false) }
+    var showPhoneNotExistDialog by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     val forceUpdateController = remember { ForceUpdateController() }
 
@@ -126,12 +128,23 @@ fun UserInfoScreen(
                 is UserInfoContract.Effect.ShowUserExist -> {
                     showUserExistDialog = true
                 }
+                is UserInfoContract.Effect.ShowEmailNotExist -> {
+                    showEmailNotExistDialog = true
+                }
+                is UserInfoContract.Effect.ShowPhoneNotExist -> {
+                    showPhoneNotExistDialog = true
+                }
                 is UserInfoContract.Effect.ConvertToDownstream -> {
                     sharedTransactionViewModel?.setIsProducerTransaction(false)
                     sharedTransactionViewModel?.setUserInfo(effect.userInfo)
                     navController.popBackStack()
                 }
-                is UserInfoContract.Effect.OpenContacts -> {
+                is UserInfoContract.Effect.OpenEmailContacts -> {
+                    pickContactLauncher.launch(
+                        Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Email.CONTENT_URI)
+                    )
+                }
+                is UserInfoContract.Effect.OpenPhoneContacts -> {
                     pickContactLauncher.launch(
                         Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI)
                     )
@@ -237,6 +250,9 @@ fun UserInfoScreen(
                 onValueChange = {
                     viewModel?.setEvent(UserInfoContract.Event.OnEmailChanged(it))
                 },
+                onContactsClicked = {
+                    viewModel?.setEvent(UserInfoContract.Event.OnEmailContactsClicked(context))
+                }
             )
 
             if (isInvite) {
@@ -271,7 +287,7 @@ fun UserInfoScreen(
                     showPhoneRegionDialog = true
                 },
                 onContactsClicked = {
-                    viewModel?.setEvent(UserInfoContract.Event.OnContactsClicked(context))
+                    viewModel?.setEvent(UserInfoContract.Event.OnPhoneContactsClicked(context))
                 }
             )
 
@@ -313,6 +329,38 @@ fun UserInfoScreen(
             },
             onDismiss = {
                 showUserExistDialog = false
+            }
+        )
+    }
+
+    if (showEmailNotExistDialog) {
+        CreateTransactionDialog(
+            title = stringResource(R.string.user_not_exist),
+            description = stringResource(R.string.user_email_not_exist),
+            actionButtonTitle = stringResource(R.string.continue_anyway),
+            secondButtonTitle = stringResource(R.string.cancel),
+            onActionClick = {
+                viewModel?.setEvent(UserInfoContract.Event.OnInitialClick)
+            },
+            onSecondClick = {},
+            onDismiss = {
+                showEmailNotExistDialog = false
+            }
+        )
+    }
+
+    if (showPhoneNotExistDialog) {
+        CreateTransactionDialog(
+            title = stringResource(R.string.user_not_exist),
+            description = stringResource(R.string.user_phone_not_exist),
+            actionButtonTitle = stringResource(R.string.continue_anyway),
+            secondButtonTitle = stringResource(R.string.cancel),
+            onActionClick = {
+                viewModel?.setEvent(UserInfoContract.Event.OnInitialClick)
+            },
+            onSecondClick = {},
+            onDismiss = {
+                showPhoneNotExistDialog = false
             }
         )
     }

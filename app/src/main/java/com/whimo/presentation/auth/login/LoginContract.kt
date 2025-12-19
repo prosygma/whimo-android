@@ -66,6 +66,7 @@ object LoginContract {
 
         data object OnLoginClick : Event()
         data class OnGoogleClick(val activity: Activity) : Event()
+        data class OnGoogleLongClick(val activity: Activity) : Event()
         data object OnRegisterClick : Event()
         data class OnChangeLanguage(val context: Context, val languageCode: String) : Event()
 

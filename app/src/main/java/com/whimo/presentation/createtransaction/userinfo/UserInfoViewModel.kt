@@ -36,6 +36,7 @@ import com.whimo.domain.createtransaction.UserInfoInteractor
 import com.whimo.domain.createtransaction.models.CreateTransactionModel
 import com.whimo.domain.createtransaction.models.UserInfoModel
 import com.whimo.domain.transactions.models.TransactionAction
+import com.whimo.extensions.getContactEmail
 import com.whimo.extensions.getContactPhone
 import com.whimo.network.ErrorHandler
 import com.whimo.network.error.ServerError
@@ -51,6 +52,7 @@ class UserInfoViewModel(
 ) : BaseViewModel<UserInfoContract.Binding>() {
 
     private var action: TransactionAction = TransactionAction.Buying
+    private var isProducerTransaction: Boolean = false
     private var isInvite: Boolean = false
 
     private var username: String? = null
@@ -62,6 +64,8 @@ class UserInfoViewModel(
     private var usernameError: String = ""
     private var emailError: String = ""
     private var phoneError: String = ""
+
+    private var isEmailContactsRequest = false
 
     override fun createBinding(): UserInfoContract.Binding {
         return UserInfoContract.Binding()
@@ -75,7 +79,8 @@ class UserInfoViewModel(
             is UserInfoContract.Event.OnEmailChanged -> onEmailChanged(event.email)
             is UserInfoContract.Event.OnPhoneRegionChanged -> onPhoneRegionChanged(event.phoneRegion)
             is UserInfoContract.Event.OnPhoneNumberChanged -> onPhoneNumberChanged(event.phoneNumber)
-            is UserInfoContract.Event.OnContactsClicked -> onContactsClicked(event.context)
+            is UserInfoContract.Event.OnEmailContactsClicked -> onContactsClicked(event.context, true)
+            is UserInfoContract.Event.OnPhoneContactsClicked -> onContactsClicked(event.context, false)
             is UserInfoContract.Event.OnContactsPermissionResult -> onContactsPermissionResult(event.context, event.result)
             is UserInfoContract.Event.OnConfirm -> onConfirm()
             is UserInfoContract.Event.OnDownstreamClick -> onDownstreamClick()
@@ -91,10 +96,10 @@ class UserInfoViewModel(
         updateBinding { b ->
             if (action == TransactionAction.Buying) {
                 b.title = resourceProvider.getString(R.string.supplier_information)
-                b.nameLabel = "Supplier’s username"
+                b.nameLabel = resourceProvider.getString(R.string.supplier_s_username)
             } else {
                 b.title = resourceProvider.getString(R.string.buyer_information)
-                b.nameLabel = "Buyer’s username"
+                b.nameLabel = resourceProvider.getString(R.string.buyer_s_username)
             }
 
             b.username = username ?: ""
@@ -110,6 +115,7 @@ class UserInfoViewModel(
 
     private fun onCreate(context: Context, transaction: CreateTransactionModel, isInvite: Boolean) {
         action = transaction.action ?: TransactionAction.Buying
+        isProducerTransaction = transaction.isProducerTransaction
         this.isInvite = isInvite
 
         if (username == null) username = transaction.userInfo?.name
@@ -168,9 +174,15 @@ class UserInfoViewModel(
         updateView()
     }
 
-    private fun onContactsClicked(context: Context) {
+    private fun onContactsClicked(context: Context, isEmailContactsRequest: Boolean = false) {
+        this.isEmailContactsRequest = isEmailContactsRequest
+
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
-            setEffect(UserInfoContract.Effect.OpenContacts)
+            if (isEmailContactsRequest) {
+                setEffect(UserInfoContract.Effect.OpenEmailContacts)
+            } else {
+                setEffect(UserInfoContract.Effect.OpenPhoneContacts)
+            }
         } else {
             setEffect(UserInfoContract.Effect.RequestContactsPermission)
         }
@@ -182,21 +194,34 @@ class UserInfoViewModel(
             val uri = intent?.data
 
             if (uri != null) {
-                val phone = context.getContactPhone(uri)
+                if (isEmailContactsRequest) {
+                    val email = context.getContactEmail(uri)
 
-                if (phone != null) {
-                    try {
-                        val parsedPhone = PhoneNumberUtils.parsePhone(phone)
-
-                        phoneRegion = parsedPhone.first
-                        phoneNumber = "${parsedPhone.second}"
+                    if (email != null) {
+                        this.email = email
 
                         updateView()
 
                         setEffect(UserInfoContract.Effect.ForceUpdateFields)
+                    }
 
-                    } catch (e: Exception) {
-                        setEffect(UserInfoContract.Effect.ShowMessage(resourceProvider.getString(R.string.invalid_phone)))
+                } else {
+                    val phone = context.getContactPhone(uri)
+
+                    if (phone != null) {
+                        try {
+                            val parsedPhone = PhoneNumberUtils.parsePhone(phone)
+
+                            phoneRegion = parsedPhone.first
+                            phoneNumber = "${parsedPhone.second}"
+
+                            updateView()
+
+                            setEffect(UserInfoContract.Effect.ForceUpdateFields)
+
+                        } catch (e: Exception) {
+                            setEffect(UserInfoContract.Effect.ShowMessage(resourceProvider.getString(R.string.invalid_phone)))
+                        }
                     }
                 }
             }
@@ -238,6 +263,35 @@ class UserInfoViewModel(
                 } else if (phoneValidationStatus == ValidationUtils.ValidationState.Valid) {
                     checkUserExist(phone)
                 }
+
+            } else if (action == TransactionAction.Buying && !isProducerTransaction) {
+                if (emailValidationStatus == ValidationUtils.ValidationState.Valid) {
+                    checkUserNotExist(email) {
+                        setEffect(
+                            if (it) {
+                                UserInfoContract.Effect.ShowEmailNotExist
+                            } else {
+                                UserInfoContract.Effect.UserInfoConfirmed(
+                                    UserInfoModel(username, email, phone)
+                                )
+                            }
+                        )
+                    }
+
+                } else if (phoneValidationStatus == ValidationUtils.ValidationState.Valid) {
+                    checkUserNotExist(phone) {
+                        setEffect(
+                            if (it) {
+                                UserInfoContract.Effect.ShowPhoneNotExist
+                            } else {
+                                UserInfoContract.Effect.UserInfoConfirmed(
+                                    UserInfoModel(username, email, phone)
+                                )
+                            }
+                        )
+                    }
+                }
+
             } else {
                 setEffect(
                     UserInfoContract.Effect.UserInfoConfirmed(
@@ -253,7 +307,7 @@ class UserInfoViewModel(
             launch {
                 setEffect(UserInfoContract.Effect.ToggleLoader(true))
 
-                interactor.checkUserExist(identifier)
+                interactor.checkUserExist(identifier, false)
                     .onSuccess {
                         setEffect(UserInfoContract.Effect.ToggleLoader(false))
 
@@ -271,6 +325,7 @@ class UserInfoViewModel(
                     .onError {
                         if (it is ServerError && it.code == 404) {
                             setEffect(
+                                UserInfoContract.Effect.ToggleLoader(false),
                                 UserInfoContract.Effect.UserInfoConfirmed(
                                     UserInfoModel(username, email, phone)
                                 )
@@ -283,6 +338,33 @@ class UserInfoViewModel(
                                 UserInfoContract.Effect.ToggleLoader(false),
                                 UserInfoContract.Effect.ShowMessage(errorMessage)
                             )
+                        }
+                    }
+            }
+        }
+    }
+
+    private fun checkUserNotExist(identifier: String?, callback: (Boolean) -> Unit) {
+        if (identifier != null) {
+            launch {
+                setEffect(UserInfoContract.Effect.ToggleLoader(true))
+
+                interactor.checkUserExist(identifier, true)
+                    .onSuccess {
+                        setEffect(UserInfoContract.Effect.ToggleLoader(false))
+
+                        callback(it == false)
+                    }
+                    .onError {
+                        setEffect(UserInfoContract.Effect.ToggleLoader(false))
+
+                        if (it is ServerError && it.code == 404) {
+                            callback(true)
+
+                        } else {
+                            val errorMessage = errorHandler.parseError(it)
+
+                            setEffect(UserInfoContract.Effect.ShowMessage(errorMessage))
                         }
                     }
             }

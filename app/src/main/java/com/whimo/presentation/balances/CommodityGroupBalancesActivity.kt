@@ -89,10 +89,10 @@ class CommodityGroupBalancesActivity : ComponentActivity(), OnBackPressedDispatc
     companion object {
         private const val COMMODITY_GROUP = "commodity_group"
 
-        fun openCommodityGroupBalances(context: Context, commodityGroupModel: CommodityGroupModel) {
+        fun openCommodityGroupBalances(context: Context, launcher: ManagedActivityResultLauncher<Intent, ActivityResult>, commodityGroupModel: CommodityGroupModel) {
             val intent = Intent(context, CommodityGroupBalancesActivity::class.java)
             intent.putExtra(COMMODITY_GROUP, commodityGroupModel)
-            context.startActivity(intent)
+            launcher.launch(intent)
         }
     }
 }

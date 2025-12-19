@@ -19,27 +19,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.whimo.domain.createtransaction
+package com.whimo.domain.commodity.models
 
-import android.content.Context
-import com.whimo.data.base.common.BaseResult
-import com.whimo.data.createtransaction.repository.UserInfoRepository
-import com.whimo.extensions.isNetworkAvailable
+data class ConvertRecipeModel(
+    val id: String,
+    val name: String,
+    val inputs: List<ConvertQuantityModel>,
+    val outputs: List<ConvertQuantityModel>,
+)
 
-interface UserInfoInteractor {
-    suspend fun checkUserExist(identifier: String, defaultResult: Boolean): BaseResult<Boolean>
-}
-
-class UserInfoInteractorImpl(
-    private val repository: UserInfoRepository,
-    private val context: Context,
-) : UserInfoInteractor {
-
-    override suspend fun checkUserExist(identifier: String, defaultResult: Boolean): BaseResult<Boolean> {
-        return if (context.isNetworkAvailable()) {
-            repository.checkUserExist(identifier)
-        } else {
-            BaseResult.Success(defaultResult)
-        }
-    }
-}
+data class ConvertQuantityModel(
+    val id: String,
+    var commodity: CommodityModel,
+    var quantity: Float,
+)

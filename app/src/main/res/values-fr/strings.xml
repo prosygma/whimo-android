@@ -31,10 +31,7 @@
     <string name="no_data_available">Aucune donnée disponible</string>
     <string name="transactions">Transactions</string>
     <string name="invalid_email">Email invalide</string>
-    <string name="check_creds">Veuillez vérifier vos identifiants</string>
     <string name="enter_email">Entrez votre email</string>
-    <string name="enter_email_phone_id">Entrez votre email, numéro de téléphone ou identifiant</string>
-    <string name="enter_email_or_phone">Entrez votre email ou numéro de téléphone</string>
     <string name="username">Nom d\'utilisateur</string>
     <string name="enter_password">Entrez votre mot de passe</string>
 
@@ -42,7 +39,6 @@
     <string name="connection_error">Erreur de connexion au serveur, veuillez vérifier votre connexion internet</string>
     <string name="network_error">Pas de connexion internet</string>
     <string name="unexpected_network_error">Erreur réseau</string>
-    <string name="welcome_description">Suivez le temps passé sur vos projets sans perdre de vue vos objectifs.</string>
     <string name="log_in_instructions">Entrez vos informations pour vous connecter. Vous pouvez utiliser l\'email ou le numéro de téléphone.</string>
     <string name="forgot_pass_instructions_email">Entrez votre email et nous vous enverrons un code de récupération pour restaurer l\'accès à votre compte.</string>
     <string name="forgot_pass_instructions_phone">Entrez votre numéro de téléphone et nous vous enverrons un code de récupération pour restaurer l\'accès à votre compte.</string>
@@ -55,13 +51,11 @@
     <string name="back_to_login">Retour à la connexion</string>
     <string name="continue_with_phone_number">Continuer avec le numéro de téléphone</string>
     <string name="continue_with_email">Continuer avec l\'email</string>
-    <string name="invalid_username">Nom d\'utilisateur invalide</string>
     <string name="invalid_phone">Numéro de téléphone invalide</string>
     <string name="invalid_password">Le mot de passe doit contenir au moins 8 caractères, dont une majuscule et un chiffre.</string>
     <string name="invalid_confirm_password">Les mots de passe ne correspondent pas</string>
     <string name="create_account">Créer un compte</string>
     <string name="create_account_instructions">Entrez un email ou un numéro de téléphone, ou les deux, pour créer votre compte</string>
-    <string name="enter_phone">Entrez votre numéro de téléphone</string>
     <string name="phone_digits">000 000 000</string>
     <string name="phone">Numéro de téléphone</string>
     <string name="create_password">Créer un mot de passe</string>
@@ -69,8 +63,6 @@
     <string name="confirm_new_password">Confirmer le nouveau mot de passe</string>
     <string name="create_new_password">Créer un nouveau mot de passe</string>
     <string name="language">Langue</string>
-    <string name="filter_by">Filtrer par</string>
-    <string name="clear_all">Tout effacer</string>
     <string name="login_with_email">Connexion avec email</string>
     <string name="login_with_phone">Connexion avec téléphone</string>
     <string name="confirm">Confirmer</string>
@@ -83,10 +75,10 @@
     <string name="get_verification_code_with_phone">Obtenir le code par téléphone</string>
 
     <!-- Transaction Strings (French) -->
-    <string name="buy_commodity">Acheter une marchandise</string>
-    <string name="sell_commodity">Vendre une marchandise</string>
+    <string name="buy_commodity">Acheter ou collecter une marchandise</string>
+    <string name="sell_commodity">Vendre ou livrer une marchandise</string>
     <string name="yes">Oui</string>
-    <string name="producer_transaction">Transaction du producteur</string>
+    <string name="producer_transaction">Transaction initiale</string>
     <string name="producer_transaction_description">Vous achetez auprès de l\'producteur qui a produit les biens.</string>
     <string name="yes_record_geodata">Oui, et je peux enregistrer mes données de géolocalisation</string>
     <string name="record_geolocation_description">Enregistrez votre propre géolocalisation (point GPS) comme emplacement de la parcelle</string>
@@ -97,16 +89,16 @@
     <string name="save_transaction_title">Enregistrer la transaction ?</string>
     <string name="save_transaction_description">Veuillez vérifier attentivement les données. Vous ne pourrez plus les modifier par la suite.</string>
     <string name="review_information">Vérifier les informations</string>
-    <string name="save_without_location_title">Enregistrer sans localisation ?</string>
+    <string name="save_without_location_title">Enregistrer sans géolocalisation?</string>
     <string name="save_without_location_description">En enregistrant sans géolocalisation de la parcelle, la traçabilité sera partielle et cela peut affecter les acheteurs suivants.\nDans la mesure du possible, ajoutez ou collectez les données de géolocalisation de la parcelle.\nVeuillez vérifier attentivement les données. Vous ne pourrez plus les modifier par la suite.</string>
-    <string name="add_farm_geodata">Ajouter des données de géo-localisation de la parcelle</string>
-    <string name="save_without_location">Enregistrer sans localisation</string>
+    <string name="add_farm_geodata">Ajouter les données de géolocalisation de la parcelle</string>
+    <string name="save_without_location">Enregistrer sans géolocalisation</string>
     <string name="create_transaction_error">Erreur lors de la création de la transaction</string>
     <string name="something_went_wrong">Une erreur s\'est produite</string>
-    <string name="are_you_on_farm">Êtes-vous à la parcelle ?</string>
+    <string name="are_you_on_farm">Êtes-vous sur la parcelle de production?</string>
     <string name="farm_geolocation_description">Avec la géolocalisation de la parcelle, la transaction sera entièrement traçable et aidera les acheteurs suivants.</string>
-    <string name="yes_on_farm">Oui, je suis à la parcelle</string>
-    <string name="no_not_on_farm">Non, je ne suis pas à la parcelle</string>
+    <string name="yes_on_farm">Oui, je suis sur la parcelle</string>
+    <string name="no_not_on_farm">Non, je ne suis pas sur la parcelle</string>
     <string name="enter_username">Entrez le nom d\'utilisateur</string>
     <string name="user_icon">Icône utilisateur</string>
     <string name="email_icon">Icône email</string>
@@ -135,8 +127,8 @@
     <string name="transaction_approval_request">Demande d\'approbation de transaction</string>
     <string name="transaction_rejected">Transaction rejetée</string>
     <string name="transaction_expired">Transaction expirée</string>
-    <string name="missing_location_request">Demande de localisation manquante</string>
-    <string name="location_updated">Localisation mise à jour</string>
+    <string name="missing_location_request">Demande de géolocalisation manquante</string>
+    <string name="location_updated">La géolocalisation a été mise à jour</string>
     <string name="push_notifications">Notifications push</string>
     <string name="languages_filter">Filtre de langues</string>
     <string name="transactions_filter">Filtre des transactions</string>
@@ -150,7 +142,7 @@
     <string name="insufficient_volumes_message">Vous n\'avez pas assez de volume pour cette transaction.\n\nSi vous continuez, une transaction automatique sera créée pour ajouter le volume nécessaire à votre solde. Cependant, ces ajouts seront marqués comme non traçables.</string>
     <string name="initial_transaction">Transaction initiale</string>
     <string name="downstream_transaction">Transaction en aval</string>
-    <string name="buying_from_farmer">J\'achète directement à l\'producteur</string>
+    <string name="buying_from_farmer">J\'achète auprès d\'un producteur</string>
     <string name="buying_from_cooperative">J\'achète à une coopérative ou à un commerçant</string>
     <string name="seller_not_using_app">Le vendeur n\'utilise pas cette application</string>
     <string name="seller_using_app">Le vendeur utilise cette application</string>
@@ -312,5 +304,28 @@
     <string name="saved">Enregistré</string>
     <string name="you">"%s (Vous)"</string>
     <string name="what_transaction_are_you_creating">Quelle transaction créez-vous?</string>
+    <string name="whimo_app_feedback">Retour d’application WHIMO</string>
+    <string name="send_email">Envoyer un e-mail</string>
+    <string name="no_email_app_is_installed">Aucune application de messagerie n’est installée</string>
+    <string name="feedback">Commentaires</string>
+    <string name="terms_accept_text">J’accepte les %1$s</string>
+    <string name="terms_and_conditions">Conditions générales</string>
+
+    <string name="from">De</string>
+    <string name="to">À</string>
+    <string name="convert_commodity">Convertir le produit</string>
+    <string name="convert_commodity_info">Les informations sont présentées à l’aide d’équivalences standardisées. Vous pouvez les modifier si nécessaire.</string>
+    <string name="no_recipes">Aucune recette</string>
+    <string name="convert_commodity_text">Veuillez sélectionner comment vous souhaitez convertir ce type de marchandise.</string>
+    <string name="convert">Convertir</string>
+    <string name="convert_commodity_dialog_title">Convertir le produit ?</string>
+    <string name="convert_commodity_dialog_description">Êtes-vous sûr de vouloir convertir le produit ? Veuillez vérifier attentivement les données. Cette action est irréversible.</string>
+
+    <string name="supplier_s_username">Nom d’utilisateur du fournisseur</string>
+    <string name="buyer_s_username">Nom d’utilisateur de l’acheteur</string>
+    <string name="user_not_exist">L’utilisateur n’existe pas</string>
+    <string name="continue_anyway">Continuer quand même</string>
+    <string name="user_email_not_exist">L’utilisateur avec cet e-mail n’existe pas.</string>
+    <string name="user_phone_not_exist">L’utilisateur avec ce numéro de téléphone n’existe pas.</string>
 
 </resources>

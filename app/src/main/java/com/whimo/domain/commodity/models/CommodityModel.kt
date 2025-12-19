@@ -30,6 +30,7 @@ data class CommodityModel(
     val code: String,
     val name: String,
     val unit: String,
+    val hasRecipe: Boolean,
     val group: CommodityGroupModel?,
     val balance: Float?,
 ) : Parcelable {
@@ -66,10 +67,3 @@ data class CommodityBalanceFilter(
     var groupId: String? = null,
     var commodityId: String? = null,
 )
-
-@Parcelize
-data class CommodityBalanceModel(
-    val id: String,
-    val volume: Float,
-    val commodity: CommodityModel
-) : Parcelable

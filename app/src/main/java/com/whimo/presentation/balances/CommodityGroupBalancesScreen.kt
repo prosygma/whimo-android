@@ -30,6 +30,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -37,9 +38,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.whimo.base.ObserveEffects
 import com.whimo.domain.commodity.models.CommodityGroupModel
+import com.whimo.extensions.isNetworkAvailable
+import com.whimo.navigation.Screens
 import com.whimo.presentation.balances.components.CommodityBalancesList
 import com.whimo.presentation.main.components.Toolbar2
 import com.whimo.presentation.ui.theme.WhimoTheme
+import com.whimo.utils.toJsonArgs
 import org.koin.androidx.compose.koinViewModel
 
 @Preview
@@ -63,6 +67,7 @@ fun CommodityGroupBalancesScreen(
     viewModel: CommodityGroupBalancesViewModel? = koinViewModel()
 ) {
     val binding = viewModel?.observeViewBinding() ?: CommodityGroupBalancesContract.Binding()
+    val context = LocalContext.current
 
     var isLoading by remember { mutableStateOf(false) }
 
@@ -93,7 +98,13 @@ fun CommodityGroupBalancesScreen(
         if (binding.commodities != null) {
             CommodityBalancesList(
                 modifier = Modifier.fillMaxHeight(),
-                commodities = binding.commodities!!
+                networkAvailable = context.isNetworkAvailable(),
+                commodities = binding.commodities!!,
+                onSelect = {
+                    navController.navigate(
+                        Screens.ConvertRecipes.putArgs(Screens.ARG_KEY_JSON to it.toJsonArgs())
+                    )
+                }
             )
         }
     }
