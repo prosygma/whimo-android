@@ -128,7 +128,7 @@ fun RegistrationScreen(
                     context.startActivity(
                         Intent(
                             Intent.ACTION_VIEW,
-                            BuildConfig.TERMS_AND_CONDITIONS.toUri()
+                            BuildConfig.TERMS_OF_USE.toUri()
                         )
                     )
                 }
@@ -252,7 +252,7 @@ fun RegistrationScreen(
                 )
 
                 val termsTag = "TERMS"
-                val termsText = stringResource(R.string.terms_and_conditions)
+                val termsText = stringResource(R.string.terms_of_use)
                 val fullText = stringResource(R.string.terms_accept_text, termsText)
 
                 RichTextWithLinks(

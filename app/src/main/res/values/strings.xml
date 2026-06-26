@@ -153,6 +153,7 @@
     <string name="upload_file_description">Upload a list of farm geolocations or polygons. You can use open-source solutions such as FAO Ground to collect geolocation data.</string>
     <string name="qr_scanner_unavailable">Qr scanner unavailable</string>
     <string name="scan_qr">Scan QR</string>
+    <string name="invalid_qr_geojson">QR code must contain GeoJSON data</string>
     <string name="create_transaction">Create transaction</string>
 
     <!-- Dialog Strings -->
@@ -309,7 +310,7 @@
     <string name="no_email_app_is_installed">No email app is installed</string>
     <string name="feedback">Feedback</string>
     <string name="terms_accept_text">I accept %1$s</string>
-    <string name="terms_and_conditions">Terms &amp; Conditions</string>
+    <string name="terms_of_use">Terms of Use</string>
 
     <string name="from">From</string>
     <string name="to">To</string>

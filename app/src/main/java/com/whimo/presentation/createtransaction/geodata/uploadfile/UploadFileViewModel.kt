@@ -93,6 +93,10 @@ class UploadFileViewModel(
 
     private fun onConfirm(context: Context) {
         launch {
+            if (file == null) {
+                return@launch
+            }
+
             val locations = file?.uri?.let { GeoFileParser.parse(context, it) }
 
             if (transactionId != null) {

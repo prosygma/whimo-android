@@ -152,6 +152,15 @@ fun SettingsScreen(
 
     if (showSheet) {
         SettingsOptionsBottomSheet(
+            onLegalInfoClick = {
+                showSheet = false
+                context.startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        BuildConfig.TERMS_OF_USE.toUri()
+                    )
+                )
+            },
             onLogoutClick = {
                 showSheet = false
                 showLogout = true

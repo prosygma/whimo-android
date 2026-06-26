@@ -183,7 +183,7 @@ fun UploadFileScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-//                isEnabled = binding.fileChosen,
+                isEnabled = binding.fileChosen,
                 title = stringResource(R.string.confirm),
                 onClick = {
                     viewModel?.setEvent(UploadFileContract.Event.OnConfirm(context))

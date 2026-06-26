@@ -60,6 +60,7 @@ fun TransactionDetailsResponse.toDomain(): TransactionModel {
 
 fun TransactionData.toDomain(): TransactionModel {
     val type = TransactionType.entries.find { it.typeName == type }
+    val createdDate = created_at.toLocalDateTime()
 
     val status = if (is_automatic) {
         TransactionStatus.Automatic
@@ -71,7 +72,8 @@ fun TransactionData.toDomain(): TransactionModel {
 
     return TransactionModel(
         id = id,
-        createdDate = created_at.toLocalDateTime(),
+        createdDate = createdDate,
+        updatedDate = updated_at?.toLocalDateTime() ?: createdDate,
         expiresDate = expires_at?.toLocalDateTime(),
         type = type,
         status = status,

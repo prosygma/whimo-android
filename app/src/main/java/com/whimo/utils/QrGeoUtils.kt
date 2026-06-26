@@ -25,149 +25,27 @@ import android.content.Context
 import androidx.core.net.toUri
 import com.google.android.gms.maps.model.LatLng
 import com.whimo.domain.createtransaction.models.MFile
+import com.whimo.utils.geojson.GeoJsonCoordinate
+import com.whimo.utils.geojson.GeoJsonParser
 import java.io.File
 
-data class GeoJsonFeatureCollection(
-    val type: String = "FeatureCollection",
-    val features: List<GeoJsonFeature>
+data class QrGeoData(
+    val location: LatLng? = null,
+    val geoJson: String? = null
 )
 
-data class GeoJsonFeature(
-    val type: String = "Feature",
-    val geometry: GeoJsonGeometry,
-    val properties: Map<String, Any?> = emptyMap()
-)
+fun parseQrGeoData(qr: String): QrGeoData {
+    val geoJson = GeoJsonParser.parse(qr) ?: return QrGeoData()
+    val location = geoJson.firstCoordinate?.toLatLng()
 
-sealed class GeoJsonGeometry(val type: String) {
-    data class GeoJsonPointGeometry(
-        val coordinates: List<Double>
-    ) : GeoJsonGeometry("Point")
-
-    data class GeoJsonPolygonGeometry(
-        val coordinates: List<List<List<Double>>>
-    ) : GeoJsonGeometry("Polygon")
+    return QrGeoData(
+        location = location,
+        geoJson = geoJson.geoJson
+    )
 }
 
-
-fun convertToGeoJson(qr: String, referenceCoordinate: LatLng?, utmCoordinates: List<LatLng>?): String {
-    val properties = extractProperties(qr)
-
-    val features = mutableListOf<GeoJsonFeature>()
-
-//    if (referenceCoordinate != null) {
-//        features.add(
-//            GeoJsonFeature(
-//                geometry = GeoJsonGeometry.GeoJsonPointGeometry(
-//                    coordinates = listOf(
-//                        referenceCoordinate.longitude,
-//                        referenceCoordinate.latitude
-//                    )
-//                ),
-//                properties = properties
-//            )
-//        )
-//    }
-
-    if (!utmCoordinates.isNullOrEmpty()) {
-        var closedUTMCoordinates = utmCoordinates
-
-        if (utmCoordinates.first() != utmCoordinates.last()) {
-            closedUTMCoordinates = utmCoordinates + utmCoordinates.first()
-        }
-
-        val polygonCoordinates = closedUTMCoordinates.map { listOf(it.longitude, it.latitude) }
-
-        features.add(
-            GeoJsonFeature(
-                geometry = GeoJsonGeometry.GeoJsonPolygonGeometry(
-                    coordinates = listOf(polygonCoordinates)
-                ),
-                properties = properties
-            )
-        )
-    }
-
-    return GeoJsonFeatureCollection(features = features).toJsonArgs()
-}
-
-private fun extractProperties(text: String): Map<String, Any?> {
-    return text
-        .lines()
-        .mapNotNull { line ->
-            if (line.startsWith("https://")) return@mapNotNull null
-
-            val parts = line.split(":", limit = 2)
-
-            if (parts.size == 2) {
-                val key = parts[0].trim()
-                val value = parts[1].trim()
-
-                return@mapNotNull key to value
-            } else {
-                return@mapNotNull null
-            }
-        }
-        .toMap()
-}
-
-fun parseGoogleLink(qr: String): List<LatLng> {
-    val googleMapsRegex = Regex("""query=(-?\d+\.\d+),(-?\d+\.\d+)""")
-
-    val results = mutableListOf<LatLng>()
-
-    googleMapsRegex.findAll(qr).forEach {
-        val lat = it.groupValues[1].toDouble()
-        val lon = it.groupValues[2].toDouble()
-        results.add(LatLng(lat, lon))
-    }
-
-    return results
-}
-
-fun parseUTMCoordinates(qr: String, referenceCoordinate: LatLng? = null): List<LatLng> {
-    val utmRegex = Regex("""\[\s*(-?\d+(?:\.\d+)?)\s*;\s*(-?\d+(?:\.\d+)?)\s*]""")
-
-    val results = mutableListOf<LatLng>()
-
-    val isNorthern = referenceCoordinate == null || referenceCoordinate.latitude >= 0
-    val utmZone = referenceCoordinate?.longitude?.let { getUTMZone(it) } ?: 32 // 32 -> Cameroon
-
-    utmRegex.findAll(qr).forEach {
-        val x = it.groupValues[1].toDouble()
-        val y = it.groupValues[2].toDouble()
-
-        try {
-            val latLng = UtmConverter.utmToLatLng(x, y, utmZone, isNorthern)
-            results.add(latLng)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    return results
-}
-
-fun parseCoordinates(qr: String): List<LatLng> {
-    val utmRegex = Regex("""\[\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*]""")
-
-    val results = mutableListOf<LatLng>()
-
-    utmRegex.findAll(qr).forEach {
-        val lat = it.groupValues[1].toDouble()
-        val lon = it.groupValues[2].toDouble()
-
-        try {
-            results.add(LatLng(lat, lon))
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    return results
-}
-
-private fun getUTMZone(longitude: Double): Int {
-    return ((longitude + 180) / 6).toInt() + 1
+private fun GeoJsonCoordinate.toLatLng(): LatLng {
+    return LatLng(latitude, longitude)
 }
 
 fun writeQRDataToCacheFile(

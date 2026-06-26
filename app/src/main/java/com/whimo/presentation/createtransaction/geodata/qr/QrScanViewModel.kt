@@ -22,7 +22,7 @@
 package com.whimo.presentation.createtransaction.geodata.qr
 
 import android.content.Context
-import com.google.android.gms.maps.model.LatLng
+import com.whimo.R
 import com.whimo.base.BaseViewModel
 import com.whimo.base.CoreViewEvent
 import com.whimo.data.base.common.onError
@@ -34,10 +34,8 @@ import com.whimo.domain.geodata.GeoDataInteractor
 import com.whimo.domain.transactions.models.TransactionModel
 import com.whimo.network.ErrorHandler
 import com.whimo.providers.ResourceProvider
-import com.whimo.utils.convertToGeoJson
-import com.whimo.utils.parseCoordinates
-import com.whimo.utils.parseGoogleLink
-import com.whimo.utils.parseUTMCoordinates
+import com.whimo.utils.QrGeoData
+import com.whimo.utils.parseQrGeoData
 import com.whimo.utils.writeQRDataToCacheFile
 import java.io.File
 
@@ -71,63 +69,31 @@ class QrScanViewModel(
 
 
     private fun qrScanned(context: Context, qrData: String) {
-        val location = parseGoogleLink(qrData).firstOrNull()
+        val qrGeoData = parseQrGeoData(qrData)
+
+        if (qrGeoData.geoJson == null) {
+            setEffect(QrScanContract.Effect.ShowMessage(resourceProvider.getString(R.string.invalid_qr_geojson)))
+            return
+        }
 
         if (transactionId == null) {
-            handleQr(qrData, location)
+            handleQr(qrData, qrGeoData)
         } else {
-            uploadQr(context, qrData, location)
+            uploadQr(context, qrData, qrGeoData)
         }
     }
 
-    private fun handleQr(qrData: String, location: LatLng?) {
-        if (location != null) {
-            setEffect(QrScanContract.Effect.QrResult(qrData, location))
-
-        } else {
-            launch {
-                setEffect(QrScanContract.Effect.ToggleLoader(true))
-
-                val coordinates = parseCoordinates(qrData)
-
-                if (coordinates.isNotEmpty()) {
-                    setEffect(
-                        QrScanContract.Effect.ToggleLoader(false),
-                        QrScanContract.Effect.QrResult(qrData, coordinates.firstOrNull())
-                    )
-
-                } else {
-                    val utmCoordinates = parseUTMCoordinates(qrData)
-
-                    setEffect(
-                        QrScanContract.Effect.ToggleLoader(false),
-                        QrScanContract.Effect.QrResult(qrData, utmCoordinates.firstOrNull())
-                    )
-                }
-            }
-        }
+    private fun handleQr(qrData: String, qrGeoData: QrGeoData) {
+        setEffect(QrScanContract.Effect.QrResult(qrData, qrGeoData.location))
     }
 
-    private fun uploadQr(context: Context, qrData: String, location: LatLng?) {
+    private fun uploadQr(context: Context, qrData: String, qrGeoData: QrGeoData) {
         launch {
             setEffect(QrScanContract.Effect.ToggleLoader(true))
 
             var qrFile: Pair<File?, MFile?> = null to null
 
-            val coordinates = parseCoordinates(qrData)
-
-            if (coordinates.isNotEmpty()) {
-                val geoJson = convertToGeoJson(qrData, location, coordinates)
-
-                qrFile = writeQRDataToCacheFile(
-                    context = context,
-                    content = geoJson,
-                )
-
-            } else {
-                val utmCoordinates = parseUTMCoordinates(qrData, location)
-                val geoJson = convertToGeoJson(qrData, location, utmCoordinates)
-
+            qrGeoData.geoJson?.let { geoJson ->
                 qrFile = writeQRDataToCacheFile(
                     context = context,
                     content = geoJson,
@@ -145,7 +111,7 @@ class QrScanViewModel(
                     qrFile.first?.delete()
                     setEffect(
                         QrScanContract.Effect.ToggleLoader(false),
-                        QrScanContract.Effect.QrResult(qrData, location)
+                        QrScanContract.Effect.QrResult(qrData, qrGeoData.location)
                     )
                 }
                 .onError {

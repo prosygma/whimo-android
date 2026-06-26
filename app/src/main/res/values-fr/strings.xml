@@ -152,6 +152,7 @@
     <string name="upload_file_description">Téléversez une liste de géolocalisations de parcelle ou de polygones. Vous pouvez utiliser des solutions open source comme FAO Ground pour collecter les données.</string>
     <string name="qr_scanner_unavailable">Scanner QR non disponible</string>
     <string name="scan_qr">Scanner le QR</string>
+    <string name="invalid_qr_geojson">Le code QR doit contenir des données GeoJSON</string>
     <string name="create_transaction">Créer une transaction</string>
 
     <!-- Dialog Strings -->
@@ -309,7 +310,7 @@
     <string name="no_email_app_is_installed">Aucune application de messagerie n’est installée</string>
     <string name="feedback">Commentaires</string>
     <string name="terms_accept_text">J’accepte les %1$s</string>
-    <string name="terms_and_conditions">Conditions générales</string>
+    <string name="terms_of_use">Conditions d’utilisation</string>
 
     <string name="from">De</string>
     <string name="to">À</string>

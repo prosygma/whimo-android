@@ -55,7 +55,7 @@ private fun Preview() {
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             val termsTag = "TERMS"
-            val termsText = stringResource(R.string.terms_and_conditions)
+            val termsText = stringResource(R.string.terms_of_use)
             val fullText = stringResource(R.string.terms_accept_text, termsText)
 
             RichTextWithLinks(

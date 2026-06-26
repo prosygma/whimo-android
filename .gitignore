@@ -67,6 +67,7 @@ obj/
 *.swo
 *.db
 *.lock
+.ai
 
 # Crashlytics
 fabric.properties

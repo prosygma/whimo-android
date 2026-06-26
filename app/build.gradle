@@ -24,8 +24,8 @@ android {
         applicationId "com.whimo"
         minSdk 26
         targetSdk 36
-        versionCode 50
-        versionName "1.0"
+        versionCode 55
+        versionName "1.5"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -70,7 +70,7 @@ android {
                 buildConfigField "double", "DEFAULT_LOCATION_LATITUDE", props['release_default_location_latitude']
                 buildConfigField "double", "DEFAULT_LOCATION_LONGITUDE", props['release_default_location_longitude']
 
-                buildConfigField "String", "TERMS_AND_CONDITIONS", props['release_terms_and_conditions']
+                buildConfigField "String", "TERMS_OF_USE", props['release_terms_of_use']
                 buildConfigField "String", "FEEDBACK_EMAIL", props['release_feedback_email']
             }
             debug {
@@ -83,7 +83,7 @@ android {
                 buildConfigField "double", "DEFAULT_LOCATION_LATITUDE", props['debug_default_location_latitude']
                 buildConfigField "double", "DEFAULT_LOCATION_LONGITUDE", props['debug_default_location_longitude']
 
-                buildConfigField "String", "TERMS_AND_CONDITIONS", props['debug_terms_and_conditions']
+                buildConfigField "String", "TERMS_OF_USE", props['debug_terms_of_use']
                 buildConfigField "String", "FEEDBACK_EMAIL", props['debug_feedback_email']
             }
         }

@@ -44,6 +44,7 @@ import com.whimo.presentation.ui.theme.WhimoTheme
 private fun Preview() {
     WhimoTheme {
         SettingsOptionsBottomSheet(
+            onLegalInfoClick = {},
             onLogoutClick = {},
             onDeleteAccountClick = {},
             onDismissRequest = {},
@@ -53,6 +54,7 @@ private fun Preview() {
 
 @Composable
 fun SettingsOptionsBottomSheet(
+    onLegalInfoClick: () -> Unit,
     onLogoutClick: () -> Unit,
     onDeleteAccountClick: () -> Unit,
     onDismissRequest: () -> Unit,
@@ -76,6 +78,7 @@ fun SettingsOptionsBottomSheet(
             SettingsOptionItem1(
                 iconRes = R.drawable.ic_shield,
                 title = stringResource(R.string.legal_information),
+                onClick = onLegalInfoClick,
             )
 
             SettingsOptionItemBase(

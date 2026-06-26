@@ -36,9 +36,7 @@ import com.whimo.domain.createtransaction.models.PendingTransactionModel
 import com.whimo.domain.createtransaction.models.UserInfoModel
 import com.whimo.domain.transactions.models.TransactionModel
 import com.whimo.extensions.isNetworkAvailable
-import com.whimo.utils.convertToGeoJson
-import com.whimo.utils.parseCoordinates
-import com.whimo.utils.parseUTMCoordinates
+import com.whimo.utils.parseQrGeoData
 import com.whimo.utils.toJsonArgs
 import com.whimo.utils.writeQRDataToCacheFile
 import java.io.File
@@ -99,22 +97,13 @@ class CreateTransactionInteractorImpl(
         if (transaction.isProducerTransaction) {
 
             var qrFile: Pair<File?, MFile?> = null to null
+            var qrLocation = transaction.location
 
             if (transaction.locationProvider == LocationProvider.QR && transaction.qr != null) {
-                val coordinates = parseCoordinates(transaction.qr)
+                val qrGeoData = parseQrGeoData(transaction.qr)
+                qrLocation = qrGeoData.location ?: transaction.location
 
-                if (coordinates.isNotEmpty()) {
-                    val geoJson = convertToGeoJson(transaction.qr, transaction.location, coordinates)
-
-                    qrFile = writeQRDataToCacheFile(
-                        context = context,
-                        content = geoJson,
-                    )
-
-                } else {
-                    val utmCoordinates = parseUTMCoordinates(transaction.qr, transaction.location)
-                    val geoJson = convertToGeoJson(transaction.qr, transaction.location, utmCoordinates)
-
+                qrGeoData.geoJson?.let { geoJson ->
                     qrFile = writeQRDataToCacheFile(
                         context = context,
                         content = geoJson,
@@ -128,8 +117,8 @@ class CreateTransactionInteractorImpl(
                     commodityId = transaction.commodity?.id,
                     volume = transaction.volume,
                     locationProvider = transaction.locationProvider?.providerName,
-                    farmLatitude = transaction.location?.latitude,
-                    farmLongitude = transaction.location?.longitude,
+                    farmLatitude = qrLocation?.latitude,
+                    farmLongitude = qrLocation?.longitude,
                     locationFile = qrFile.second ?: transaction.file,
                     transactionLatitude = transaction.creationLocation?.latitude,
                     transactionLongitude = transaction.creationLocation?.longitude,

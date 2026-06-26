@@ -75,13 +75,13 @@
     <string name="get_verification_code_with_phone">Obtener código con teléfono</string>
 
     <!-- Transaction Strings (Spanish) -->
-    <string name="buy_commodity">Comprar producto</string>
-    <string name="sell_commodity">Vender producto</string>
+    <string name="buy_commodity">Comprar o adquirir</string>
+    <string name="sell_commodity">Vender o entregar</string>
     <string name="yes">Sí</string>
     <string name="producer_transaction">Transacción del productor</string>
     <string name="producer_transaction_description">Estás comprando al agricultor que produjo los bienes.</string>
     <string name="yes_record_geodata">Sí, y puedo registrar mis datos geográficos</string>
-    <string name="record_geolocation_description">Registra tu propia geolocalización (punto GPS) como ubicación de la granja</string>
+    <string name="record_geolocation_description">Registra tu propia geolocalización (punto GPS) como ubicación de la finca</string>
     <string name="scan_qr_code">Escanear código QR</string>
     <string name="scan_qr_description">Escanea un código QR en una tarjeta presentada por el agricultor.</string>
     <string name="add_transaction">Agregar transacción</string>
@@ -90,15 +90,15 @@
     <string name="save_transaction_description">Revisa cuidadosamente los datos. No podrás cambiarlos después.</string>
     <string name="review_information">Revisar información</string>
     <string name="save_without_location_title">¿Guardar sin ubicación?</string>
-    <string name="save_without_location_description">Al guardar sin la geolocalización de la granja, la trazabilidad será parcial y puede afectar a los compradores posteriores.\nSiempre que sea posible, agrega o recopila los datos de geolocalización.\nRevisa cuidadosamente los datos. No podrás cambiarlos después.</string>
-    <string name="add_farm_geodata">Agregar datos geográficos de la granja</string>
+    <string name="save_without_location_description">Al guardar sin la geolocalización de la finca, la trazabilidad será parcial y puede afectar a los compradores posteriores.\nSiempre que sea posible, agrega o recopila los datos de geolocalización.\nRevisa cuidadosamente los datos. No podrás cambiarlos después.</string>
+    <string name="add_farm_geodata">Agregar datos geográficos de la finca</string>
     <string name="save_without_location">Guardar sin ubicación</string>
     <string name="create_transaction_error">Error al crear transacción</string>
     <string name="something_went_wrong">Algo salió mal</string>
-    <string name="are_you_on_farm">¿Estás en la granja?</string>
+    <string name="are_you_on_farm">¿Estás en la finca?</string>
     <string name="farm_geolocation_description">Con la geolocalización, la transacción será totalmente trazable y ayudará a los compradores posteriores.</string>
-    <string name="yes_on_farm">Sí, estoy en la granja</string>
-    <string name="no_not_on_farm">No, no estoy en la granja</string>
+    <string name="yes_on_farm">Sí, estoy en la finca</string>
+    <string name="no_not_on_farm">No, no estoy en la finca</string>
     <string name="enter_username">Ingresa nombre de usuario</string>
     <string name="user_icon">Ícono de usuario</string>
     <string name="email_icon">Ícono de correo electrónico</string>
@@ -134,14 +134,14 @@
     <string name="transactions_filter">Filtro de transacciones</string>
     <string name="require_actions">Acciones requeridas</string>
     <string name="please_provide_accurate_info">Por favor, proporciona información precisa, ya que es esencial para la trazabilidad.</string>
-    <string name="farm_geodata">Datos geográficos de la granja</string>
+    <string name="farm_geodata">Datos geográficos de la finca</string>
     <string name="commodity_type_required">Tipo de producto*</string>
     <string name="volume_commodities">Volumen de productos</string>
     <string name="volume_commodities_required">Volumen de productos*</string>
     <string name="farmer_information">Información del agricultor*</string>
     <string name="insufficient_volumes_message">No tienes volumen suficiente para esta transacción.\n\nSi continúas, se creará automáticamente una transacción para agregar el volumen necesario a tu saldo. Sin embargo, estas adiciones se marcarán como no trazables.</string>
     <string name="initial_transaction">Transacción inicial</string>
-    <string name="downstream_transaction">Transacción descendente</string>
+    <string name="downstream_transaction">Transacción posterior</string>
     <string name="buying_from_farmer">Estoy comprando al agricultor</string>
     <string name="buying_from_cooperative">Estoy comprando a una cooperativa o comerciante</string>
     <string name="seller_not_using_app">El vendedor no usa esta aplicación</string>
@@ -149,9 +149,10 @@
     <string name="upload_file">Subir archivo</string>
     <string name="record_my_geodata">Registrar mis datos geográficos</string>
     <string name="add_gps_point">Agregar punto GPS</string>
-    <string name="upload_file_description">Sube una lista de ubicaciones geográficas de granjas o polígonos. Puedes usar soluciones de código abierto como FAO Ground para recolectar datos geográficos.</string>
+    <string name="upload_file_description">Sube una lista de ubicaciones geográficas de fincas o polígonos. Puedes usar soluciones de código abierto como FAO Ground para recolectar datos geográficos.</string>
     <string name="qr_scanner_unavailable">Escáner QR no disponible</string>
     <string name="scan_qr">Escanear QR</string>
+    <string name="invalid_qr_geojson">El código QR debe contener datos GeoJSON</string>
     <string name="create_transaction">Crear transacción</string>
 
     <!-- Dialog Strings -->
@@ -189,8 +190,8 @@
     <string name="buying_from_cooperative_description">Comprando a una cooperativa que compró productos de varios agricultores o de otro comerciante.</string>
     <string name="scan_qr_description_long">Escanea un código QR en una tarjeta que te presenta el agricultor.</string>
     <string name="upload_file_description_long">Formatos soportados: GeoJSON, GeoID, CSV, GPX, KMZ y GPKG. Máximo 25MB.</string>
-    <string name="record_geolocation_description_long">Registra tu propia geolocalización (punto GPS) como ubicación de la granja.</string>
-    <string name="add_gps_point_description">Agrega el punto GPS de la granja seleccionándolo en el mapa.</string>
+    <string name="record_geolocation_description_long">Registra tu propia geolocalización (punto GPS) como ubicación de la finca.</string>
+    <string name="add_gps_point_description">Agrega el punto GPS de la finca seleccionándolo en el mapa.</string>
     <string name="qr_scanner_unavailable_description">El escáner QR no está disponible en este dispositivo</string>
     <string name="enter_number">Ingresa número</string>
     <string name="number">Número</string>
@@ -203,7 +204,7 @@
     <string name="no_transactions_found">No se encontraron transacciones</string>
     <string name="seller_not_using_app_description">Transacción inicial</string>
     <string name="seller_not_using_app_description2">Tu proveedor no está usando esta aplicación. Serás el primer punto en la cadena.</string>
-    <string name="seller_using_app_description">Transacción descendente</string>
+    <string name="seller_using_app_description">Transacción posterior</string>
     <string name="seller_using_app_description2">Tu proveedor está usando esta aplicación. Recuperaremos su información de trazabilidad.</string>
     <string name="select_commodity_type">Selecciona tipo de producto</string>
     <string name="enter_volume">Ingresa volumen</string>
@@ -285,18 +286,18 @@
     <string name="user_already_exist">El usuario ya existe</string>
     <string name="continue_initial">Continuar como inicial</string>
     <string name="continue_downstream">Continuar como descendente</string>
-    <string name="user_already_exist_description">Recomendamos crear una transacción descendente para recuperar la información de trazabilidad de tu proveedor.\n\nPuedes proceder con una transacción inicial y convertirte en el primer punto de la cadena, pero perderás la información de ubicación de tu proveedor.</string>
+    <string name="user_already_exist_description">Recomendamos crear una transacción posterior para recuperar la información de trazabilidad de tu proveedor.\n\nPuedes proceder con una transacción inicial y convertirte en el primer punto de la cadena, pero perderás la información de ubicación de tu proveedor.</string>
     <string name="check_inbox_instructions_verify">Te enviamos un código a \n%s para verificar tu cuenta.</string>
 
     <string name="download">Descargar</string>
     <string name="offline_transaction">Transacción sin conexión</string>
-    <string name="download_farms_locations">Descargar ubicaciones de granjas</string>
-    <string name="download_farms_locations_description">Vas a descargar datos de geolocalización de granjas, incluyendo:\n• Archivos GeoJSON combinados\n• Archivos de ubicación personalizados</string>
+    <string name="download_farms_locations">Descargar ubicaciones de fincas</string>
+    <string name="download_farms_locations_description">Vas a descargar datos de geolocalización de fincas, incluyendo:\n• Archivos GeoJSON combinados\n• Archivos de ubicación personalizados</string>
     <string name="download_transaction_details_q">¿Descargar detalles de la transacción?</string>
     <string name="downloading_transaction_details">Vas a descargar los detalles de las transacciones de %1$s comerciantes.</string>
     <string name="downloading_locations_data_for_trader">Vas a descargar datos de ubicación para el comerciante #%s, %.2f%s, incluyendo:\n• Archivos GeoJSON combinados\n• Archivos de ubicación personalizados</string>
     <string name="download_locations_dialog">¿Descargar ubicaciones?</string>
-    <string name="download_farm_geolocation">Descargar geolocalización de la granja</string>
+    <string name="download_farm_geolocation">Descargar geolocalización de la finca</string>
     <string name="download_transaction_details">Descargar detalles de la transacción</string>
     <string name="email_not_verified">Correo electrónico no verificado</string>
     <string name="phone_not_verified">Teléfono no verificado</string>
@@ -309,7 +310,7 @@
     <string name="no_email_app_is_installed">No hay ninguna aplicación de correo instalada</string>
     <string name="feedback">Comentarios</string>
     <string name="terms_accept_text">Acepto los %1$s</string>
-    <string name="terms_and_conditions">Términos y Condiciones</string>
+    <string name="terms_of_use">Términos de Uso</string>
 
     <string name="from">De</string>
     <string name="to">A</string>

@@ -21,6 +21,7 @@
  */
 package com.whimo.presentation.createtransaction.geodata.qr
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -92,6 +93,13 @@ fun QrScanScreen(
                         qrData = effect.qrData,
                     )
                     activity.finish()
+                }
+                is QrScanContract.Effect.ShowMessage -> {
+                    Toast.makeText(context, effect.message, Toast.LENGTH_LONG).show()
+                    mResult = false
+                }
+                is QrScanContract.Effect.ToggleLoader -> {
+                    Unit
                 }
             }
         }

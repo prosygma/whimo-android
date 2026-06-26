@@ -45,6 +45,7 @@ data class BaseResponse(
 data class TransactionData(
     val id: String,
     val created_at: String,
+    val updated_at: String?,
     val expires_at: String?,
     val type: String,
     val status: String,

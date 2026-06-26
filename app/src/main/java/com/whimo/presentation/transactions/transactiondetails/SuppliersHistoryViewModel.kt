@@ -112,6 +112,7 @@ class SuppliersHistoryViewModel(
         filter.status = transactionModel.status
         filter.user = transactionModel.seller
         filter.commodityGroup = transactionModel.commodity.group
+        filter.dateEnd = transactionModel.updatedDate ?: transactionModel.createdDate
 
         updateView()
         onRefresh()

@@ -52,6 +52,7 @@ data class BaseModel(
 data class TransactionModel(
     val id: String,
     val createdDate: LocalDateTime,
+    val updatedDate: LocalDateTime?,
     val expiresDate: LocalDateTime?,
     val type: TransactionType?,
     val status: TransactionStatus?,
