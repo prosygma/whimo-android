@@ -32,10 +32,10 @@ build/
 *.pem
 *.key
 config/signing.properties
+app/google-services.json
 
 # Proguard
 proguard/
-proguard-rules.pro
 
 # Android Studio specific
 .idea/

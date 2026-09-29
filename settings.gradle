@@ -13,6 +13,26 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // Mapbox SDK artifacts.
+        //
+        // As of Maps SDK v11 these artifacts are served anonymously, so no
+        // credentials are required. Sending a token that lacks the
+        // DOWNLOADS:READ scope makes the repo return 403, which is worse than
+        // sending nothing - so credentials are attached only when a token is
+        // actually configured (MAPBOX_DOWNLOADS_TOKEN as a Gradle property or
+        // an environment variable).
+        maven {
+            url = uri('https://api.mapbox.com/downloads/v2/releases/maven')
+            def mapboxToken = System.getenv('MAPBOX_DOWNLOADS_TOKEN')
+                ?: providers.gradleProperty('MAPBOX_DOWNLOADS_TOKEN').getOrElse('')
+            if (mapboxToken) {
+                authentication { basic(BasicAuthentication) }
+                credentials {
+                    username = 'mapbox'
+                    password = mapboxToken
+                }
+            }
+        }
     }
 }
 

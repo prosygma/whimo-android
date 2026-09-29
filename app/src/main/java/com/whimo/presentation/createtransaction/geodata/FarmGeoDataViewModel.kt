@@ -26,7 +26,7 @@ import com.whimo.base.BaseViewModel
 import com.whimo.base.CoreViewEvent
 import com.whimo.domain.createtransaction.models.CreateTransactionModel
 import com.whimo.domain.transactions.models.TransactionModel
-import com.whimo.extensions.toLatLng
+import com.whimo.extensions.toPoint
 import com.whimo.utils.getCurrentLocation
 
 class FarmGeoDataViewModel : BaseViewModel<FarmGeoDataContract.Binding>() {
@@ -74,7 +74,7 @@ class FarmGeoDataViewModel : BaseViewModel<FarmGeoDataContract.Binding>() {
                 if (location == null) {
                     FarmGeoDataContract.Effect.RequestLocationPermission
                 } else {
-                    FarmGeoDataContract.Effect.LocationRecorded(location.toLatLng())
+                    FarmGeoDataContract.Effect.LocationRecorded(location.toPoint())
                 }
             )
         }

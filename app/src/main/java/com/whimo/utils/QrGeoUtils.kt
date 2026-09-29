@@ -23,20 +23,20 @@ package com.whimo.utils
 
 import android.content.Context
 import androidx.core.net.toUri
-import com.google.android.gms.maps.model.LatLng
+import com.mapbox.geojson.Point
 import com.whimo.domain.createtransaction.models.MFile
 import com.whimo.utils.geojson.GeoJsonCoordinate
 import com.whimo.utils.geojson.GeoJsonParser
 import java.io.File
 
 data class QrGeoData(
-    val location: LatLng? = null,
+    val location: Point? = null,
     val geoJson: String? = null
 )
 
 fun parseQrGeoData(qr: String): QrGeoData {
     val geoJson = GeoJsonParser.parse(qr) ?: return QrGeoData()
-    val location = geoJson.firstCoordinate?.toLatLng()
+    val location = geoJson.firstCoordinate?.toPoint()
 
     return QrGeoData(
         location = location,
@@ -44,8 +44,8 @@ fun parseQrGeoData(qr: String): QrGeoData {
     )
 }
 
-private fun GeoJsonCoordinate.toLatLng(): LatLng {
-    return LatLng(latitude, longitude)
+private fun GeoJsonCoordinate.toPoint(): Point {
+    return Point.fromLngLat(longitude, latitude)
 }
 
 fun writeQRDataToCacheFile(

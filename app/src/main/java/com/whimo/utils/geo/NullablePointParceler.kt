@@ -19,28 +19,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.whimo.presentation.createtransaction.geodata.qr
+package com.whimo.utils.geo
 
-import android.content.Context
+import android.os.Parcel
 import com.mapbox.geojson.Point
-import com.whimo.base.CoreViewBinding
-import com.whimo.base.CoreViewEvent
-import com.whimo.base.CoreViewSideEffect
-import com.whimo.domain.transactions.models.TransactionModel
+import kotlinx.parcelize.Parceler
 
-object QrScanContract {
-    data class Binding(
-        var text: String = "",
-    ) : CoreViewBinding
+/**
+ * Mapbox's [Point] is Serializable but not Parcelable, so @Parcelize models that
+ * carry a location need an explicit parceler.
+ *
+ * Written as longitude-then-latitude to match [Point.fromLngLat] and avoid any
+ * chance of the pair being reassembled in the wrong order.
+ */
+object NullablePointParceler : Parceler<Point?> {
 
-    sealed class Event : CoreViewEvent {
-        data class OnCreate(val transactionModel: TransactionModel) : Event()
-        data class QrScanned(val context: Context, val qrData: String) : Event()
+    override fun create(parcel: Parcel): Point? {
+        val hasValue = parcel.readInt() == 1
+        if (!hasValue) return null
+        val longitude = parcel.readDouble()
+        val latitude = parcel.readDouble()
+        return Point.fromLngLat(longitude, latitude)
     }
 
-    sealed class Effect : CoreViewSideEffect {
-        data class ToggleLoader(val isLoading: Boolean): Effect()
-        data class ShowMessage(val message: String): Effect()
-        data class QrResult(val qrData: String?, val location: Point?): Effect()
+    override fun Point?.write(parcel: Parcel, flags: Int) {
+        if (this == null) {
+            parcel.writeInt(0)
+            return
+        }
+        parcel.writeInt(1)
+        parcel.writeDouble(longitude())
+        parcel.writeDouble(latitude())
     }
 }

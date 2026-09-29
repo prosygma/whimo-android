@@ -23,7 +23,7 @@ package com.whimo.presentation.createtransaction.geodata.uploadfile
 
 import android.content.Context
 import android.net.Uri
-import com.google.android.gms.maps.model.LatLng
+import com.mapbox.geojson.Point
 import com.whimo.base.CoreViewBinding
 import com.whimo.base.CoreViewEvent
 import com.whimo.base.CoreViewSideEffect
@@ -46,6 +46,6 @@ object UploadFileContract {
     }
 
     sealed class Effect : CoreViewSideEffect {
-        data class FileConfirmed(val file: MFile?, val location: LatLng?): Effect()
+        data class FileConfirmed(val file: MFile?, val location: Point?): Effect()
     }
 }

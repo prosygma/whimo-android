@@ -34,7 +34,7 @@ import com.whimo.domain.createtransaction.models.getCommodityVolumeText
 import com.whimo.domain.createtransaction.models.getLocationText
 import com.whimo.domain.createtransaction.models.getUserInfoText
 import com.whimo.domain.transactions.models.TransactionAction
-import com.whimo.extensions.toLatLng
+import com.whimo.extensions.toPoint
 import com.whimo.network.ErrorHandler
 import com.whimo.providers.ResourceProvider
 import com.whimo.utils.checkLocationPermissionGranted
@@ -122,7 +122,7 @@ class CreateTransactionFormViewModel(
                 setEffect(CreateTransactionFormContract.Effect.ToggleLoader(true))
 
                 val location = getCurrentLocation(context)
-                transaction = transaction?.copy(creationLocation = location?.toLatLng())
+                transaction = transaction?.copy(creationLocation = location?.toPoint())
 
                 interactor.createTransaction(transaction!!)
                     .onSuccess {

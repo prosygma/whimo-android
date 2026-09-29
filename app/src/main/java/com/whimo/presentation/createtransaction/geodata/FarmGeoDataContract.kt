@@ -22,7 +22,7 @@
 package com.whimo.presentation.createtransaction.geodata
 
 import android.content.Context
-import com.google.android.gms.maps.model.LatLng
+import com.mapbox.geojson.Point
 import com.whimo.base.CoreViewBinding
 import com.whimo.base.CoreViewEvent
 import com.whimo.base.CoreViewSideEffect
@@ -45,6 +45,6 @@ object FarmGeoDataContract {
 
     sealed class Effect : CoreViewSideEffect {
         data object RequestLocationPermission: Effect()
-        data class LocationRecorded(val location: LatLng): Effect()
+        data class LocationRecorded(val location: Point): Effect()
     }
 }

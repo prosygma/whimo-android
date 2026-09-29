@@ -71,7 +71,7 @@ This structure improves testability, readability, and maintainability.
 ### Requirements
 - Android Studio **Ladybug** (or newer)  
 - JDK **17** (ensure correct version in *Project Structure*)  
-- Minimum SDK: `28`
+- Minimum SDK: `26`
 
 ---
 
@@ -105,16 +105,29 @@ GOOGLE_AUTH_CLIENT_ID=your_Google_Sign-In_client_ID
 
 #### 🔐 `build.properties`
 ```properties
-release_base_url="https://api_url"
+release_base_url="https://api_url/api/v1/"
 release_default_country_code="CM"
 release_default_location_latitude=4.106729
 release_default_location_longitude=9.3972812
+release_terms_of_use="https://example.com/terms"
+release_feedback_email="contact@example.com"
 
-debug_base_url="https://api_url"
+debug_base_url="https://api_url/api/v1/"
 debug_default_country_code="CM"
 debug_default_location_latitude=4.106729
 debug_default_location_longitude=9.3972812
+debug_terms_of_use="https://example.com/terms"
+debug_feedback_email="contact@example.com"
 ```
+
+> ⚠️ `base_url` **must end in `/`** — it is passed straight to
+> `Retrofit.Builder().baseUrl()`, which throws at startup otherwise. It must also
+> include the API version prefix, because the Retrofit service interfaces use
+> relative paths (e.g. `@POST("auth/jwt/refresh/")`).
+>
+> `String` values are injected verbatim into `buildConfigField`, so the double
+> quotes must be part of the value. Latitude/longitude are `double` and stay
+> unquoted.
 
 > ⚠️ These files are required for the project to build successfully.  
 > They are already excluded in `.gitignore` — do **not** commit them.

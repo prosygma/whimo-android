@@ -1,0 +1,141 @@
+name: Release to Play (internal)
+
+# The Google Play Developer API cannot create an app or publish its FIRST
+# release. Before this workflow can succeed, an AAB must have been uploaded
+# manually through the Play Console at least once for whimo.camertrace.cm.
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      track:
+        description: Play track
+        default: internal
+        type: choice
+        options: [internal, alpha, beta]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: play-release
+  cancel-in-progress: false # never cancel mid-upload
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      # settings.gradle authenticates to Mapbox's Maven repo with this; without
+      # it the SDK dependency cannot be resolved at all.
+      MAPBOX_DOWNLOADS_TOKEN: ${{ secrets.MAPBOX_DOWNLOADS_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install SDK 36
+        run: |
+          yes | sdkmanager --licenses > /dev/null
+          sdkmanager --install "platforms;android-36" "build-tools;36.0.0"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Materialize gitignored build inputs
+        env:
+          KS: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          BP: ${{ secrets.BUILD_PROPERTIES_BASE64 }}
+          SP: ${{ secrets.SECRETS_PROPERTIES_BASE64 }}
+          GS: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
+          STOREPASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEYPASS: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          echo "$KS" | base64 -d > config/camertrace-upload.jks
+          echo "$BP" | base64 -d > config/build.properties
+          echo "$SP" | base64 -d > config/secrets.properties
+          echo "$GS" | base64 -d > app/google-services.json
+          # rootProject.file() resolves relative paths against the repo root,
+          # so CI points at the keystore it just wrote rather than a local path.
+          cat > config/signing.properties <<EOF
+          release_storeFile=config/camertrace-upload.jks
+          release_storePassword=$STOREPASS
+          release_keyAlias=$ALIAS
+          release_keyPassword=$KEYPASS
+          debug_storeFile=config/camertrace-upload.jks
+          debug_storePassword=$STOREPASS
+          debug_keyAlias=$ALIAS
+          debug_keyPassword=$KEYPASS
+          EOF
+
+      - name: Guard against placeholder or malformed config
+        run: |
+          set -euo pipefail
+          # secrets-gradle-plugin silently falls back to local.defaults.properties,
+          # so a missing/placeholder key builds fine and ships a dead map.
+          if grep -q 'DEFAULT_MAPBOX_TOKEN\|REPLACE_ME' config/secrets.properties; then
+            echo "::error::placeholder MAPBOX_PUBLIC_TOKEN in secrets.properties"; exit 1
+          fi
+          grep -qE '^MAPBOX_PUBLIC_TOKEN=pk\.' config/secrets.properties || {
+            echo "::error::MAPBOX_PUBLIC_TOKEN must be a public pk.* token"; exit 1
+          }
+          if [ -z "${MAPBOX_DOWNLOADS_TOKEN:-}" ]; then
+            echo "::error::MAPBOX_DOWNLOADS_TOKEN secret is not set"; exit 1
+          fi
+          if grep -q 'DEFAULT_ID' config/secrets.properties; then
+            echo "::error::placeholder GOOGLE_AUTH_CLIENT_ID in secrets.properties"; exit 1
+          fi
+          # Retrofit throws at startup if baseUrl does not end in "/".
+          if ! grep -qE '^release_base_url=".*/"$' config/build.properties; then
+            echo "::error::release_base_url must be quoted and end in /"; exit 1
+          fi
+          for k in release_terms_of_use release_feedback_email; do
+            grep -q "^$k=" config/build.properties || { echo "::error::missing $k"; exit 1; }
+          done
+          python3 - <<'PY'
+          import json, sys
+          d = json.load(open('app/google-services.json'))
+          pkgs = [c['client_info']['android_client_info']['package_name'] for c in d['client']]
+          if 'whimo.camertrace.cm' not in pkgs:
+              sys.exit(f"::error::google-services.json has no client for whimo.camertrace.cm: {pkgs}")
+          PY
+
+      - name: Unit tests
+        run: ./gradlew :app:testReleaseUnitTest
+
+      - name: Build AAB
+        run: ./gradlew :app:bundleRelease --no-daemon --stacktrace
+
+      - name: Verify signature
+        run: |
+          keytool -printcert -jarfile app/build/outputs/bundle/release/app-release.aab \
+            | grep -E "SHA1:|Owner:"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: app-release-aab
+          path: app/build/outputs/bundle/release/app-release.aab
+          retention-days: 30
+
+      - name: Upload to Google Play
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: whimo.camertrace.cm
+          releaseFiles: app/build/outputs/bundle/release/app-release.aab
+          track: ${{ inputs.track || 'internal' }}
+          status: completed
+          releaseName: ${{ github.ref_name }}
+
+      - name: Scrub secrets from workspace
+        if: always()
+        run: |
+          rm -f config/camertrace-upload.jks config/signing.properties \
+                config/build.properties config/secrets.properties \
+                app/google-services.json

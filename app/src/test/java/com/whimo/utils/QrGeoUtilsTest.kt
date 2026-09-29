@@ -21,7 +21,7 @@
  */
 package com.whimo.utils
 
-import com.google.android.gms.maps.model.LatLng
+import com.mapbox.geojson.Point
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
@@ -92,12 +92,12 @@ class QrGeoUtilsTest {
     }
 
     private fun assertCoordinate(
-        coordinate: LatLng?,
+        coordinate: Point?,
         latitude: Double,
         longitude: Double,
     ) {
         assertNotNull(coordinate)
-        assertEquals(latitude, coordinate!!.latitude, 0.000001)
-        assertEquals(longitude, coordinate.longitude, 0.000001)
+        assertEquals(latitude, coordinate!!.latitude(), 0.000001)
+        assertEquals(longitude, coordinate.longitude(), 0.000001)
     }
 }

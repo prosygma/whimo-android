@@ -21,7 +21,7 @@
  */
 package com.whimo.presentation.transactions.transactiondetails
 
-import com.google.android.gms.maps.model.LatLng
+import com.mapbox.geojson.Point
 import com.whimo.base.CoreViewBinding
 import com.whimo.base.CoreViewEvent
 import com.whimo.base.CoreViewSideEffect
@@ -46,7 +46,7 @@ object TransactionDetailsContract {
 
         var showLocation: Boolean = false,
         var locationProvider: LocationProvider? = null,
-        var location: LatLng? = null,
+        var location: Point? = null,
         var editLocationType: EditLocationType = EditLocationType.All,
 
         var traceability: TraceabilityStatus? = null,

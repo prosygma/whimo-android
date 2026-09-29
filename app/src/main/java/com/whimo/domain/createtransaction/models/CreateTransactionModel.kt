@@ -23,27 +23,30 @@ package com.whimo.domain.createtransaction.models
 
 import android.net.Uri
 import android.os.Parcelable
-import com.google.android.gms.maps.model.LatLng
+import com.mapbox.geojson.Point
 import com.whimo.domain.commodity.models.CommodityModel
 import com.whimo.domain.transactions.models.TransactionAction
 import com.whimo.extensions.toText
 import com.whimo.utils.stringOrNull
+import com.whimo.utils.geo.NullablePointParceler
 import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.TypeParceler
 
 @Parcelize
+@TypeParceler<Point?, NullablePointParceler>()
 data class CreateTransactionModel(
     val action: TransactionAction? = null,
     val isProducerTransaction: Boolean = false,
     val isBuyingFromFarmer: Boolean = false,
     val isOnFarm: Boolean = false,
     val locationProvider: LocationProvider? = null,
-    val location: LatLng? = null,
+    val location: Point? = null,
     val file: MFile? = null,
     val qr: String? = null,
     val commodity: CommodityModel? = null,
     val volume: Float? = null,
     val userInfo: UserInfoModel? = null,
-    val creationLocation: LatLng? = null,
+    val creationLocation: Point? = null,
 ) : Parcelable
 
 enum class LocationProvider(val providerName: String) {

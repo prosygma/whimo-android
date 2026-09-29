@@ -23,7 +23,7 @@ package com.whimo.domain.transactions.models
 
 import android.os.Parcelable
 import androidx.compose.ui.graphics.Color
-import com.google.android.gms.maps.model.LatLng
+import com.mapbox.geojson.Point
 import com.whimo.R
 import com.whimo.domain.commodity.models.CommodityGroupModel
 import com.whimo.domain.commodity.models.CommodityModel
@@ -40,7 +40,9 @@ import com.whimo.presentation.ui.theme.ColorLightOrange
 import com.whimo.presentation.ui.theme.ColorLightRed
 import com.whimo.presentation.ui.theme.ColorSuccess
 import com.whimo.presentation.ui.theme.ColorWarning
+import com.whimo.utils.geo.NullablePointParceler
 import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.TypeParceler
 import java.time.LocalDateTime
 
 data class BaseModel(
@@ -49,6 +51,7 @@ data class BaseModel(
 )
 
 @Parcelize
+@TypeParceler<Point?, NullablePointParceler>()
 data class TransactionModel(
     val id: String,
     val createdDate: LocalDateTime,
@@ -58,7 +61,7 @@ data class TransactionModel(
     val status: TransactionStatus?,
     val action: TransactionAction?,
     val locationProvider: LocationProvider?,
-    val location: LatLng?,
+    val location: Point?,
     val commodity: CommodityModel,
     val volume: Float,
     val traceability: TraceabilityStatus?,

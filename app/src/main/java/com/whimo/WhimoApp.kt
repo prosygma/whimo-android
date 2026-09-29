@@ -27,6 +27,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Bundle
+import com.mapbox.common.MapboxOptions
 import com.whimo.di.authModule
 import com.whimo.di.commodityModule
 import com.whimo.di.createTransactionsModule
@@ -53,6 +54,11 @@ class WhimoApp : Application() {
         super.onCreate()
 
         createNotificationChannel()
+
+        // Mapbox reads its public access token from MapboxOptions. The token is
+        // injected into BuildConfig by the secrets-gradle-plugin from
+        // config/secrets.properties (MAPBOX_PUBLIC_TOKEN).
+        MapboxOptions.accessToken = BuildConfig.MAPBOX_PUBLIC_TOKEN
 
         // Initialize Koin
         GlobalContext.startKoin {

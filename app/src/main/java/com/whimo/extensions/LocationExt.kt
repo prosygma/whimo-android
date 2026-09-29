@@ -22,13 +22,14 @@
 package com.whimo.extensions
 
 import android.location.Location
-import com.google.android.gms.maps.model.LatLng
+import com.mapbox.geojson.Point
 import java.util.Locale
 
-fun Location.toLatLng(): LatLng {
-    return LatLng(latitude, longitude)
+fun Location.toPoint(): Point {
+    return Point.fromLngLat(longitude, latitude)
 }
 
-fun LatLng.toText(): String {
-    return String.format(Locale.ENGLISH, "lat/lng: (%.6f, %.6f)", latitude, longitude)
+/** Displayed latitude-first, which is how users read coordinates. */
+fun Point.toText(): String {
+    return String.format(Locale.ENGLISH, "lat/lng: (%.6f, %.6f)", latitude(), longitude())
 }

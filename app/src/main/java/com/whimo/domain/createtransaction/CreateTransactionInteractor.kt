@@ -117,11 +117,11 @@ class CreateTransactionInteractorImpl(
                     commodityId = transaction.commodity?.id,
                     volume = transaction.volume,
                     locationProvider = transaction.locationProvider?.providerName,
-                    farmLatitude = qrLocation?.latitude,
-                    farmLongitude = qrLocation?.longitude,
+                    farmLatitude = qrLocation?.latitude(),
+                    farmLongitude = qrLocation?.longitude(),
                     locationFile = qrFile.second ?: transaction.file,
-                    transactionLatitude = transaction.creationLocation?.latitude,
-                    transactionLongitude = transaction.creationLocation?.longitude,
+                    transactionLatitude = transaction.creationLocation?.latitude(),
+                    transactionLongitude = transaction.creationLocation?.longitude(),
                     recipient = recipient.toJsonArgs(),
                 )
             )
@@ -136,8 +136,8 @@ class CreateTransactionInteractorImpl(
                     commodityId = transaction.commodity?.id,
                     volume = transaction.volume,
                     locationProvider = transaction.locationProvider?.providerName,
-                    transactionLatitude = transaction.creationLocation?.latitude,
-                    transactionLongitude = transaction.creationLocation?.longitude,
+                    transactionLatitude = transaction.creationLocation?.latitude(),
+                    transactionLongitude = transaction.creationLocation?.longitude(),
                     action = transaction.action?.actionName,
                     recipient = recipient.toJsonArgs(),
                 )

@@ -24,7 +24,7 @@ package com.whimo.utils
 import android.content.Context
 import android.net.Uri
 import androidx.documentfile.provider.DocumentFile
-import com.google.android.gms.maps.model.LatLng
+import com.mapbox.geojson.Point
 import com.opencsv.CSVReader
 import org.apache.poi.ss.usermodel.WorkbookFactory
 import org.xmlpull.v1.XmlPullParserFactory
@@ -34,11 +34,11 @@ import java.io.InputStreamReader
 import java.util.zip.ZipInputStream
 
 interface GeoParserStrategy {
-    fun parse(context: Context, uri: Uri): List<LatLng>
+    fun parse(context: Context, uri: Uri): List<Point>
 }
 
 object GeoFileParser {
-    fun parse(context: Context, uri: Uri): List<LatLng> {
+    fun parse(context: Context, uri: Uri): List<Point> {
         val extension = getFileExtension(context, uri) ?: return emptyList()
         val strategy = getStrategy(extension.lowercase()) ?: return emptyList()
         return strategy.parse(context, uri)
@@ -66,7 +66,7 @@ object GeoFileParser {
 }
 
 private class GeoJsonParser : GeoParserStrategy {
-    override fun parse(context: Context, uri: Uri): List<LatLng> {
+    override fun parse(context: Context, uri: Uri): List<Point> {
         val json = context.contentResolver.openInputStream(uri)?.bufferedReader()?.readText()
             ?: return emptyList()
         return Regex("""\[\s*(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)\s*]""")
@@ -74,24 +74,24 @@ private class GeoJsonParser : GeoParserStrategy {
             .mapNotNull {
                 val lon = it.groupValues[1].toDoubleOrNull()
                 val lat = it.groupValues[2].toDoubleOrNull()
-                if (lat != null && lon != null) LatLng(lat, lon) else null
+                if (lat != null && lon != null) Point.fromLngLat(lon, lat) else null
             }.toList()
     }
 }
 
 private class GeoIdParser : GeoParserStrategy {
-    override fun parse(context: Context, uri: Uri): List<LatLng> {
+    override fun parse(context: Context, uri: Uri): List<Point> {
         return context.contentResolver.openInputStream(uri)?.bufferedReader()?.useLines { lines ->
             lines.mapNotNull {
                 val (lat, lon) = it.split(",").mapNotNull(String::toDoubleOrNull)
-                if (lat != null && lon != null) LatLng(lat, lon) else null
+                if (lat != null && lon != null) Point.fromLngLat(lon, lat) else null
             }.toList()
         } ?: emptyList()
     }
 }
 
 private class CsvParser : GeoParserStrategy {
-    override fun parse(context: Context, uri: Uri): List<LatLng> {
+    override fun parse(context: Context, uri: Uri): List<Point> {
         val inputStream = context.contentResolver.openInputStream(uri) ?: return emptyList()
         val reader = CSVReader(InputStreamReader(inputStream))
         val rows = reader.readAll()
@@ -107,14 +107,14 @@ private class CsvParser : GeoParserStrategy {
         return rows.drop(1).mapNotNull { row ->
             val lat = row.getOrNull(latIndex)?.toDoubleOrNull()
             val lon = row.getOrNull(lonIndex)?.toDoubleOrNull()
-            if (lat != null && lon != null) LatLng(lat, lon) else null
+            if (lat != null && lon != null) Point.fromLngLat(lon, lat) else null
         }
     }
 }
 
 private class GpxParser : GeoParserStrategy {
-    override fun parse(context: Context, uri: Uri): List<LatLng> {
-        val result = mutableListOf<LatLng>()
+    override fun parse(context: Context, uri: Uri): List<Point> {
+        val result = mutableListOf<Point>()
         val input = context.contentResolver.openInputStream(uri) ?: return emptyList()
         val parser = XmlPullParserFactory.newInstance().newPullParser()
         parser.setInput(input, null)
@@ -124,7 +124,7 @@ private class GpxParser : GeoParserStrategy {
             if (event == org.xmlpull.v1.XmlPullParser.START_TAG && parser.name == "trkpt") {
                 val lat = parser.getAttributeValue(null, "lat")?.toDoubleOrNull()
                 val lon = parser.getAttributeValue(null, "lon")?.toDoubleOrNull()
-                if (lat != null && lon != null) result.add(LatLng(lat, lon))
+                if (lat != null && lon != null) result.add(Point.fromLngLat(lon, lat))
             }
             event = parser.next()
         }
@@ -133,8 +133,8 @@ private class GpxParser : GeoParserStrategy {
 }
 
 private class KmzParser : GeoParserStrategy {
-    override fun parse(context: Context, uri: Uri): List<LatLng> {
-        val result = mutableListOf<LatLng>()
+    override fun parse(context: Context, uri: Uri): List<Point> {
+        val result = mutableListOf<Point>()
         context.contentResolver.openInputStream(uri)?.use { input ->
             ZipInputStream(input).use { zip ->
                 var entry = zip.nextEntry
@@ -148,7 +148,7 @@ private class KmzParser : GeoParserStrategy {
                                     val parts = coord.split(",")
                                     val lon = parts.getOrNull(0)?.toDoubleOrNull()
                                     val lat = parts.getOrNull(1)?.toDoubleOrNull()
-                                    if (lat != null && lon != null) LatLng(lat, lon) else null
+                                    if (lat != null && lon != null) Point.fromLngLat(lon, lat) else null
                                 }
                             }.forEach { result.add(it) }
                     }
@@ -161,7 +161,7 @@ private class KmzParser : GeoParserStrategy {
 }
 
 private class GpkgParser : GeoParserStrategy {
-    override fun parse(context: Context, uri: Uri): List<LatLng> {
+    override fun parse(context: Context, uri: Uri): List<Point> {
         val file = File(context.cacheDir, "temp.gpkg")
         context.contentResolver.openInputStream(uri)?.use { it.copyTo(file.outputStream()) }
 
@@ -169,7 +169,7 @@ private class GpkgParser : GeoParserStrategy {
             file.path, null, android.database.sqlite.SQLiteDatabase.OPEN_READONLY
         )
 
-        val result = mutableListOf<LatLng>()
+        val result = mutableListOf<Point>()
         try {
             val cursor = db.rawQuery(
                 "SELECT ST_AsText(geometry) FROM (SELECT geometry FROM sqlite_master UNION ALL SELECT geometry FROM features)",
@@ -180,7 +180,7 @@ private class GpkgParser : GeoParserStrategy {
                 Regex("POINT\\(([-\\d.]+) ([-\\d.]+)\\)").find(wkt)?.let {
                     val lon = it.groupValues[1].toDoubleOrNull()
                     val lat = it.groupValues[2].toDoubleOrNull()
-                    if (lat != null && lon != null) result.add(LatLng(lat, lon))
+                    if (lat != null && lon != null) result.add(Point.fromLngLat(lon, lat))
                 }
             }
             cursor.close()
@@ -195,13 +195,13 @@ private class GpkgParser : GeoParserStrategy {
 }
 
 private class ExcelParser : GeoParserStrategy {
-    override fun parse(context: Context, uri: Uri): List<LatLng> {
+    override fun parse(context: Context, uri: Uri): List<Point> {
         val inputStream = context.contentResolver.openInputStream(uri) ?: return emptyList()
         return parseExcel(inputStream)
     }
 
-    private fun parseExcel(inputStream: InputStream): List<LatLng> {
-        val result = mutableListOf<LatLng>()
+    private fun parseExcel(inputStream: InputStream): List<Point> {
+        val result = mutableListOf<Point>()
         val workbook = WorkbookFactory.create(inputStream)
         val sheet = workbook.getSheetAt(0) ?: return emptyList()
 
@@ -215,7 +215,7 @@ private class ExcelParser : GeoParserStrategy {
             val row = sheet.getRow(i) ?: continue
             val lat = row.getCell(latIndex)?.numericCellValue
             val lon = row.getCell(lonIndex)?.numericCellValue
-            if (lat != null && lon != null) result.add(LatLng(lat, lon))
+            if (lat != null && lon != null) result.add(Point.fromLngLat(lon, lat))
         }
 
         workbook.close()

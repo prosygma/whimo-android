@@ -37,7 +37,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
-import com.google.android.gms.maps.model.LatLng
+import com.mapbox.geojson.Point
 import com.whimo.domain.createtransaction.models.CreateTransactionModel
 import com.whimo.domain.createtransaction.models.LocationProvider
 import com.whimo.domain.createtransaction.models.MFile
@@ -111,7 +111,7 @@ class FarmGeoDataActivity : ComponentActivity(), OnBackPressedDispatcherOwner {
 
     fun setResult(
         locationProvider: LocationProvider? = null,
-        location: LatLng? = null,
+        location: Point? = null,
         qrData: String? = null,
         file: MFile? = null,
     ) {
@@ -119,7 +119,10 @@ class FarmGeoDataActivity : ComponentActivity(), OnBackPressedDispatcherOwner {
             RESULT_OK,
             Intent()
                 .putExtra(RESULT_LOCATION_PROVIDER, locationProvider?.providerName)
-                .putExtra(RESULT_LOCATION, location)
+                // Point is not Parcelable, so the coordinate crosses the Activity
+                // boundary as two primitives. NaN marks "no location".
+                .putExtra(RESULT_LOCATION_LNG, location?.longitude() ?: Double.NaN)
+                .putExtra(RESULT_LOCATION_LAT, location?.latitude() ?: Double.NaN)
                 .putExtra(RESULT_QR_DATA, qrData)
                 .putExtra(RESULT_FILE, file)
         )
@@ -130,7 +133,8 @@ class FarmGeoDataActivity : ComponentActivity(), OnBackPressedDispatcherOwner {
         private const val CREATE_TRANSACTION_MODEL = "create_transaction_model"
 
         const val RESULT_LOCATION_PROVIDER = "result_location_provider"
-        const val RESULT_LOCATION = "result_location"
+        const val RESULT_LOCATION_LNG = "result_location_lng"
+        const val RESULT_LOCATION_LAT = "result_location_lat"
         const val RESULT_QR_DATA = "result_qr_data"
         const val RESULT_FILE = "result_file"
 

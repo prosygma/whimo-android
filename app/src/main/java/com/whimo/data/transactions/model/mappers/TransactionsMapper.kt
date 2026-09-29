@@ -21,7 +21,7 @@
  */
 package com.whimo.data.transactions.model.mappers
 
-import com.google.android.gms.maps.model.LatLng
+import com.mapbox.geojson.Point
 import com.whimo.data.base.common.toDomain
 import com.whimo.data.commodity.model.mappers.toDomain
 import com.whimo.data.transactions.model.entity.TransactionEntity
@@ -79,7 +79,7 @@ fun TransactionData.toDomain(): TransactionModel {
         status = status,
         action = TransactionAction.entries.find { it.actionName == action },
         locationProvider = LocationProvider.entries.find { it.providerName == location },
-        location = if (latitude != null && longitude != null) LatLng(latitude, longitude) else null,
+        location = if (latitude != null && longitude != null) Point.fromLngLat(longitude, latitude) else null,
         commodity = commodity.toDomain(),
         volume = volume,
         traceability = TraceabilityStatus.entries.find { it.statusName == traceability },

@@ -25,7 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.google.android.gms.maps.model.LatLng
+import com.mapbox.geojson.Point
 import com.whimo.domain.commodity.models.CommodityModel
 import com.whimo.domain.createtransaction.models.CreateTransactionModel
 import com.whimo.domain.createtransaction.models.LocationProvider
@@ -77,7 +77,7 @@ class SharedTransactionViewModel : ViewModel() {
         transaction = transaction.copy(locationProvider = locationProvider)
     }
 
-    fun setLocation(location: LatLng?) {
+    fun setLocation(location: Point?) {
         transaction = transaction.copy(location = location)
     }
 

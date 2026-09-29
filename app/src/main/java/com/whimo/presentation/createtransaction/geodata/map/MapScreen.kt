@@ -25,7 +25,6 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -48,16 +47,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.MapProperties
-import com.google.maps.android.compose.MapUiSettings
-import com.google.maps.android.compose.rememberCameraPositionState
+import com.mapbox.geojson.Point
+import com.mapbox.maps.Style
+import com.mapbox.maps.extension.compose.MapEffect
+import com.mapbox.maps.extension.compose.MapboxMap
+import com.mapbox.maps.extension.compose.animation.viewport.rememberMapViewportState
+import com.mapbox.maps.extension.compose.style.MapStyle
+import com.mapbox.maps.plugin.locationcomponent.createDefault2DPuck
+import com.mapbox.maps.plugin.locationcomponent.location
 import com.whimo.BuildConfig
 import com.whimo.R
 import com.whimo.domain.createtransaction.models.LocationProvider
@@ -67,20 +66,10 @@ import com.whimo.presentation.createtransaction.geodata.FarmGeoDataActivity
 import com.whimo.presentation.main.components.Toolbar2
 import com.whimo.presentation.ui.baseScreen.MainButton
 import com.whimo.presentation.ui.components.BaseTextField
-import com.whimo.presentation.ui.theme.WhimoTheme
 import com.whimo.utils.LocationPermissionRequester
 import kotlinx.coroutines.flow.debounce
 
-@Preview
-@Composable
-private fun Preview() {
-    WhimoTheme {
-        MapScreen(
-            modifier = Modifier.fillMaxSize(),
-            navController = rememberNavController(),
-        )
-    }
-}
+private const val DEFAULT_ZOOM = 12.0
 
 @SuppressLint("MissingPermission")
 @Composable
@@ -108,27 +97,46 @@ fun MapScreen(
             val iconSize = 46.dp
             val contentPadding = 148.dp
 
-            var currentLatLng by remember { mutableStateOf(LatLng(BuildConfig.DEFAULT_LOCATION_LATITUDE,BuildConfig.DEFAULT_LOCATION_LONGITUDE)) }
-
-            val cameraPositionState = rememberCameraPositionState {
-                position = CameraPosition.fromLatLngZoom(currentLatLng, 12f)
+            val defaultPoint = remember {
+                Point.fromLngLat(
+                    BuildConfig.DEFAULT_LOCATION_LONGITUDE,
+                    BuildConfig.DEFAULT_LOCATION_LATITUDE,
+                )
             }
 
-            LaunchedEffect(cameraPositionState) {
-                snapshotFlow { cameraPositionState.position.target }
+            var currentPoint by remember { mutableStateOf(defaultPoint) }
+
+            val mapViewportState = rememberMapViewportState {
+                setCameraOptions {
+                    center(defaultPoint)
+                    zoom(DEFAULT_ZOOM)
+                }
+            }
+
+            // The pin is fixed at the centre of the viewport, so the selected
+            // coordinate is whatever the camera is currently centred on.
+            LaunchedEffect(mapViewportState) {
+                snapshotFlow { mapViewportState.cameraState?.center }
                     .debounce(200)
-                    .collect {
-                        currentLatLng = it
+                    .collect { center ->
+                        if (center != null) currentPoint = center
                     }
             }
 
-            GoogleMap(
+            MapboxMap(
                 modifier = Modifier.fillMaxSize(),
-                cameraPositionState = cameraPositionState,
-                properties = MapProperties(isMyLocationEnabled = isMyLocationEnabled),
-                uiSettings = MapUiSettings(myLocationButtonEnabled = isMyLocationEnabled),
-                contentPadding = PaddingValues(bottom = contentPadding),
-            )
+                mapViewportState = mapViewportState,
+                // Satellite imagery with labels: needed to identify actual plot boundaries.
+                style = { MapStyle(style = Style.SATELLITE_STREETS) },
+            ) {
+                MapEffect(isMyLocationEnabled) { mapView ->
+                    mapView.location.updateSettings {
+                        enabled = isMyLocationEnabled
+                        locationPuck = createDefault2DPuck(withBearing = true)
+                        puckBearingEnabled = true
+                    }
+                }
+            }
 
             Icon(
                 modifier = Modifier
@@ -150,7 +158,7 @@ fun MapScreen(
 
                 isReadOnly = true,
 
-                text = currentLatLng.toText(),
+                text = currentPoint.toText(),
 
                 leadingIcon = {
                     Icon(
@@ -182,7 +190,7 @@ fun MapScreen(
                     val activity = context.findActivity() as FarmGeoDataActivity
                     activity.setResult(
                         locationProvider = LocationProvider.Manual,
-                        location = currentLatLng,
+                        location = currentPoint,
                     )
                     activity.finish()
                 }
