@@ -118,7 +118,7 @@ class MyFirebaseMessagingService : FirebaseMessagingService() {
             )
 
         val builder = NotificationCompat.Builder(this, PUSH_NOTIFICATIONS_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_launcher)
+            .setSmallIcon(R.drawable.ic_push_notification)
             .setContentTitle(title)
             .setContentIntent(action)
             .setPriority(NotificationCompat.PRIORITY_HIGH)

@@ -24,6 +24,13 @@ package com.whimo.presentation.routing
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.BasicText
+import androidx.compose.foundation.text.TextAutoSize
+import androidx.compose.ui.res.integerResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -46,7 +53,7 @@ import com.whimo.R
 import com.whimo.base.ObserveEffects
 import com.whimo.presentation.auth.AuthActivity
 import com.whimo.presentation.main.MainActivity
-import com.whimo.presentation.ui.theme.ColorMidnightBlue
+import com.whimo.presentation.ui.theme.BrandPalette
 import com.whimo.presentation.ui.theme.TextStyleSplash1
 import com.whimo.presentation.ui.theme.TextStyleSplash2
 import com.whimo.presentation.ui.theme.WhimoTheme
@@ -102,16 +109,32 @@ fun SplashScreen() {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
 
-        Column {
-            Text(
+        Column(
+            modifier = Modifier.padding(horizontal = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            // Brand flavors can show their logo above the name (integer/brand_splash_show_logo).
+            if (integerResource(R.integer.brand_splash_show_logo) == 1) {
+                Image(
+                    painter = painterResource(R.drawable.brand_splash_logo),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(bottom = 32.dp)
+                        .size(180.dp),
+                )
+            }
+            // A long product name shrinks to fit one line instead of overflowing.
+            BasicText(
                 text = stringResource(R.string.app_name),
-                style = TextStyleSplash1,
-                color = ColorMidnightBlue
+                style = TextStyleSplash1.copy(color = BrandPalette.SurfaceDark, textAlign = TextAlign.Center),
+                maxLines = 1,
+                autoSize = TextAutoSize.StepBased(minFontSize = 24.sp, maxFontSize = TextStyleSplash1.fontSize),
             )
             Text(
                 text = stringResource(R.string.what_is_my_origin),
                 style = TextStyleSplash2,
-                color = ColorMidnightBlue
+                color = BrandPalette.SurfaceDark,
+                textAlign = TextAlign.Center,
             )
         }
     }

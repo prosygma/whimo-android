@@ -25,11 +25,11 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
 val ColorScheme = lightColorScheme(
-    primary = ColorSeaBlue,
+    primary = BrandPalette.Primary,
     onPrimary = Color.White,
 
-    secondary = ColorLightBlue,
-    onSecondary = ColorSeaBlue,
+    secondary = BrandPalette.PrimaryTint,
+    onSecondary = BrandPalette.Primary,
 
     tertiary = ColorLightOrange,
     onTertiary = ColorWarning,
@@ -47,12 +47,12 @@ val ColorScheme = lightColorScheme(
     onError = Color.White,
 
     outline = ColorGray10,
-    outlineVariant = ColorSeaBlue10,
+    outlineVariant = BrandPalette.Primary.copy(alpha = 0x1A / 255f),
 
-    scrim = ColorMidnightBlue30,
+    scrim = BrandPalette.SurfaceDark.copy(alpha = 0x4D / 255f),
 
-    surfaceBright = ColorLightBlue,
+    surfaceBright = BrandPalette.PrimaryTint,
     surfaceContainerHigh = Color.White,
 
-    surfaceDim = ColorMidnightBlue,
+    surfaceDim = BrandPalette.SurfaceDark,
 )

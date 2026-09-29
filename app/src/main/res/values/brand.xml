@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Brand resources: a flavor of the "brand" dimension overrides them in
+     src/<flavor>/res with the same names. -->
+<resources>
+    <!-- Accent of the app's line icons (res/drawable/ic_*.xml). -->
+    <color name="brand_primary">#298FC2</color>
+
+    <!-- Monochrome small icon for push notifications. -->
+    <drawable name="ic_push_notification">@drawable/ic_launcher</drawable>
+
+    <!-- Optional logo above the name on the in-app splash screen. -->
+    <drawable name="brand_splash_logo">@drawable/ic_launcher</drawable>
+    <integer name="brand_splash_show_logo">0</integer>
+</resources>
