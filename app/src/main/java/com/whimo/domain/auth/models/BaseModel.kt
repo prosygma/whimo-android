@@ -27,4 +27,5 @@ data class BaseModel(
     val code: String,
     val usernameError: List<String>,
     val passwordError: List<String>,
+    val channel: String? = null,
 )

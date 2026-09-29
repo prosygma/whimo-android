@@ -40,6 +40,7 @@ class EnterCodeViewModel(
     private var state: EnterCodeScreenState = EnterCodeScreenState.Registration
     private var email: String? = null
     private var phone: String? = null
+    private var channel: String? = null
     private var username: String = ""
     private var code: String = ""
     private var codeError: String = ""
@@ -68,6 +69,8 @@ class EnterCodeViewModel(
         updateBinding { b ->
             if (!email.isNullOrEmpty()) {
                 b.title = resourceProvider.getString(R.string.check_your_email_inbox)
+            } else if (channel == CHANNEL_WHATSAPP) {
+                b.title = resourceProvider.getString(R.string.check_your_whatsapp_messages)
             } else {
                 b.title = resourceProvider.getString(R.string.check_your_sms_messages)
             }
@@ -124,6 +127,7 @@ class EnterCodeViewModel(
         launch {
             authInteractor.sendOtp(username)
                 .onSuccess {
+                    onCodeSent(it?.channel)
                     setEffect(
                         EnterCodeContract.Effect.ToggleLoader(false),
                         EnterCodeContract.Effect.ShowMessage("Code sent")
@@ -140,12 +144,21 @@ class EnterCodeViewModel(
         }
     }
 
+    private fun onCodeSent(channel: String?) {
+        // Older backends do not report the channel: keep the current title then.
+        if (channel != null && channel != this.channel) {
+            this.channel = channel
+            updateView()
+        }
+    }
+
     private fun resetPassword() {
         setEffect(EnterCodeContract.Effect.ToggleLoader(true))
 
         launch {
             authInteractor.passwordResetSend(username)
                 .onSuccess {
+                    onCodeSent(it?.channel)
                     setEffect(
                         EnterCodeContract.Effect.ToggleLoader(false),
                         EnterCodeContract.Effect.ShowMessage("Code sent")
@@ -212,3 +225,5 @@ class EnterCodeViewModel(
         }
     }
 }
+
+private const val CHANNEL_WHATSAPP = "whatsapp"
