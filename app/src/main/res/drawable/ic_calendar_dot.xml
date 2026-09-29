@@ -31,7 +31,7 @@
     <path
         android:pathData="M20,6m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0"
         android:strokeWidth="2"
-        android:fillColor="#298FC2"
+        android:fillColor="@color/brand_primary"
         android:strokeColor="#ffffff"/>
 
 </vector>

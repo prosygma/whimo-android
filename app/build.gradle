@@ -33,6 +33,15 @@ android {
         }
     }
 
+    // White-label builds: each flavor of the "brand" dimension overrides resources
+    // (src/<flavor>/res) and BrandPalette (src/<flavor>/java) without touching main.
+    flavorDimensions = ["brand"]
+    productFlavors {
+        whimo {
+            dimension "brand"
+        }
+    }
+
     signingConfigs {
         def propsFile = rootProject.file("config/signing.properties")
         if (propsFile.exists()) {

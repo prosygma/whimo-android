@@ -21,38 +21,18 @@
  */
 package com.whimo.presentation.ui.theme
 
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
-val ColorScheme = lightColorScheme(
-    primary = BrandPalette.Primary,
-    onPrimary = Color.White,
-
-    secondary = BrandPalette.PrimaryTint,
-    onSecondary = BrandPalette.Primary,
-
-    tertiary = ColorLightOrange,
-    onTertiary = ColorWarning,
-
-    background = ColorGray5,
-    onBackground = ColorGray90,
-
-    surface = Color.White,
-    onSurface = ColorGray90,
-
-    surfaceVariant = ColorGray5,
-    onSurfaceVariant = ColorGray60,
-
-    error = ColorError,
-    onError = Color.White,
-
-    outline = ColorGray10,
-    outlineVariant = BrandPalette.Primary.copy(alpha = 0x1A / 255f),
-
-    scrim = BrandPalette.SurfaceDark.copy(alpha = 0x4D / 255f),
-
-    surfaceBright = BrandPalette.PrimaryTint,
-    surfaceContainerHigh = Color.White,
-
-    surfaceDim = BrandPalette.SurfaceDark,
-)
+/**
+ * Brand colours of the "whimo" product flavor.
+ *
+ * Each flavor of the "brand" dimension provides its own BrandPalette in
+ * src/<flavor>/java. Only the Material colour scheme and the splash screen use
+ * it: the named colours of Palette.kt also encode traceability and transaction
+ * statuses, which must not change with the brand.
+ */
+internal object BrandPalette {
+    val Primary = ColorSeaBlue
+    val PrimaryTint = ColorLightBlue
+    val SurfaceDark = ColorMidnightBlue
+}
