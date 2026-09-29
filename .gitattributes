@@ -1,0 +1,3 @@
+# Fork-owned binary brand files: on merges from upstream keep the CamerTrace
+# version (needs `git config merge.ours.driver true`, see scripts/fork-setup.sh).
+app/src/camertrace/res/drawable-*/* merge=ours

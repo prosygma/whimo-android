@@ -1,0 +1,5 @@
+# Paths owned by the CamerTrace brand overlay (bash glob patterns).
+app/src/camertrace/*
+app/src/whimo/*
+app/src/main/res/values/brand.xml
+.github/workflows/release.yml

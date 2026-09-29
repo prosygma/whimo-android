@@ -40,6 +40,10 @@ android {
         whimo {
             dimension "brand"
         }
+        camertrace {
+            dimension "brand"
+            applicationId "whimo.camertrace.cm"
+        }
     }
 
     signingConfigs {

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="brand_primary">#0B6B3A</color>
+    <drawable name="ic_push_notification">@drawable/ct_push_notification</drawable>
+    <drawable name="brand_splash_logo">@drawable/ct_splash_logo</drawable>
+    <integer name="brand_splash_show_logo">1</integer>
+</resources>
