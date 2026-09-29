@@ -27,7 +27,9 @@ data class BaseResponse(
     val success: Boolean?,
     val message: String?,
     val code: String?,
-    val errors: ErrorsResponse?
+    val errors: ErrorsResponse?,
+    /** How a verification code was delivered: "email", "sms" or "whatsapp" (OTP send endpoints only). */
+    val channel: String? = null,
 )
 
 fun BaseResponse.toDomain() = BaseModel(
@@ -35,6 +37,7 @@ fun BaseResponse.toDomain() = BaseModel(
     success = success ?: false,
     message = message ?: "",
     usernameError = errors?.username ?: emptyList(),
-    passwordError = errors?.password ?: emptyList()
+    passwordError = errors?.password ?: emptyList(),
+    channel = channel,
 
 )

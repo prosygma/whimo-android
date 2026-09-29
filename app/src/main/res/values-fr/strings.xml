@@ -74,6 +74,7 @@
     <string name="request_another">Demander un autre</string>
     <string name="check_your_email_inbox">Vérifiez votre boîte mail</string>
     <string name="check_your_sms_messages">Vérifiez vos messages SMS</string>
+    <string name="check_your_whatsapp_messages">Vérifiez vos messages WhatsApp</string>
     <string name="check_inbox_instructions">Nous vous avons envoyé un code à \n%s pour restaurer l\'accès à votre compte.</string>
     <string name="get_verification_code_with_email">Obtenir le code par email</string>
     <string name="get_verification_code_with_phone">Obtenir le code par téléphone</string>
