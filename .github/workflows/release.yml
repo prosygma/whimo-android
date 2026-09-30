@@ -15,7 +15,7 @@ on:
         options: [internal, alpha, beta]
 
 permissions:
-  contents: read
+  contents: write # the sideload APK is attached to a GitHub release
 
 concurrency:
   group: play-release
@@ -25,10 +25,8 @@ jobs:
   bundle:
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    env:
-      # settings.gradle authenticates to Mapbox's Maven repo with this; without
-      # it the SDK dependency cannot be resolved at all.
-      MAPBOX_DOWNLOADS_TOKEN: ${{ secrets.MAPBOX_DOWNLOADS_TOKEN }}
+    # No MAPBOX_DOWNLOADS_TOKEN: Maps SDK v11 is served anonymously, and a
+    # token without DOWNLOADS:READ turns that into a 403 (see settings.gradle).
     steps:
       - uses: actions/checkout@v4
 
@@ -85,9 +83,6 @@ jobs:
           grep -qE '^MAPBOX_PUBLIC_TOKEN=pk\.' config/secrets.properties || {
             echo "::error::MAPBOX_PUBLIC_TOKEN must be a public pk.* token"; exit 1
           }
-          if [ -z "${MAPBOX_DOWNLOADS_TOKEN:-}" ]; then
-            echo "::error::MAPBOX_DOWNLOADS_TOKEN secret is not set"; exit 1
-          fi
           if grep -q 'DEFAULT_ID' config/secrets.properties; then
             echo "::error::placeholder GOOGLE_AUTH_CLIENT_ID in secrets.properties"; exit 1
           fi
@@ -107,7 +102,7 @@ jobs:
           PY
 
       - name: Unit tests
-        run: ./gradlew :app:testReleaseUnitTest
+        run: ./gradlew :app:testCamertraceReleaseUnitTest
 
       - name: Build AAB
         run: ./gradlew :app:bundleCamertraceRelease --no-daemon --stacktrace
@@ -116,6 +111,18 @@ jobs:
         run: |
           keytool -printcert -jarfile app/build/outputs/bundle/camertraceRelease/app-camertrace-release.aab \
             | grep -E "SHA1:|Owner:"
+
+      # Same signature as the Play build only if Play App Signing uses the CICC
+      # key; otherwise sideload users must uninstall before switching to Play.
+      - name: Build sideload APK
+        id: apk
+        run: |
+          set -euo pipefail
+          ./gradlew :app:assembleCamertraceRelease --no-daemon --stacktrace
+          code=$(grep -oP '^\s*versionCode\s+\K\d+' app/build.gradle)
+          cp app/build/outputs/apk/camertrace/release/app-camertrace-release.apk "camertrace_${code}.apk"
+          cp "camertrace_${code}.apk" camertrace.apk
+          echo "code=$code" >> "$GITHUB_OUTPUT"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -132,6 +139,19 @@ jobs:
           track: ${{ inputs.track || 'internal' }}
           status: completed
           releaseName: ${{ github.ref_name }}
+
+      # Not a v* tag: that would start another Play upload. camertrace.apk is
+      # the stable name behind releases/latest/download/camertrace.apk.
+      - name: Publish APK as GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ steps.apk.outputs.code }}
+          name: CamerTrace ${{ github.ref_name }} (${{ steps.apk.outputs.code }})
+          target_commitish: ${{ github.sha }}
+          make_latest: true
+          files: |
+            camertrace_${{ steps.apk.outputs.code }}.apk
+            camertrace.apk
 
       - name: Scrub secrets from workspace
         if: always()
