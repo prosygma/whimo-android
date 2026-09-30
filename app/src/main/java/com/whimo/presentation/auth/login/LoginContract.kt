@@ -27,7 +27,7 @@ import com.whimo.R
 import com.whimo.base.CoreViewBinding
 import com.whimo.base.CoreViewEvent
 import com.whimo.base.CoreViewSideEffect
-import com.whimo.presentation.ui.models.Languages
+import com.whimo.domain.languages.models.AppLanguage
 import com.whimo.utils.PhoneNumberUtils
 
 enum class LoginTypeTab(val tabNameRes: Int) {
@@ -49,7 +49,8 @@ object LoginContract {
 
         var loginEnabled: Boolean = false,
 
-        var selectedLanguage: String = Languages.ENGLISH.languageCode,
+        var languages: List<AppLanguage> = AppLanguage.BUNDLED,
+        var selectedLanguage: String = "",
     ) : CoreViewBinding
 
     sealed class Event : CoreViewEvent {

@@ -25,7 +25,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.setContent
@@ -37,6 +36,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.whimo.base.BaseActivity
 import com.whimo.domain.transactions.models.TransactionModel
 import com.whimo.extensions.getParcelableCompatExtra
 import com.whimo.navigation.navgraphs.TransactionDetailsNavGraph
@@ -45,7 +45,7 @@ import com.whimo.presentation.auth.AuthActivity
 import com.whimo.presentation.ui.theme.WhimoTheme
 import org.koin.android.ext.android.inject
 
-class TransactionDetailsActivity : ComponentActivity(), OnBackPressedDispatcherOwner {
+class TransactionDetailsActivity : BaseActivity(), OnBackPressedDispatcherOwner {
     private val sessionManager: SessionManager by inject()
 
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")

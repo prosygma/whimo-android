@@ -19,25 +19,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.whimo.presentation.settings.language
+package com.whimo.di
 
-import android.content.Context
-import com.whimo.base.CoreViewBinding
-import com.whimo.base.CoreViewEvent
-import com.whimo.base.CoreViewSideEffect
-import com.whimo.domain.languages.models.AppLanguage
+import com.whimo.data.languages.repository.LanguagesRepository
+import com.whimo.data.languages.repository.LanguagesRepositoryImpl
+import com.whimo.data.languages.service.LanguagesService
+import com.whimo.domain.languages.LanguagesInteractor
+import com.whimo.domain.languages.LanguagesInteractorImpl
+import com.whimo.utils.translations.TranslationsStore
+import org.koin.android.ext.koin.androidContext
+import org.koin.dsl.module
+import retrofit2.Retrofit
 
-object LanguageContract {
-    data class Binding(
-        var languages: List<AppLanguage> = AppLanguage.BUNDLED,
-        var selectedLanguage: String = "",
-    ) : CoreViewBinding
+val languagesModule = module {
+    // Services
+    single { get<Retrofit>(UNAUTHORISED).create(LanguagesService::class.java) }
 
-    sealed class Event : CoreViewEvent {
-        data class OnCreate(val context: Context) : Event()
-        data class OnSelectedLanguageChange(val selectedLanguage: String) : Event()
-        data class OnSave(val context: Context) : Event()
-    }
+    // Storage
+    single { TranslationsStore.getInstance(androidContext()) }
 
-    sealed class Effect : CoreViewSideEffect
+    // Repositories
+    single<LanguagesRepository> { LanguagesRepositoryImpl(service = get(), store = get()) }
+
+    // Interactors
+    factory<LanguagesInteractor> { LanguagesInteractorImpl(repository = get(), appLocaleManager = get()) }
 }

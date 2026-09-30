@@ -24,7 +24,6 @@ package com.whimo.presentation.main
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,6 +33,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.whimo.base.BaseActivity
 import com.whimo.navigation.bottombar.BottomNavItem.Companion.MainNavItems
 import com.whimo.navigation.bottombar.BottomNavigationBar
 import com.whimo.navigation.navgraphs.MainNavGraph
@@ -44,7 +44,7 @@ import com.whimo.utils.PostNotificationPermissionRequester
 import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class MainActivity : ComponentActivity(), OnBackPressedDispatcherOwner {
+class MainActivity : BaseActivity(), OnBackPressedDispatcherOwner {
     private val viewModel: MainViewModel by viewModel()
     private val sessionManager: SessionManager by inject()
 

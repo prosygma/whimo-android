@@ -19,25 +19,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.whimo.presentation.settings.language
+package com.whimo.data.languages.model.response
 
-import android.content.Context
-import com.whimo.base.CoreViewBinding
-import com.whimo.base.CoreViewEvent
-import com.whimo.base.CoreViewSideEffect
-import com.whimo.domain.languages.models.AppLanguage
+data class LanguagesResponse(
+    val success: Boolean?,
+    val data: LanguagesData?,
+)
 
-object LanguageContract {
-    data class Binding(
-        var languages: List<AppLanguage> = AppLanguage.BUNDLED,
-        var selectedLanguage: String = "",
-    ) : CoreViewBinding
+data class LanguagesData(
+    val default: String?,
+    val languages: List<LanguageResponse>?,
+)
 
-    sealed class Event : CoreViewEvent {
-        data class OnCreate(val context: Context) : Event()
-        data class OnSelectedLanguageChange(val selectedLanguage: String) : Event()
-        data class OnSave(val context: Context) : Event()
-    }
-
-    sealed class Effect : CoreViewSideEffect
-}
+data class LanguageResponse(
+    val code: String?,
+    val name: String?,
+    val english_name: String?,
+    val flag: String?,
+    val version: Int?,
+)

@@ -25,7 +25,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.setContent
@@ -38,6 +37,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.mapbox.geojson.Point
+import com.whimo.base.BaseActivity
 import com.whimo.domain.createtransaction.models.CreateTransactionModel
 import com.whimo.domain.createtransaction.models.LocationProvider
 import com.whimo.domain.createtransaction.models.MFile
@@ -50,7 +50,7 @@ import com.whimo.presentation.auth.AuthActivity
 import com.whimo.presentation.ui.theme.WhimoTheme
 import org.koin.android.ext.android.inject
 
-class FarmGeoDataActivity : ComponentActivity(), OnBackPressedDispatcherOwner {
+class FarmGeoDataActivity : BaseActivity(), OnBackPressedDispatcherOwner {
     private val sessionManager: SessionManager by inject()
     private var transactionModel: TransactionModel? = null
     private var createTransactionModel: CreateTransactionModel? = null

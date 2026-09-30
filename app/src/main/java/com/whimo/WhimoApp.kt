@@ -26,6 +26,7 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import com.mapbox.common.MapboxOptions
 import com.whimo.di.authModule
@@ -33,14 +34,21 @@ import com.whimo.di.commodityModule
 import com.whimo.di.createTransactionsModule
 import com.whimo.di.dataBaseModule
 import com.whimo.di.geoDataModule
+import com.whimo.di.languagesModule
 import com.whimo.di.mainModule
 import com.whimo.di.networkModule
 import com.whimo.di.notificationsModule
 import com.whimo.di.providersModule
 import com.whimo.di.settingsModule
 import com.whimo.di.transactionsModule
+import com.whimo.domain.languages.LanguagesInteractor
 import com.whimo.services.MyFirebaseMessagingService.Companion.PUSH_NOTIFICATIONS_CHANNEL_ID
 import com.whimo.services.MyFirebaseMessagingService.Companion.PUSH_NOTIFICATIONS_CHANNEL_NAME
+import com.whimo.utils.translations.withTranslations
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.GlobalContext
@@ -49,6 +57,13 @@ import org.koin.core.logger.Level
 class WhimoApp : Application() {
 
     var currentActivity: Activity? = null
+
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    override fun attachBaseContext(base: Context) {
+        // Strings downloaded from the backend take precedence over the bundled ones.
+        super.attachBaseContext(base.withTranslations())
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -75,9 +90,12 @@ class WhimoApp : Application() {
                 commodityModule,
                 geoDataModule,
                 notificationsModule,
-                settingsModule
+                settingsModule,
+                languagesModule
             )
         }
+
+        syncLanguages()
 
         // Register activity lifecycle callbacks
         registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
@@ -98,6 +116,21 @@ class WhimoApp : Application() {
             override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
             override fun onActivityDestroyed(activity: Activity) {}
         })
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        // The language may have been changed from the system settings.
+        appScope.launch {
+            val interactor = GlobalContext.get().get<LanguagesInteractor>()
+            interactor.updateStrings(interactor.getCurrentLanguageCode(this@WhimoApp))
+        }
+    }
+
+    private fun syncLanguages() {
+        appScope.launch {
+            GlobalContext.get().get<LanguagesInteractor>().syncLanguages(this@WhimoApp)
+        }
     }
 
     private fun createNotificationChannel() {

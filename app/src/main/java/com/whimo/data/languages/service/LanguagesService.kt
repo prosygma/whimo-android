@@ -19,25 +19,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.whimo.presentation.settings.language
+package com.whimo.data.languages.service
 
-import android.content.Context
-import com.whimo.base.CoreViewBinding
-import com.whimo.base.CoreViewEvent
-import com.whimo.base.CoreViewSideEffect
-import com.whimo.domain.languages.models.AppLanguage
+import com.whimo.data.languages.model.response.LanguageStringsResponse
+import com.whimo.data.languages.model.response.LanguagesResponse
+import retrofit2.Response
+import retrofit2.http.GET
+import retrofit2.http.Path
 
-object LanguageContract {
-    data class Binding(
-        var languages: List<AppLanguage> = AppLanguage.BUNDLED,
-        var selectedLanguage: String = "",
-    ) : CoreViewBinding
+interface LanguagesService {
+    @GET("languages/")
+    suspend fun getLanguages(): Response<LanguagesResponse>
 
-    sealed class Event : CoreViewEvent {
-        data class OnCreate(val context: Context) : Event()
-        data class OnSelectedLanguageChange(val selectedLanguage: String) : Event()
-        data class OnSave(val context: Context) : Event()
-    }
-
-    sealed class Effect : CoreViewSideEffect
+    @GET("languages/{code}/android/")
+    suspend fun getStrings(
+        @Path("code") code: String
+    ): Response<LanguageStringsResponse>
 }

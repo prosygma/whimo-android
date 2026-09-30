@@ -134,6 +134,14 @@ android {
     androidResources {
         generateLocaleConfig = true
     }
+
+    // The app language is chosen in the app, not only from the device languages:
+    // ship every language in the base APK instead of Play language splits.
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
 }
 
 dependencies {

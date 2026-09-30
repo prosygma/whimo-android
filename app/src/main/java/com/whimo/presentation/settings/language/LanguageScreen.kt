@@ -43,7 +43,6 @@ import com.whimo.R
 import com.whimo.presentation.main.components.Toolbar2
 import com.whimo.presentation.settings.components.LanguageItem
 import com.whimo.presentation.ui.baseScreen.MainButton
-import com.whimo.presentation.ui.models.Languages
 import com.whimo.presentation.ui.theme.WhimoTheme
 import org.koin.androidx.compose.koinViewModel
 
@@ -84,13 +83,12 @@ fun LanguageScreen(
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
-            items(Languages.entries.toTypedArray()) {
+            items(binding.languages) {
                 LanguageItem(
-                    iconRes = it.languageIcon,
-                    title = it.languageName,
-                    isSelected = binding.selectedLanguage == it.languageCode,
+                    language = it,
+                    isSelected = binding.selectedLanguage == it.code,
                     onClick = {
-                        viewModel?.setEvent(LanguageContract.Event.OnSelectedLanguageChange(it.languageCode))
+                        viewModel?.setEvent(LanguageContract.Event.OnSelectedLanguageChange(it.code))
                     },
                 )
             }

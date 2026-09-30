@@ -22,23 +22,26 @@
 package com.whimo.presentation.ui.models
 
 import com.whimo.R
+import com.whimo.domain.languages.models.AppLanguage
 
-enum class Languages(val languageName: String, val languageCode: String, val languageIcon: Int) {
-    ENGLISH("English", "en", languageIcon = R.drawable.ic_en),
-    FRENCH("French", "fr", languageIcon = R.drawable.ic_fr),
-    SPANISH("Spanish", "es", languageIcon = R.drawable.ic_sp);
+/**
+ * Name shown in the language pickers: the app's own name for the bundled languages,
+ * else the native name set in the admin panel.
+ */
+val AppLanguage.label: String
+    get() = AppLanguage.bundled(code)?.name ?: name
 
-    companion object {
-        private val codeToLanguageMap = entries.associateBy { it.languageCode }
-        private val nameToLanguageMap = entries.associateBy { it.languageName }
-
-        fun fromCode(code: String): Languages? {
-            return codeToLanguageMap[code]
-        }
-
-        fun fromName(name: String): Languages? {
-            return nameToLanguageMap[name]
-        }
+/**
+ * Flag drawable shipped with the app, null for languages added in the admin panel.
+ */
+val AppLanguage.iconRes: Int?
+    get() = when (code) {
+        "en" -> R.drawable.ic_en
+        "fr" -> R.drawable.ic_fr
+        "es" -> R.drawable.ic_sp
+        else -> null
     }
 
+fun List<AppLanguage>.labelFor(code: String): String {
+    return find { it.code == code }?.label ?: AppLanguage.bundled(code)?.name ?: code
 }
