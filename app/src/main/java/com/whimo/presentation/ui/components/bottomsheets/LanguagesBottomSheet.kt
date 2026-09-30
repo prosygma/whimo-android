@@ -36,15 +36,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.whimo.R
+import com.whimo.domain.languages.models.AppLanguage
 import com.whimo.presentation.settings.components.BottomSheetBase
 import com.whimo.presentation.settings.components.SettingsOptionItemBase
-import com.whimo.presentation.ui.models.Languages
+import com.whimo.presentation.ui.components.LanguageIcon
+import com.whimo.presentation.ui.models.label
 import com.whimo.presentation.ui.theme.ColorSuccess
 import com.whimo.presentation.ui.theme.TextStyleMediumL
 
@@ -52,6 +53,7 @@ import com.whimo.presentation.ui.theme.TextStyleMediumL
 @Composable
 fun LanguagesBottomSheetPreview() {
     LanguagesBottomSheet(
+        languages = AppLanguage.BUNDLED,
         onDismiss = {},
         onLanguageSelected = {},
     )
@@ -59,6 +61,7 @@ fun LanguagesBottomSheetPreview() {
 
 @Composable
 fun LanguagesBottomSheet(
+    languages: List<AppLanguage>,
     selectedLanguageCode: String? = null,
     onDismiss: () -> Unit,
     onLanguageSelected: (String) -> Unit,
@@ -80,17 +83,15 @@ fun LanguagesBottomSheet(
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .background(MaterialTheme.colorScheme.surfaceVariant),
-            userScrollEnabled = false,
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
 
-            items(Languages.entries) {
+            items(languages) {
                 LanguageItem(
-                    iconRes = it.languageIcon,
-                    title = it.languageName,
-                    isSelected = it.languageCode == selectedLanguageCode,
+                    language = it,
+                    isSelected = it.code == selectedLanguageCode,
                     onClick = {
-                        onLanguageSelected(it.languageCode)
+                        onLanguageSelected(it.code)
                     }
                 )
             }
@@ -101,16 +102,14 @@ fun LanguagesBottomSheet(
 @Composable
 fun LanguageItem(
     modifier: Modifier = Modifier,
-    iconRes: Int,
-    title: String,
+    language: AppLanguage,
     isSelected: Boolean,
     onClick: () -> Unit = {},
 ) {
     SettingsOptionItemBase(
         modifier = modifier,
-        iconRes = iconRes,
-        iconTint = Color.Unspecified,
-        title = title,
+        icon = { LanguageIcon(language = language) },
+        title = language.label,
         onClick = onClick,
     ) {
         if (isSelected) {

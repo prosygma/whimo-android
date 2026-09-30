@@ -22,7 +22,6 @@
 package com.whimo.presentation.routing
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -43,6 +42,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.whimo.R
+import com.whimo.base.BaseActivity
 import com.whimo.base.ObserveEffects
 import com.whimo.presentation.auth.AuthActivity
 import com.whimo.presentation.main.MainActivity
@@ -52,7 +52,7 @@ import com.whimo.presentation.ui.theme.TextStyleSplash2
 import com.whimo.presentation.ui.theme.WhimoTheme
 import org.koin.androidx.viewmodel.ext.android.getViewModel
 
-class RoutingActivity : ComponentActivity() {
+class RoutingActivity : BaseActivity() {
     private lateinit var viewModel: RoutingViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {

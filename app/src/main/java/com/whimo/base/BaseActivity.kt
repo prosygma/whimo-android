@@ -19,25 +19,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package com.whimo.presentation.settings.language
+package com.whimo.base
 
 import android.content.Context
-import com.whimo.base.CoreViewBinding
-import com.whimo.base.CoreViewEvent
-import com.whimo.base.CoreViewSideEffect
-import com.whimo.domain.languages.models.AppLanguage
+import androidx.activity.ComponentActivity
+import com.whimo.utils.translations.withTranslations
 
-object LanguageContract {
-    data class Binding(
-        var languages: List<AppLanguage> = AppLanguage.BUNDLED,
-        var selectedLanguage: String = "",
-    ) : CoreViewBinding
+/**
+ * Base of every activity: their resources, and so Compose stringResource(), return the strings
+ * downloaded from the backend for the current language before the bundled ones.
+ */
+open class BaseActivity : ComponentActivity() {
 
-    sealed class Event : CoreViewEvent {
-        data class OnCreate(val context: Context) : Event()
-        data class OnSelectedLanguageChange(val selectedLanguage: String) : Event()
-        data class OnSave(val context: Context) : Event()
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(newBase.withTranslations())
     }
-
-    sealed class Effect : CoreViewSideEffect
 }

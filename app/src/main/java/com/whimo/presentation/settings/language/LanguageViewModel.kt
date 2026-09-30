@@ -24,14 +24,16 @@ package com.whimo.presentation.settings.language
 import android.content.Context
 import com.whimo.base.BaseViewModel
 import com.whimo.base.CoreViewEvent
-import com.whimo.presentation.ui.models.Languages
-import com.whimo.utils.AppLocaleManager
+import com.whimo.data.base.common.onSuccess
+import com.whimo.domain.languages.LanguagesInteractor
+import com.whimo.domain.languages.models.AppLanguage
 
 class LanguageViewModel(
-    private val appLocaleManager: AppLocaleManager,
+    private val languagesInteractor: LanguagesInteractor,
 ) : BaseViewModel<LanguageContract.Binding>() {
 
-    private var selectedLanguage: String = Languages.ENGLISH.languageCode
+    private var languages: List<AppLanguage> = languagesInteractor.getLanguages().languages
+    private var selectedLanguage: String = languagesInteractor.getLanguages().defaultCode
 
     override fun createBinding(): LanguageContract.Binding {
         return LanguageContract.Binding()
@@ -52,13 +54,24 @@ class LanguageViewModel(
 
     private fun updateView() {
         updateBinding { b ->
+            b.languages = languages
             b.selectedLanguage = selectedLanguage
         }
     }
 
     private fun onCreate(context: Context) {
-        selectedLanguage = appLocaleManager.getLanguageCode(context)
+        selectedLanguage = languagesInteractor.getCurrentLanguageCode(context)
         updateView()
+
+        launch {
+            languagesInteractor.refreshLanguages(context)
+                .onSuccess { model ->
+                    if (model != null) {
+                        languages = model.languages
+                        updateView()
+                    }
+                }
+        }
     }
 
     private fun onSelectedLanguageChange(selectedLanguage: String) {
@@ -67,7 +80,9 @@ class LanguageViewModel(
     }
 
     private fun onSave(context: Context) {
-        appLocaleManager.changeLanguage(context, selectedLanguage)
         updateView()
+        launch {
+            languagesInteractor.changeLanguage(context, selectedLanguage)
+        }
     }
 }

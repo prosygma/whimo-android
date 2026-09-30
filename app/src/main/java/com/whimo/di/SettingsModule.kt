@@ -58,5 +58,5 @@ val settingsModule = module {
     viewModel { EditPhoneViewModel(interactor = get(), errorHandler = get(), resourceProvider = get(), remoteConfigProvider = get()) }
     viewModel { ChangePasswordViewModel(interactor = get(), errorHandler = get(), resourceProvider = get()) }
     viewModel { NotificationSettingsViewModel(interactor = get(), errorHandler = get(), sharedPreferencesProvider = get(), resourceProvider = get()) }
-    viewModel { LanguageViewModel(appLocaleManager = get()) }
+    viewModel { LanguageViewModel(languagesInteractor = get()) }
 }

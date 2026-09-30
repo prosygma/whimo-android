@@ -173,6 +173,30 @@ fun SettingsOptionItemBase(
     onClick: () -> Unit = {},
     endContent: @Composable RowScope.() -> Unit = {},
 ) {
+    SettingsOptionItemBase(
+        modifier = modifier,
+        icon = {
+            Icon(
+                modifier = Modifier.size(24.dp),
+                painter = painterResource(id = iconRes),
+                contentDescription = null,
+                tint = iconTint,
+            )
+        },
+        title = title,
+        onClick = onClick,
+        endContent = endContent,
+    )
+}
+
+@Composable
+fun SettingsOptionItemBase(
+    modifier: Modifier = Modifier,
+    icon: @Composable () -> Unit,
+    title: String,
+    onClick: () -> Unit = {},
+    endContent: @Composable RowScope.() -> Unit = {},
+) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -182,12 +206,7 @@ fun SettingsOptionItemBase(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Icon(
-            modifier = Modifier.size(24.dp),
-            painter = painterResource(id = iconRes),
-            contentDescription = null,
-            tint = iconTint,
-        )
+        icon()
 
         Text(
             modifier = Modifier.weight(1f),

@@ -29,12 +29,12 @@ import com.whimo.base.CoreViewEvent
 import com.whimo.data.base.common.onError
 import com.whimo.data.base.common.onSuccess
 import com.whimo.domain.auth.AuthInteractor
+import com.whimo.domain.languages.LanguagesInteractor
+import com.whimo.domain.languages.models.AppLanguage
 import com.whimo.network.ErrorHandler
 import com.whimo.network.error.ServerError
-import com.whimo.presentation.ui.models.Languages
 import com.whimo.providers.ResourceProvider
 import com.whimo.providers.SharedPreferencesProvider
-import com.whimo.utils.AppLocaleManager
 import com.whimo.utils.GoogleSignInHelper
 import com.whimo.utils.GoogleSignInResult
 import com.whimo.utils.PhoneNumberUtils
@@ -44,7 +44,7 @@ import com.whimo.utils.getLastLocation
 class LoginViewModel(
     private val authInteractor: AuthInteractor,
     private val sharedPreferencesProvider: SharedPreferencesProvider,
-    private val appLocaleManager: AppLocaleManager,
+    private val languagesInteractor: LanguagesInteractor,
     private val errorHandler: ErrorHandler,
     private val resourceProvider: ResourceProvider,
 ) : BaseViewModel<LoginContract.Binding>() {
@@ -57,7 +57,8 @@ class LoginViewModel(
     private var emailError: String = ""
     private var phoneError: String = ""
     private var passwordError: String = ""
-    private var selectedLanguage: String = Languages.ENGLISH.languageCode
+    private var languages: List<AppLanguage> = languagesInteractor.getLanguages().languages
+    private var selectedLanguage: String = languagesInteractor.getLanguages().defaultCode
 
     override fun createBinding(): LoginContract.Binding {
         return LoginContract.Binding()
@@ -104,12 +105,14 @@ class LoginViewModel(
                     phoneNumber.isNotEmpty() && password.isNotEmpty()
                 }
             }
+            b.languages = languages
             b.selectedLanguage = selectedLanguage
         }
     }
 
     private fun onCreate(context: Context) {
-        selectedLanguage = appLocaleManager.getLanguageCode(context)
+        selectedLanguage = languagesInteractor.getCurrentLanguageCode(context)
+        refreshLanguages(context)
 
         launch {
             val location = getLastLocation(context)
@@ -260,9 +263,28 @@ class LoginViewModel(
         setEffect(LoginContract.Effect.NavigateRegistration)
     }
 
+    private fun refreshLanguages(context: Context) {
+        launch {
+            languagesInteractor.refreshLanguages(context)
+                .onSuccess { model ->
+                    if (model != null) {
+                        languages = model.languages
+                        updateView()
+                    }
+                }
+        }
+    }
+
     private fun onChangeLanguage(context: Context, languageCode: String) {
-        appLocaleManager.changeLanguage(context, languageCode)
         selectedLanguage = languageCode
+        updateView()
+
+        launch {
+            setEffect(LoginContract.Effect.ToggleLoader(true))
+            // Downloads the strings of a language added in the admin panel before switching to it.
+            languagesInteractor.changeLanguage(context, languageCode)
+            setEffect(LoginContract.Effect.ToggleLoader(false))
+        }
     }
 
     private fun onOtpSuccess(username: String) {

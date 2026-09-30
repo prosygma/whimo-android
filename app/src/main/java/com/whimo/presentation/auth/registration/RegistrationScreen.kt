@@ -77,7 +77,7 @@ import com.whimo.presentation.ui.components.RichTextWithLinks
 import com.whimo.presentation.ui.components.bottomsheets.LanguagesBottomSheet
 import com.whimo.presentation.ui.components.bottomsheets.VerificationMethodBottomSheet
 import com.whimo.presentation.ui.components.dialogs.PhoneRegionDialog
-import com.whimo.presentation.ui.models.Languages
+import com.whimo.presentation.ui.models.labelFor
 import com.whimo.presentation.ui.theme.TextStyleBodyM
 import com.whimo.presentation.ui.theme.TextStyleButtonM
 import com.whimo.presentation.ui.theme.WhimoTheme
@@ -346,7 +346,7 @@ fun RegistrationScreen(
                     )
 
                     Text(
-                        text = Languages.fromCode(binding.selectedLanguage)?.languageName ?: Languages.ENGLISH.languageName,
+                        text = binding.languages.labelFor(binding.selectedLanguage),
                         style = TextStyleButtonM,
                         color = MaterialTheme.colorScheme.primary,
                     )
@@ -372,6 +372,7 @@ fun RegistrationScreen(
 
     if (showLanguageBottomSheet) {
         LanguagesBottomSheet(
+            languages = binding.languages,
             selectedLanguageCode = binding.selectedLanguage,
             onDismiss = { showLanguageBottomSheet = false },
             onLanguageSelected = {

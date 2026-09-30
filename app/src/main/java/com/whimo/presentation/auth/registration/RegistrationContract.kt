@@ -26,7 +26,7 @@ import android.content.Context
 import com.whimo.base.CoreViewBinding
 import com.whimo.base.CoreViewEvent
 import com.whimo.base.CoreViewSideEffect
-import com.whimo.presentation.ui.models.Languages
+import com.whimo.domain.languages.models.AppLanguage
 import com.whimo.utils.PhoneNumberUtils
 
 object RegistrationContract {
@@ -46,7 +46,8 @@ object RegistrationContract {
         var registrationEnabled: Boolean = false,
         var emailRequired: Boolean = false,
 
-        var selectedLanguage: String = Languages.ENGLISH.languageName,
+        var languages: List<AppLanguage> = AppLanguage.BUNDLED,
+        var selectedLanguage: String = "",
     ) : CoreViewBinding
 
     sealed class Event : CoreViewEvent {
