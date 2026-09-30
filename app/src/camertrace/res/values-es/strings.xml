@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">CamerTrace</string>
-    <string name="what_is_my_origin">Traçabilité du cacao et du café au Cameroun</string>
+    <string name="what_is_my_origin">Traçabilité du Cacao et du Café au Cameroun</string>
     <string name="tap_to_invite_user">Toca para invitar a un usuario a CamerTrace</string>
     <string name="counterparty_info_instruction">Por favor, introduce información precisa del contraparte para que podamos invitarlo a CamerTrace.</string>
     <string name="whimo_app_feedback">Comentarios de la aplicación CamerTrace</string>
