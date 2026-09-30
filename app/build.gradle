@@ -43,6 +43,11 @@ android {
         camertrace {
             dimension "brand"
             applicationId "whimo.camertrace.cm"
+            // The APK is also downloaded directly from the site: ship only the ARM
+            // libraries phones use (x86 is for emulators), which halves its size.
+            ndk {
+                abiFilters "armeabi-v7a", "arm64-v8a"
+            }
         }
     }
 
