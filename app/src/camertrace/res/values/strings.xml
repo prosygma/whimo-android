@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">CamerTrace</string>
     <!-- Brand signature, kept in French in every language (like the upstream tagline). -->
-    <string name="what_is_my_origin">Traçabilité du cacao et du café au Cameroun</string>
+    <string name="what_is_my_origin">Traçabilité du Cacao et du Café au Cameroun</string>
     <string name="counterparty_info_instruction">Please enter accurate counterparty information so we can invite them to CamerTrace.</string>
     <string name="tap_to_invite_user">Tap to invite a user to CamerTrace</string>
     <string name="whimo_app_feedback">CamerTrace App Feedback</string>
