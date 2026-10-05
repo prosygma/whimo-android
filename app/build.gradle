@@ -24,8 +24,8 @@ android {
         applicationId "com.whimo"
         minSdk 26
         targetSdk 36
-        versionCode 61
-        versionName "1.8.1"
+        versionCode 62
+        versionName "1.8.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -197,10 +197,12 @@ dependencies {
     implementation "androidx.constraintlayout:constraintlayout-compose:1.1.1"
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4")
 
-    // Mapbox Maps (replaces Google Maps). play-services-location stays: it is the
-    // Fused Location Provider for GPS fixes, unrelated to the map SDK.
-    implementation "com.mapbox.maps:android:11.30.1"
-    implementation "com.mapbox.extension:maps-compose:11.30.1"
+    // Mapbox Maps (replaces Google Maps). The "-ndk27" artifacts ship 16 KB
+    // page-aligned native libraries, which Google Play requires.
+    // play-services-location stays: it is the Fused Location Provider for GPS
+    // fixes, unrelated to the map SDK.
+    implementation "com.mapbox.maps:android-ndk27:11.30.1"
+    implementation "com.mapbox.extension:maps-compose-ndk27:11.30.1"
     implementation 'com.google.android.gms:play-services-location:21.3.0'
 
     implementation("com.google.mlkit:barcode-scanning:17.3.0")
