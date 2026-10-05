@@ -49,7 +49,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.whimo.R
-import com.whimo.presentation.ui.theme.ColorSeaBlue50
+import com.whimo.presentation.ui.theme.BrandPalette
 import com.whimo.presentation.ui.theme.TextStyleButtonM
 import com.whimo.presentation.ui.theme.TextStyleMediumM
 import com.whimo.presentation.ui.theme.WhimoTheme
@@ -93,7 +93,7 @@ fun LoadingButton(
         modifier = modifier,
         isEnabled = enabled,
         backgroundColor = MaterialTheme.colorScheme.primary,
-        disabledBackgroundColor = ColorSeaBlue50,
+        disabledBackgroundColor = BrandPalette.Primary.copy(alpha = 0.5f),
         onClick = onClick,
     ) {
         if (isLoading) {
@@ -192,7 +192,7 @@ fun MainButton(
         modifier = modifier,
         isEnabled = isEnabled,
         backgroundColor = MaterialTheme.colorScheme.primary,
-        disabledBackgroundColor = ColorSeaBlue50,
+        disabledBackgroundColor = BrandPalette.Primary.copy(alpha = 0.5f),
         onClick = onClick,
     ) {
         Text(
@@ -215,7 +215,7 @@ fun MainIconButton(
         modifier = modifier,
         isEnabled = isEnabled,
         backgroundColor = MaterialTheme.colorScheme.primary,
-        disabledBackgroundColor = ColorSeaBlue50,
+        disabledBackgroundColor = BrandPalette.Primary.copy(alpha = 0.5f),
         onClick = onClick,
     ) {
         Row(
