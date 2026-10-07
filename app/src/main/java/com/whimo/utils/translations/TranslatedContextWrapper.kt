@@ -31,21 +31,38 @@ import java.util.Locale
 
 /**
  * Context whose resources return the strings downloaded from the backend first.
- * Wrap the base context of the application and of every activity with [withTranslations].
+ * Wrap the base context of every activity with [withTranslations].
+ *
+ * Never wrap the base context of the Application: the framework casts it to ContextImpl
+ * (ActivityThread.handleReceiver), so a broadcast to a manifest receiver would crash the app.
+ * The Application overrides getResources() with [TranslatedResourcesHolder] instead.
+ */
+class TranslatedContextWrapper(base: Context) : ContextWrapper(base) {
+
+    private val holder = TranslatedResourcesHolder(this, TranslationsStore.getInstance(base))
+
+    override fun getResources(): Resources {
+        return holder.get(super.getResources())
+    }
+}
+
+/**
+ * Builds and caches the translated resources of a context from its own resources.
  *
  * Below Android 13 it also applies the language chosen in the app, which the system only
  * does by itself from Android 13 (per-app languages).
  */
-class TranslatedContextWrapper(base: Context) : ContextWrapper(base) {
-
-    private val store = TranslationsStore.getInstance(base)
+class TranslatedResourcesHolder(
+    private val context: Context,
+    private val store: TranslationsStore,
+) {
 
     private var translated: TranslatedResources? = null
     private var localized: LocalizedResources? = null
 
     @Synchronized
-    override fun getResources(): Resources {
-        val source = localizedResources()
+    fun get(resources: Resources): Resources {
+        val source = localizedResources(resources)
         translated?.let {
             // Rebuilt when the configuration changes (the application context is never recreated).
             if (it.base === source && it.configuration == source.configuration) return it
@@ -53,8 +70,7 @@ class TranslatedContextWrapper(base: Context) : ContextWrapper(base) {
         return TranslatedResources(source, store).also { translated = it }
     }
 
-    private fun localizedResources(): Resources {
-        val resources = super.getResources()
+    private fun localizedResources(resources: Resources): Resources {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) return resources
 
         val code = store.selectedLanguageCode ?: return resources
@@ -68,7 +84,7 @@ class TranslatedContextWrapper(base: Context) : ContextWrapper(base) {
         val configuration = Configuration(resources.configuration).apply {
             setLocales(LocaleList(locale))
         }
-        return createConfigurationContext(configuration).resources.also {
+        return context.createConfigurationContext(configuration).resources.also {
             localized = LocalizedResources(code, Configuration(resources.configuration), it)
         }
     }
