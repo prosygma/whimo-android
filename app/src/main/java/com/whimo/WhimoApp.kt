@@ -27,6 +27,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.res.Configuration
+import android.content.res.Resources
 import android.os.Bundle
 import com.whimo.di.authModule
 import com.whimo.di.commodityModule
@@ -43,7 +44,8 @@ import com.whimo.di.transactionsModule
 import com.whimo.domain.languages.LanguagesInteractor
 import com.whimo.services.MyFirebaseMessagingService.Companion.PUSH_NOTIFICATIONS_CHANNEL_ID
 import com.whimo.services.MyFirebaseMessagingService.Companion.PUSH_NOTIFICATIONS_CHANNEL_NAME
-import com.whimo.utils.translations.withTranslations
+import com.whimo.utils.translations.TranslatedResourcesHolder
+import com.whimo.utils.translations.TranslationsStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -59,9 +61,18 @@ class WhimoApp : Application() {
 
     private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    override fun attachBaseContext(base: Context) {
-        // Strings downloaded from the backend take precedence over the bundled ones.
-        super.attachBaseContext(base.withTranslations())
+    private var translatedResources: TranslatedResourcesHolder? = null
+
+    // Strings downloaded from the backend take precedence over the bundled ones.
+    // The base context is not wrapped: the framework casts it to ContextImpl when it
+    // delivers a broadcast, see TranslatedContextWrapper.
+    override fun getResources(): Resources {
+        val resources = super.getResources()
+        if (baseContext == null) return resources
+        val holder = translatedResources
+            ?: TranslatedResourcesHolder(this, TranslationsStore.getInstance(this))
+                .also { translatedResources = it }
+        return holder.get(resources)
     }
 
     override fun onCreate() {
