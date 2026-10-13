@@ -28,6 +28,7 @@ import com.whimo.base.CoreViewBinding
 import com.whimo.base.CoreViewEvent
 import com.whimo.base.CoreViewSideEffect
 import com.whimo.domain.languages.models.AppLanguage
+import com.whimo.presentation.auth.registration.RegistrationAlreadyRegisteredResult
 import com.whimo.utils.PhoneNumberUtils
 
 enum class LoginTypeTab(val tabNameRes: Int) {
@@ -51,6 +52,7 @@ object LoginContract {
 
         var languages: List<AppLanguage> = AppLanguage.BUNDLED,
         var selectedLanguage: String = "",
+        var prefillGeneration: Long = 0L,
     ) : CoreViewBinding
 
     sealed class Event : CoreViewEvent {
@@ -70,6 +72,9 @@ object LoginContract {
         data class OnGoogleLongClick(val activity: Activity) : Event()
         data object OnRegisterClick : Event()
         data class OnChangeLanguage(val context: Context, val languageCode: String) : Event()
+        data class OnRegistrationAlreadyRegistered(
+            val result: RegistrationAlreadyRegisteredResult,
+        ) : Event()
 
         data class OnOtpSuccess(val username: String) : Event()
     }
@@ -86,4 +91,4 @@ object LoginContract {
         data class NavigateToEmailOtp(val email: String) : Effect()
         data class NavigateToPhoneOtp(val phone: String) : Effect()
     }
-} 
+}

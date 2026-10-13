@@ -25,8 +25,10 @@ import android.net.Uri
 import android.os.Parcelable
 import com.mapbox.geojson.Point
 import com.whimo.domain.commodity.models.CommodityModel
+import com.whimo.domain.harvestseasons.models.HarvestSeasonModel
 import com.whimo.domain.transactions.models.TransactionAction
 import com.whimo.extensions.toText
+import com.whimo.extensions.toQuantityText
 import com.whimo.utils.stringOrNull
 import com.whimo.utils.geo.NullablePointParceler
 import kotlinx.parcelize.Parcelize
@@ -47,6 +49,7 @@ data class CreateTransactionModel(
     val volume: Float? = null,
     val userInfo: UserInfoModel? = null,
     val creationLocation: Point? = null,
+    val harvestSeason: HarvestSeasonModel? = null,
 ) : Parcelable
 
 enum class LocationProvider(val providerName: String) {
@@ -93,7 +96,7 @@ fun CreateTransactionModel?.getCommodityText(): String? {
 fun CreateTransactionModel?.getCommodityVolumeText(): String? {
     if (this?.volume == null || commodity == null) return null
 
-    return "$volume ${commodity.unit}"
+    return "${volume.toQuantityText()} ${commodity.unit}"
 }
 
 fun CreateTransactionModel?.getCommodityFullText(): String? {

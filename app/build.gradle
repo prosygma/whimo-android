@@ -84,12 +84,14 @@ android {
                 signingConfig signingConfigs.release
 
                 buildConfigField "String", "BASE_URL", props['release_base_url']
+                buildConfigField "String", "TEST_BASE_URL", props['release_test_base_url']
                 buildConfigField "String", "DEFAULT_COUNTRY_CODE", props['release_default_country_code']
                 buildConfigField "double", "DEFAULT_LOCATION_LATITUDE", props['release_default_location_latitude']
                 buildConfigField "double", "DEFAULT_LOCATION_LONGITUDE", props['release_default_location_longitude']
 
                 buildConfigField "String", "TERMS_OF_USE", props['release_terms_of_use']
                 buildConfigField "String", "FEEDBACK_EMAIL", props['release_feedback_email']
+                buildConfigField "String", "CAPTCHA_URL", props['release_captcha_url']
             }
             debug {
                 minifyEnabled false
@@ -97,12 +99,14 @@ android {
                 signingConfig signingConfigs.debug
 
                 buildConfigField "String", "BASE_URL", props['debug_base_url']
+                buildConfigField "String", "TEST_BASE_URL", props['debug_test_base_url']
                 buildConfigField "String", "DEFAULT_COUNTRY_CODE", props['debug_default_country_code']
                 buildConfigField "double", "DEFAULT_LOCATION_LATITUDE", props['debug_default_location_latitude']
                 buildConfigField "double", "DEFAULT_LOCATION_LONGITUDE", props['debug_default_location_longitude']
 
                 buildConfigField "String", "TERMS_OF_USE", props['debug_terms_of_use']
                 buildConfigField "String", "FEEDBACK_EMAIL", props['debug_feedback_email']
+                buildConfigField "String", "CAPTCHA_URL", props['debug_captcha_url']
             }
         }
     }

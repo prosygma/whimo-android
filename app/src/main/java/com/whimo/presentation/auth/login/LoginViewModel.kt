@@ -33,6 +33,8 @@ import com.whimo.domain.languages.LanguagesInteractor
 import com.whimo.domain.languages.models.AppLanguage
 import com.whimo.network.ErrorHandler
 import com.whimo.network.error.ServerError
+import com.whimo.presentation.auth.registration.RegistrationAlreadyRegisteredResult
+import com.whimo.presentation.auth.registration.RegistrationTypeTab
 import com.whimo.providers.ResourceProvider
 import com.whimo.providers.SharedPreferencesProvider
 import com.whimo.utils.GoogleSignInHelper
@@ -59,6 +61,8 @@ class LoginViewModel(
     private var passwordError: String = ""
     private var languages: List<AppLanguage> = languagesInteractor.getLanguages().languages
     private var selectedLanguage: String = languagesInteractor.getLanguages().defaultCode
+    private var phoneRegionSelectedManually: Boolean = false
+    private var prefillGeneration: Long = 0L
 
     override fun createBinding(): LoginContract.Binding {
         return LoginContract.Binding()
@@ -79,6 +83,7 @@ class LoginViewModel(
             is LoginContract.Event.OnGoogleLongClick -> onGoogleLongClick(event.activity)
             is LoginContract.Event.OnRegisterClick -> onRegisterClick()
             is LoginContract.Event.OnChangeLanguage -> onChangeLanguage(event.context, event.languageCode)
+            is LoginContract.Event.OnRegistrationAlreadyRegistered -> onRegistrationAlreadyRegistered(event.result)
             is LoginContract.Event.OnOtpSuccess -> onOtpSuccess(event.username)
         }
     }
@@ -107,12 +112,17 @@ class LoginViewModel(
             }
             b.languages = languages
             b.selectedLanguage = selectedLanguage
+            b.prefillGeneration = prefillGeneration
         }
     }
 
     private fun onCreate(context: Context) {
         selectedLanguage = languagesInteractor.getCurrentLanguageCode(context)
         refreshLanguages(context)
+
+        if (phoneRegionSelectedManually) {
+            return
+        }
 
         launch {
             val location = getLastLocation(context)
@@ -122,8 +132,10 @@ class LoginViewModel(
 
             } else {
                 PhoneNumberUtils.getCountryCodeFromLocation(context, location)?.let { countryCode ->
-                    phoneRegion = PhoneNumberUtils.getPhoneRegion(countryCode)
-                    updateView()
+                    if (!phoneRegionSelectedManually) {
+                        phoneRegion = PhoneNumberUtils.getPhoneRegion(countryCode)
+                        updateView()
+                    }
                 }
             }
         }
@@ -148,6 +160,7 @@ class LoginViewModel(
 
     private fun onPhoneRegionChanged(phoneRegion: PhoneNumberUtils.PhoneRegion) {
         this.phoneRegion = phoneRegion
+        this.phoneRegionSelectedManually = true
         updateView()
     }
 
@@ -285,6 +298,31 @@ class LoginViewModel(
             languagesInteractor.changeLanguage(context, languageCode)
             setEffect(LoginContract.Effect.ToggleLoader(false))
         }
+    }
+
+    private fun onRegistrationAlreadyRegistered(result: RegistrationAlreadyRegisteredResult) {
+        emailError = ""
+        phoneError = ""
+        passwordError = ""
+        password = result.password
+
+        when (result.registrationType) {
+            RegistrationTypeTab.Email -> {
+                currentTab = LoginTypeTab.Email
+                email = result.email
+                phoneNumber = ""
+            }
+            RegistrationTypeTab.Phone -> {
+                currentTab = LoginTypeTab.Phone
+                email = ""
+                phoneRegion = PhoneNumberUtils.getPhoneRegion(result.phoneCountryCode)
+                phoneNumber = result.phoneNumber
+                phoneRegionSelectedManually = true
+            }
+        }
+
+        prefillGeneration += 1
+        updateView()
     }
 
     private fun onOtpSuccess(username: String) {
