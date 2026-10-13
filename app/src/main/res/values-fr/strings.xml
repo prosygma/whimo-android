@@ -386,4 +386,14 @@
     <string name="user_email_not_exist">L’utilisateur avec cet e-mail n’existe pas.</string>
     <string name="user_phone_not_exist">L’utilisateur avec ce numéro de téléphone n’existe pas.</string>
 
+    <string name="test_environment">Environnement de test</string>
+    <string name="test_environment_description">Entraînez-vous à créer des transactions dans un environnement séparé, sans affecter vos données réelles.</string>
+    <string name="test_environment_banner">Vous êtes dans l’environnement de test</string>
+    <string name="test_environment_settings_unavailable">Certains paramètres ne sont pas disponibles dans l’environnement de test.</string>
+    <string name="entering_test_environment_title">Accéder à l’environnement de test</string>
+    <string name="entering_test_environment_notice">Tout fonctionne comme dans l’application réelle, mais rien ici n’affecte vos données réelles.</string>
+    <string name="entering_test_environment_description">- Créez et recevez des transactions de test.\n- Explorez la traçabilité et les soldes.\n- Découvrez le fonctionnement de l’application avant de l’utiliser pour de vraies transactions.\n- Toutes les données de test restent séparées de votre espace de travail réel.\n- Revenez à l’environnement réel à tout moment depuis les Paramètres.</string>
+    <string name="test_environment_unsynced_changes_title">Des modifications ne sont pas synchronisées</string>
+    <string name="test_environment_unsynced_changes_description">Les transactions non synchronisées doivent être synchronisées avant d’accéder à l’environnement de test.\n\nReconnectez-vous à Internet et synchronisez vos données. Vous pourrez ensuite accéder à l’environnement de test.</string>
+    <string name="test_environment_transaction_notice">Vous créez une transaction dans un environnement de test. Elle n’affecte pas la traçabilité.</string>
 </resources>

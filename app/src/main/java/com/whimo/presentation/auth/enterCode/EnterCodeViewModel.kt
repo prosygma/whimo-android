@@ -152,16 +152,26 @@ class EnterCodeViewModel(
         setEffect(EnterCodeContract.Effect.ShowMessage(resourceProvider.getString(R.string.captcha_verification_failed)))
     }
 
+    // No captcha page is configured for this build: send without a token, as before
+    // captcha existed. The backend only checks the token when it has a Turnstile secret.
     private fun onCaptchaUnavailable() {
+        val action = pendingOtpRequestAction ?: when (state) {
+            EnterCodeScreenState.Registration -> OtpRequestAction.Registration
+            EnterCodeScreenState.ForgotPassword -> OtpRequestAction.PasswordReset
+        }
         pendingOtpRequestAction = null
-        setEffect(EnterCodeContract.Effect.ShowMessage(resourceProvider.getString(R.string.captcha_not_configured)))
+
+        when (action) {
+            OtpRequestAction.Registration -> requestOtp(null)
+            OtpRequestAction.PasswordReset -> resetPassword(null)
+        }
     }
 
     private fun onCaptchaDismissed() {
         pendingOtpRequestAction = null
     }
 
-    private fun requestOtp(captchaToken: String) {
+    private fun requestOtp(captchaToken: String?) {
         setEffect(EnterCodeContract.Effect.ToggleLoader(true))
 
         launch {
@@ -189,7 +199,7 @@ class EnterCodeViewModel(
         }
     }
 
-    private fun resetPassword(captchaToken: String) {
+    private fun resetPassword(captchaToken: String?) {
         setEffect(EnterCodeContract.Effect.ToggleLoader(true))
 
         launch {

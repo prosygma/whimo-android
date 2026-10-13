@@ -70,7 +70,7 @@ import com.whimo.presentation.createtransaction.components.DashedDivider
 import com.whimo.presentation.createtransaction.components.LineDivider
 import com.whimo.presentation.settings.components.BottomSheetBase
 import com.whimo.presentation.settings.components.DialogButtonsItem
-import com.whimo.presentation.ui.theme.ColorBerryBlue
+import com.whimo.presentation.ui.theme.BrandPalette
 import com.whimo.presentation.ui.theme.ColorBirchWhite
 import com.whimo.presentation.ui.theme.ColorGray30
 import com.whimo.presentation.ui.theme.ColorGray60
@@ -338,7 +338,7 @@ fun HarvestSeasonFilterChip(
         Text(
             text = title,
             style = TextStyleMediumXS,
-            color = ColorBerryBlue,
+            color = BrandPalette.Primary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )

@@ -90,7 +90,7 @@ jobs:
           if ! grep -qE '^release_base_url=".*/"$' config/build.properties; then
             echo "::error::release_base_url must be quoted and end in /"; exit 1
           fi
-          for k in release_terms_of_use release_feedback_email; do
+          for k in release_terms_of_use release_feedback_email release_test_base_url release_captcha_url; do
             grep -q "^$k=" config/build.properties || { echo "::error::missing $k"; exit 1; }
           done
           python3 - <<'PY'
