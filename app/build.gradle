@@ -83,6 +83,11 @@ android {
                 proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
                 signingConfig signingConfigs.release
 
+                // Ship native symbol tables in the bundle so Play can symbolicate native crashes.
+                ndk {
+                    debugSymbolLevel 'SYMBOL_TABLE'
+                }
+
                 buildConfigField "String", "BASE_URL", props['release_base_url']
                 buildConfigField "String", "TEST_BASE_URL", props['release_test_base_url']
                 buildConfigField "String", "DEFAULT_COUNTRY_CODE", props['release_default_country_code']
