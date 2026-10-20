@@ -11,4 +11,10 @@
     <!-- Optional logo above the name on the in-app splash screen. -->
     <drawable name="brand_splash_logo">@drawable/ic_launcher</drawable>
     <integer name="brand_splash_show_logo">0</integer>
+    <dimen name="brand_splash_logo_width">180dp</dimen>
+    <!-- 0 when the splash logo already contains the name and slogan. -->
+    <integer name="brand_splash_show_text">1</integer>
+
+    <!-- Icon of the system splash screen (Android 12+ shows it inside a circle). -->
+    <drawable name="brand_splash_icon">@drawable/ic_launcher</drawable>
 </resources>

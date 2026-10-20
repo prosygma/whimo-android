@@ -20,7 +20,7 @@
 
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/white</item>
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/brand_splash_icon</item>
         <item name="postSplashScreenTheme">@style/Theme.WhimoApp</item>
         <item name="android:windowSplashScreenBrandingImage" tools:ignore="MissingTranslation,NewApi">@null</item>
     </style>

@@ -28,6 +28,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.TextAutoSize
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.integerResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
@@ -35,7 +37,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -113,29 +115,34 @@ fun SplashScreen() {
             modifier = Modifier.padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Brand flavors can show their logo above the name (integer/brand_splash_show_logo).
+            // Brand flavors can show their logo above the name (integer/brand_splash_show_logo),
+            // or a logo that already contains the name and slogan (integer/brand_splash_show_text = 0).
+            val showText = integerResource(R.integer.brand_splash_show_text) == 1
             if (integerResource(R.integer.brand_splash_show_logo) == 1) {
                 Image(
                     painter = painterResource(R.drawable.brand_splash_logo),
-                    contentDescription = null,
+                    contentDescription = if (showText) null else stringResource(R.string.app_name),
+                    contentScale = ContentScale.Fit,
                     modifier = Modifier
-                        .padding(bottom = 32.dp)
-                        .size(180.dp),
+                        .padding(bottom = if (showText) 32.dp else 0.dp)
+                        .width(dimensionResource(R.dimen.brand_splash_logo_width)),
                 )
             }
-            // A long product name shrinks to fit one line instead of overflowing.
-            BasicText(
-                text = stringResource(R.string.app_name),
-                style = TextStyleSplash1.copy(color = BrandPalette.SurfaceDark, textAlign = TextAlign.Center),
-                maxLines = 1,
-                autoSize = TextAutoSize.StepBased(minFontSize = 24.sp, maxFontSize = TextStyleSplash1.fontSize),
-            )
-            Text(
-                text = stringResource(R.string.what_is_my_origin),
-                style = TextStyleSplash2,
-                color = BrandPalette.SurfaceDark,
-                textAlign = TextAlign.Center,
-            )
+            if (showText) {
+                // A long product name shrinks to fit one line instead of overflowing.
+                BasicText(
+                    text = stringResource(R.string.app_name),
+                    style = TextStyleSplash1.copy(color = BrandPalette.SurfaceDark, textAlign = TextAlign.Center),
+                    maxLines = 1,
+                    autoSize = TextAutoSize.StepBased(minFontSize = 24.sp, maxFontSize = TextStyleSplash1.fontSize),
+                )
+                Text(
+                    text = stringResource(R.string.what_is_my_origin),
+                    style = TextStyleSplash2,
+                    color = BrandPalette.SurfaceDark,
+                    textAlign = TextAlign.Center,
+                )
+            }
         }
     }
 }
