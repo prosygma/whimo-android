@@ -77,14 +77,15 @@ stays as EFI ships it.
 |---|---|
 | `java/.../ui/theme/BrandPalette.kt` | primary, tint, dark surface (Material colour scheme, splash) |
 | `res/values*/strings.xml` | name, splash signature, the few strings that name the product |
-| `res/values/brand.xml` | line-icon accent, notification icon, splash logo switch |
+| `res/values/brand.xml` | line-icon accent, notification icon, splash logo, its width and text switch, system splash icon |
 | `res/values/colors.xml` | XML theme colours |
-| `res/drawable/ic_launcher.xml`, `ic_logo_foreground.xml`, `drawable-*/ct_*.png` | adaptive launcher icon, notification icon, splash logo |
+| `res/drawable/ic_launcher.xml`, `ic_logo_foreground.xml`, `drawable-*/ct_*.png` | adaptive launcher icon, notification icon, splash logo (full logo), system splash icon (round seal) |
 
 `app/google-services.json` (git-ignored) must contain a client for
 `whimo.camertrace.cm`. The named colours of `Palette.kt` (ColorSeaBlue…) are
 left to EFI on purpose: they also encode traceability statuses.
 
-Brand sources (logos, graphic chart, export scripts) are outside the repo, in
-`Documents/whimo/logos/camertrace-cicc/` (`charte-graphique.html`,
-`render.sh`, `declinaisons/`).
+Brand sources (logos, graphic chart, export scripts) are outside the repo. The
+logo in use is v3, in `Documents/whimo/logos/camertrace-cicc-v3/` (`render.sh`,
+`check_fit.py`, `declinaisons/`); the graphic chart (`charte-graphique.html`)
+is still in `Documents/whimo/logos/camertrace-cicc/`.
