@@ -2,6 +2,11 @@
 <resources>
     <color name="brand_primary">#0B6B3A</color>
     <drawable name="ic_push_notification">@drawable/ct_push_notification</drawable>
+    <!-- Full logo (seal, CamerTrace, slogan): the splash shows no separate text. -->
     <drawable name="brand_splash_logo">@drawable/ct_splash_logo</drawable>
     <integer name="brand_splash_show_logo">1</integer>
+    <integer name="brand_splash_show_text">0</integer>
+    <dimen name="brand_splash_logo_width">280dp</dimen>
+    <!-- Round seal sized to sit whole inside the system splash circle. -->
+    <drawable name="brand_splash_icon">@drawable/ct_splash_icon</drawable>
 </resources>
