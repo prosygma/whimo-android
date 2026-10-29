@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<defaults>
+    <entry>
+        <key>registration_phone_region_policy</key>
+        <value>{
+            "schemaVersion": 1,
+            "enabled": true,
+            "allowedRegions": [
+                {
+                    "regionCode": "CM",
+                    "regionName": "Cameroon",
+                    "callingCode": 237,
+                    "e164Prefix": "+237"
+                }
+            ]
+        }</value>
+    </entry>
+</defaults>
