@@ -22,6 +22,7 @@
 package com.whimo.domain.languages
 
 import android.content.Context
+import com.whimo.data.appoptions.AppOptionsRepository
 import com.whimo.data.base.common.BaseResult
 import com.whimo.data.base.common.onSuccess
 import com.whimo.data.languages.repository.LanguagesRepository
@@ -56,6 +57,7 @@ interface LanguagesInteractor {
 class LanguagesInteractorImpl(
     private val repository: LanguagesRepository,
     private val appLocaleManager: AppLocaleManager,
+    private val appOptions: AppOptionsRepository? = null,
 ) : LanguagesInteractor {
 
     override fun getLanguages(): LanguagesModel {
@@ -90,6 +92,7 @@ class LanguagesInteractorImpl(
 
     override suspend fun changeLanguage(context: Context, code: String) {
         updateStrings(code)
+        appOptions?.sync(code) // status explanations in the new language
         withContext(Dispatchers.Main) {
             appLocaleManager.changeLanguage(context, code)
         }

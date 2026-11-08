@@ -42,5 +42,5 @@ val languagesModule = module {
     single<LanguagesRepository> { LanguagesRepositoryImpl(service = get(), store = get()) }
 
     // Interactors
-    factory<LanguagesInteractor> { LanguagesInteractorImpl(repository = get(), appLocaleManager = get()) }
+    factory<LanguagesInteractor> { LanguagesInteractorImpl(repository = get(), appLocaleManager = get(), appOptions = get()) }
 }

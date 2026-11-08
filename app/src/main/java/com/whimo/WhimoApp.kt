@@ -140,7 +140,9 @@ class WhimoApp : Application() {
         // The language may have been changed from the system settings.
         appScope.launch {
             val interactor = GlobalContext.get().get<LanguagesInteractor>()
-            interactor.updateStrings(interactor.getCurrentLanguageCode(this@WhimoApp))
+            val code = interactor.getCurrentLanguageCode(this@WhimoApp)
+            interactor.updateStrings(code)
+            GlobalContext.get().get<AppOptionsRepository>().sync(code)
         }
     }
 
@@ -152,7 +154,8 @@ class WhimoApp : Application() {
 
     private fun syncAppOptions() {
         appScope.launch {
-            GlobalContext.get().get<AppOptionsRepository>().sync()
+            val code = GlobalContext.get().get<LanguagesInteractor>().getCurrentLanguageCode(this@WhimoApp)
+            GlobalContext.get().get<AppOptionsRepository>().sync(code)
         }
     }
 

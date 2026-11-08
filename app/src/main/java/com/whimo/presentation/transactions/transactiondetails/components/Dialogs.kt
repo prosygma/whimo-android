@@ -33,14 +33,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.whimo.R
+import com.whimo.data.appoptions.AppOptionsRepository
+import com.whimo.data.appoptions.descriptionFor
+import com.whimo.domain.languages.LanguagesInteractor
 import com.whimo.domain.transactions.models.HarvestSeasonModel
 import com.whimo.domain.transactions.models.HarvestSeasonStatus
 import com.whimo.domain.transactions.models.TraceabilityStatus
@@ -58,6 +64,7 @@ import com.whimo.presentation.ui.theme.TextStyleBodyM
 import com.whimo.presentation.ui.theme.TextStyleBodyS
 import com.whimo.presentation.ui.theme.TextStyleMediumM
 import com.whimo.presentation.ui.theme.WhimoTheme
+import org.koin.core.context.GlobalContext
 @Preview
 @Composable
 private fun Preview() {
@@ -321,12 +328,28 @@ fun TraceabilityStatusesDialog(
 
 @Composable
 private fun getTraceabilityStatusDescription(status: TraceabilityStatus): String {
-    return when(status) {
+    val bundled = when(status) {
         TraceabilityStatus.Full -> stringResource(R.string.full_traceability_status_description)
         TraceabilityStatus.Conditional -> stringResource(R.string.conditional_traceability_status_description)
         TraceabilityStatus.Partial -> stringResource(R.string.partial_traceability_status_description)
         TraceabilityStatus.Incomplete -> stringResource(R.string.incomplete_traceability_status_description)
     }
+    // CamerTrace: the statuses follow the admin's traceability rules, so the backend writes
+    // their explanation. The bundled text stays for offline use and before the first download.
+    val context = LocalContext.current
+    val isPreview = LocalInspectionMode.current
+    val descriptions = remember(context) {
+        if (isPreview) {
+            null
+        } else {
+            runCatching {
+                val koin = GlobalContext.get()
+                val code = koin.get<LanguagesInteractor>().getCurrentLanguageCode(context)
+                koin.get<AppOptionsRepository>().traceabilityDescriptions(code)
+            }.getOrNull()
+        }
+    }
+    return descriptions.descriptionFor(status.statusName) ?: bundled
 }
 
 @Composable

@@ -24,10 +24,13 @@ package com.whimo.data.appoptions
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.whimo.data.base.common.onSuccess
 import com.whimo.network.handleResponse
 import retrofit2.Response
 import retrofit2.http.GET
+import retrofit2.http.Header
 
 /** Geodata choices set in the admin (Settings > Options). */
 data class AppOptions(
@@ -45,18 +48,30 @@ data class AppOptionsData(
     val ask_on_plot: Boolean?,
     val allow_gps_point: Boolean?,
     val allow_cicc_qr: Boolean?,
+    /** Explanation of each traceability status ("full", "conditional", ...), built from the
+     *  admin's traceability rules, in the requested language. */
+    val traceability_descriptions: Map<String, String>?,
 )
+
+/** The backend's explanation for a status ("full", ...), or null when there is none to show. */
+fun Map<String, String>?.descriptionFor(status: String): String? {
+    return this?.get(status.lowercase())?.takeIf { it.isNotBlank() }
+}
 
 interface AppOptionsService {
     @GET("app-options/")
-    suspend fun getAppOptions(): Response<AppOptionsResponse>
+    suspend fun getAppOptions(@Header("Accept-Language") language: String?): Response<AppOptionsResponse>
 }
 
 interface AppOptionsRepository {
     /** Last options received, or the defaults (today's behaviour) before the first sync. */
     fun current(): AppOptions
 
-    suspend fun sync()
+    /** Status explanations received for [languageCode], or null (the app then shows its own text). */
+    fun traceabilityDescriptions(languageCode: String): Map<String, String>?
+
+    /** Downloads the options; the status explanations come in [languageCode]. */
+    suspend fun sync(languageCode: String?)
 }
 
 class AppOptionsRepositoryImpl(
@@ -75,22 +90,36 @@ class AppOptionsRepositoryImpl(
         )
     }
 
-    override suspend fun sync() {
-        handleResponse { service.getAppOptions() }.onSuccess { response ->
+    override fun traceabilityDescriptions(languageCode: String): Map<String, String>? {
+        val json = prefs.getString(descriptionsKey(languageCode), null) ?: return null
+        return runCatching { gson.fromJson<Map<String, String>>(json, descriptionsType) }.getOrNull()
+    }
+
+    override suspend fun sync(languageCode: String?) {
+        handleResponse { service.getAppOptions(languageCode) }.onSuccess { response ->
             val data = response?.data ?: return@onSuccess
             val defaults = AppOptions()
             prefs.edit {
                 putBoolean(KEY_ASK_ON_PLOT, data.ask_on_plot ?: defaults.askOnPlot)
                 putBoolean(KEY_ALLOW_GPS_POINT, data.allow_gps_point ?: defaults.allowGpsPoint)
                 putBoolean(KEY_ALLOW_CICC_QR, data.allow_cicc_qr ?: defaults.allowCiccQr)
+                // Kept per language, so that a language change never shows text in the old one.
+                if (languageCode != null && data.traceability_descriptions != null) {
+                    putString(descriptionsKey(languageCode), gson.toJson(data.traceability_descriptions))
+                }
             }
         }
     }
+
+    private fun descriptionsKey(languageCode: String) = "$KEY_DESCRIPTIONS_PREFIX${languageCode.lowercase()}"
 
     private companion object {
         const val PREFS = "app_options"
         const val KEY_ASK_ON_PLOT = "ask_on_plot"
         const val KEY_ALLOW_GPS_POINT = "allow_gps_point"
         const val KEY_ALLOW_CICC_QR = "allow_cicc_qr"
+        const val KEY_DESCRIPTIONS_PREFIX = "traceability_descriptions_"
+        val gson = Gson()
+        val descriptionsType = object : TypeToken<Map<String, String>>() {}.type
     }
 }
