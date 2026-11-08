@@ -34,6 +34,8 @@ import com.whimo.domain.geodata.GeoDataInteractor
 import com.whimo.domain.transactions.models.TransactionModel
 import com.whimo.network.ErrorHandler
 import com.whimo.providers.ResourceProvider
+import com.mapbox.geojson.Point
+import com.whimo.utils.QrCiccParser
 import com.whimo.utils.QrGeoData
 import com.whimo.utils.parseQrGeoData
 import com.whimo.utils.writeQRDataToCacheFile
@@ -55,7 +57,11 @@ class QrScanViewModel(
         super.handleEvents(event)
         when (event) {
             is QrScanContract.Event.OnCreate -> onCreate(event.transactionModel)
-            is QrScanContract.Event.QrScanned -> qrScanned(event.context, event.qrData)
+            is QrScanContract.Event.QrScanned -> if (event.cicc) {
+                ciccQrScanned(event.context, event.qrData)
+            } else {
+                qrScanned(event.context, event.qrData)
+            }
         }
     }
 
@@ -83,11 +89,39 @@ class QrScanViewModel(
         }
     }
 
-    private fun handleQr(qrData: String, qrGeoData: QrGeoData) {
-        setEffect(QrScanContract.Effect.QrResult(qrData, qrGeoData.location))
+    /** CamerTrace: the CICC card's text becomes GeoJSON here, then follows the generic QR path. */
+    private fun ciccQrScanned(context: Context, qrData: String) {
+        when (val result = QrCiccParser.parse(qrData)) {
+            is QrCiccParser.Result.Invalid -> {
+                val message = if (QrCiccParser.KEY_COORDINATES in result.missingKeys) {
+                    resourceProvider.getString(R.string.invalid_cicc_qr_coordinates)
+                } else {
+                    resourceProvider.getString(R.string.invalid_cicc_qr_fields, result.missingKeys.joinToString(", "))
+                }
+                setEffect(QrScanContract.Effect.ShowMessage(message))
+            }
+            is QrCiccParser.Result.Success -> {
+                val (latitude, longitude) = result.firstCorner
+                val qrGeoData = QrGeoData(location = Point.fromLngLat(longitude, latitude), geoJson = result.geoJson)
+                if (transactionId == null) {
+                    handleQr(result.geoJson, qrGeoData, LocationProvider.QRCicc)
+                } else {
+                    uploadQr(context, result.geoJson, qrGeoData, LocationProvider.QRCicc)
+                }
+            }
+        }
     }
 
-    private fun uploadQr(context: Context, qrData: String, qrGeoData: QrGeoData) {
+    private fun handleQr(qrData: String, qrGeoData: QrGeoData, provider: LocationProvider = LocationProvider.QR) {
+        setEffect(QrScanContract.Effect.QrResult(qrData, qrGeoData.location, provider))
+    }
+
+    private fun uploadQr(
+        context: Context,
+        qrData: String,
+        qrGeoData: QrGeoData,
+        provider: LocationProvider = LocationProvider.QR,
+    ) {
         launch {
             setEffect(QrScanContract.Effect.ToggleLoader(true))
 
@@ -103,7 +137,7 @@ class QrScanViewModel(
             interactor.updateTransactionGeoData(
                 transactionId = transactionId!!,
                 request = UpdateGeoDataRequest(
-                    locationProvider = LocationProvider.QR,
+                    locationProvider = provider,
                     locationFile = qrFile.second,
                 )
             )
@@ -111,7 +145,7 @@ class QrScanViewModel(
                     qrFile.first?.delete()
                     setEffect(
                         QrScanContract.Effect.ToggleLoader(false),
-                        QrScanContract.Effect.QrResult(qrData, qrGeoData.location)
+                        QrScanContract.Effect.QrResult(qrData, qrGeoData.location, provider)
                     )
                 }
                 .onError {

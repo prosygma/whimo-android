@@ -171,6 +171,10 @@
     <string name="qr_scanner_unavailable">Scanner QR non disponible</string>
     <string name="scan_qr">Scanner le QR</string>
     <string name="invalid_qr_geojson">Le code QR doit contenir des données GeoJSON</string>
+    <string name="scan_cicc_qr_code">Scanner le code QR du CICC</string>
+    <string name="scan_cicc_qr_description">Scannez le code QR de la fiche d\'identification de parcelle du CICC présentée par le producteur.</string>
+    <string name="invalid_cicc_qr_coordinates">Code QR du CICC invalide : les coordonnées de la parcelle manquent</string>
+    <string name="invalid_cicc_qr_fields">Code QR du CICC invalide : champ(s) manquant(s) %1$s</string>
     <string name="create_transaction">Créer une transaction</string>
 
     <!-- Dialog Strings -->

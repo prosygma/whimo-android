@@ -74,6 +74,7 @@ fun QrScanScreen(
     modifier: Modifier,
     navController: NavHostController,
     transactionModel: TransactionModel? = null,
+    cicc: Boolean = false,
     viewModel: QrScanViewModel? = koinViewModel(),
 ) {
     val binding = viewModel?.observeViewBinding() ?: QrScanContract.Binding()
@@ -88,7 +89,7 @@ fun QrScanScreen(
                 is QrScanContract.Effect.QrResult -> {
                     val activity = context.findActivity() as FarmGeoDataActivity
                     activity.setResult(
-                        locationProvider = LocationProvider.QR,
+                        locationProvider = effect.provider,
                         location = effect.location,
                         qrData = effect.qrData,
                     )
@@ -118,7 +119,7 @@ fun QrScanScreen(
     Column(modifier = modifier) {
         Toolbar2(
             navController = navController,
-            title = stringResource(R.string.scan_qr),
+            title = stringResource(if (cicc) R.string.scan_cicc_qr_code else R.string.scan_qr),
             showOfflineBanner = false,
         )
 
@@ -132,7 +133,7 @@ fun QrScanScreen(
                     if (!mResult) {
                         mResult = true
 
-                        viewModel?.setEvent(QrScanContract.Event.QrScanned(context, data))
+                        viewModel?.setEvent(QrScanContract.Event.QrScanned(context, data, cicc))
                     }
                 }
 

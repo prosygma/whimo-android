@@ -142,6 +142,16 @@ fun FarmGeoDataScreen(
                     }
                 }
 
+                if (binding.ciccQrButtonVisible) {
+                    CreateTransactionButton4(
+                        iconRes = R.drawable.ic_qr,
+                        title = stringResource(R.string.scan_cicc_qr_code),
+                        description = stringResource(R.string.scan_cicc_qr_description),
+                    ) {
+                        navController.navigate(Screens.QrScanCicc.route)
+                    }
+                }
+
                 if (binding.uploadFileButtonVisible) {
                     CreateTransactionButton4(
                         iconRes = R.drawable.ic_upload,

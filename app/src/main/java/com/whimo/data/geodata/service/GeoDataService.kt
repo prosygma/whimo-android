@@ -45,6 +45,7 @@ interface GeoDataService {
 //        @Part("latitude") latitude: RequestBody?,
 //        @Part("longitude") longitude: RequestBody?,
         @Part file: MultipartBody.Part?,
+        @Part("qr_source") qrSource: RequestBody? = null,
     ): Response<BaseResponse>
 
     @POST("transactions/{transaction_id}/geodata/request/")

@@ -91,7 +91,7 @@ class SharedTransactionViewModel : ViewModel() {
         )
     }
 
-    fun setQR(qr: String?) {
+    fun setQR(qr: String?, provider: LocationProvider = LocationProvider.QR) {
         if (qr == null) {
             transaction = transaction.copy(
                 locationProvider = null,
@@ -102,7 +102,7 @@ class SharedTransactionViewModel : ViewModel() {
         }
 
         transaction = transaction.copy(
-            locationProvider = LocationProvider.QR,
+            locationProvider = provider,
             qr = qr,
         )
     }

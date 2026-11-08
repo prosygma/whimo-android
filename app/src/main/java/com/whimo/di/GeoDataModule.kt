@@ -43,5 +43,5 @@ val geoDataModule = module {
     factory<GeoDataInteractor> { GeoDataInteractorImpl(repository = get()) }
 
     // ViewModels
-    viewModel { FarmGeoDataViewModel() }
+    viewModel { FarmGeoDataViewModel(appOptions = get()) }
 }

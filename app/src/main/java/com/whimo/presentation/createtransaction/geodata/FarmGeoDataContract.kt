@@ -32,6 +32,7 @@ import com.whimo.domain.transactions.models.TransactionModel
 object FarmGeoDataContract {
     data class Binding(
         var qrButtonVisible: Boolean = false,
+        var ciccQrButtonVisible: Boolean = false,
         var uploadFileButtonVisible: Boolean = false,
         var gpsButtonVisible: Boolean = false,
         var mapButtonVisible: Boolean = false,

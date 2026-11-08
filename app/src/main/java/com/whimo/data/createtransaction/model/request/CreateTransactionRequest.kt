@@ -29,6 +29,7 @@ data class CreateProducerTransactionRequest(
     val commodityId: String?,
     val volume: Float?,
     val locationProvider: String?,
+    val qrSource: String? = null,
     val farmLatitude: Double?,
     val farmLongitude: Double?,
     val locationFile: MFile?,

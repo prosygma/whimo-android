@@ -52,11 +52,22 @@ data class CreateTransactionModel(
     val harvestSeason: HarvestSeasonModel? = null,
 ) : Parcelable
 
-enum class LocationProvider(val providerName: String) {
+/**
+ * [providerName] identifies the choice inside the app (intent extras, saved drafts);
+ * [apiName] and [qrSource] are what the API receives as `location` and `qr_source`.
+ */
+enum class LocationProvider(
+    val providerName: String,
+    val apiName: String = providerName,
+    val qrSource: String? = null,
+) {
     GPS("gps"),
     QR("qr"),
     Manual("manual"),
     File("file"),
+
+    /** CamerTrace: QR code of a CICC plot card, sent as a QR GeoJSON with qr_source=cicc. */
+    QRCicc("qr_cicc", apiName = "qr", qrSource = "cicc"),
 }
 
 @Parcelize
@@ -75,7 +86,7 @@ data class UserInfoModel(
 
 fun CreateTransactionModel?.getLocationText(): String? {
     return when(this?.locationProvider) {
-        LocationProvider.GPS, LocationProvider.QR, LocationProvider.Manual -> {
+        LocationProvider.GPS, LocationProvider.QR, LocationProvider.QRCicc, LocationProvider.Manual -> {
             "${locationProvider.providerName}: ${location?.toText()}"
         }
 

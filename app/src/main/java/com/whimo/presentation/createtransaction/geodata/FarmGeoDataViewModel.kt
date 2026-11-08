@@ -23,6 +23,7 @@ package com.whimo.presentation.createtransaction.geodata
 
 import android.content.Context
 import com.whimo.base.BaseViewModel
+import com.whimo.data.appoptions.AppOptionsRepository
 import com.whimo.base.CoreViewEvent
 import com.whimo.domain.createtransaction.models.CreateTransactionModel
 import com.whimo.domain.transactions.models.TransactionModel
@@ -30,7 +31,9 @@ import com.whimo.extensions.toPoint
 import com.whimo.utils.checkLocationPermissionGranted
 import com.whimo.utils.getCurrentLocation
 
-class FarmGeoDataViewModel : BaseViewModel<FarmGeoDataContract.Binding>() {
+class FarmGeoDataViewModel(
+    private val appOptions: AppOptionsRepository,
+) : BaseViewModel<FarmGeoDataContract.Binding>() {
 
     private var isLocationLoading = false
 
@@ -52,17 +55,21 @@ class FarmGeoDataViewModel : BaseViewModel<FarmGeoDataContract.Binding>() {
     }
 
     private fun onCreate(transaction: CreateTransactionModel) {
+        val options = appOptions.current()
         updateBinding { b ->
             b.qrButtonVisible = transaction.isBuyingFromFarmer
+            b.ciccQrButtonVisible = transaction.isBuyingFromFarmer && options.allowCiccQr
             b.uploadFileButtonVisible = !transaction.isBuyingFromFarmer
             b.gpsButtonVisible = transaction.isBuyingFromFarmer && transaction.isOnFarm
-            b.mapButtonVisible = transaction.isBuyingFromFarmer
+            b.mapButtonVisible = transaction.isBuyingFromFarmer && options.allowGpsPoint
         }
     }
 
     private fun onCreate2(transaction: TransactionModel) {
+        val options = appOptions.current()
         updateBinding { b ->
             b.qrButtonVisible = true
+            b.ciccQrButtonVisible = options.allowCiccQr
             b.uploadFileButtonVisible = true
             b.gpsButtonVisible = false
             b.mapButtonVisible = false

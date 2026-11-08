@@ -44,6 +44,7 @@ interface  CreateTransactionService {
         @Part("is_buying_from_farmer") isBuyingFromFarmer: RequestBody?,
         @Part("recipient") recipient: RequestBody?,
         @Part("harvest_season_id") harvestSeasonId: RequestBody?,
+        @Part("qr_source") qrSource: RequestBody? = null,
     ): Response<CreateTransactionResponse>
 
     @Multipart

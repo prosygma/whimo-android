@@ -27,6 +27,7 @@ import android.graphics.drawable.Drawable
 import com.whimo.R
 import com.whimo.data.base.common.BaseResult
 import com.whimo.data.geodata.model.request.UpdateGeoDataRequest
+import com.whimo.domain.createtransaction.models.LocationProvider
 import com.whimo.domain.geodata.GeoDataInteractor
 import com.whimo.domain.geodata.models.DownloadGeoDataModel
 import com.whimo.domain.transactions.models.BaseModel
@@ -47,6 +48,7 @@ import okhttp3.ResponseBody
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import java.io.File
@@ -89,6 +91,42 @@ class QrScanViewModelTest {
 
         assertEquals(resourceProvider.invalidQrMessage, message.await().message)
         assertFalse(interactor.updateTransactionGeoDataCalled)
+    }
+
+    @Test
+    fun `CICC QR returns its GeoJSON with the CICC provider`() = runTest {
+        val result = async {
+            viewModel.effect
+                .filterIsInstance<QrScanContract.Effect.QrResult>()
+                .first()
+        }
+        val card = "NIPr_CICC :A\nGLN_Parcelle :1\nLien_GS1_Parcelle :https://x\nCoordonnées :\n[3.1;11.1],[3.2;11.2],[3.3;11.1]"
+
+        viewModel.setEvent(QrScanContract.Event.QrScanned(mockk<Context>(), card, cicc = true))
+        advanceUntilIdle()
+
+        val effect = result.await()
+        assertEquals(LocationProvider.QRCicc, effect.provider)
+        assertEquals(11.1, effect.location!!.longitude(), 0.0)
+        assertEquals(3.1, effect.location!!.latitude(), 0.0)
+        assertTrue(effect.qrData!!.contains("\"NIPr_CICC\":\"A\""))
+        assertFalse(interactor.updateTransactionGeoDataCalled)
+    }
+
+    @Test
+    fun `CICC QR without coordinates emits message`() = runTest {
+        val message = async {
+            viewModel.effect
+                .filterIsInstance<QrScanContract.Effect.ShowMessage>()
+                .first()
+        }
+
+        viewModel.setEvent(
+            QrScanContract.Event.QrScanned(mockk<Context>(), "NIPr_CICC :A\nGLN_Parcelle :1\nLien_GS1_Parcelle :x", cicc = true)
+        )
+        advanceUntilIdle()
+
+        assertEquals("string-${R.string.invalid_cicc_qr_coordinates}", message.await().message)
     }
 
     private class TestResourceProvider : ResourceProvider {

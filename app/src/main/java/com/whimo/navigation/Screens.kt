@@ -73,6 +73,7 @@ sealed class Screens(val route: String) {
     data object UploadFile : Screens("screen_upload_file")
     data object Map : Screens("screen_map")
     data object QrScan : Screens("screen_qr_scan")
+    data object QrScanCicc : Screens("screen_qr_scan_cicc")
 
     // Settings
     data object AccountInfo : Screens("screen_account_info")

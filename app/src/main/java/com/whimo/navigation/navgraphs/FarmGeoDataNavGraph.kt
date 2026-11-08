@@ -77,5 +77,13 @@ fun FarmGeoDataNavGraph(
                 transactionModel = transactionModel,
             )
         }
+        composable(route = Screens.QrScanCicc.route) {
+            QrScanScreen(
+                modifier = modifier.fillMaxSize(),
+                navController = navController,
+                transactionModel = transactionModel,
+                cicc = true,
+            )
+        }
     }
 }

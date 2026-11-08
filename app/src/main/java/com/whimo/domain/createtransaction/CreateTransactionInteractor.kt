@@ -141,7 +141,9 @@ class CreateTransactionInteractorImpl(
             var qrFile: Pair<File?, MFile?> = null to null
             var qrLocation = transaction.location
 
-            if (transaction.locationProvider == LocationProvider.QR && transaction.qr != null) {
+            val isQr = transaction.locationProvider == LocationProvider.QR ||
+                    transaction.locationProvider == LocationProvider.QRCicc
+            if (isQr && transaction.qr != null) {
                 val qrGeoData = parseQrGeoData(transaction.qr)
                 qrLocation = qrGeoData.location ?: transaction.location
 
@@ -158,7 +160,8 @@ class CreateTransactionInteractorImpl(
                     isBuyingFromFarmer = transaction.isBuyingFromFarmer,
                     commodityId = transaction.commodity?.id,
                     volume = transaction.volume,
-                    locationProvider = transaction.locationProvider?.providerName,
+                    locationProvider = transaction.locationProvider?.apiName,
+                    qrSource = transaction.locationProvider?.qrSource,
                     farmLatitude = qrLocation?.latitude(),
                     farmLongitude = qrLocation?.longitude(),
                     locationFile = qrFile.second ?: transaction.file,

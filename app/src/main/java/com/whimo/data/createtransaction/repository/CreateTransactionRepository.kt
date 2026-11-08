@@ -73,6 +73,7 @@ class CreateTransactionRepositoryImpl(
                 isBuyingFromFarmer = request.isBuyingFromFarmer.toRequestBodyOrNull(),
                 recipient = request.recipient.toRequestBodyOrNull(),
                 harvestSeasonId = request.harvestSeasonId.toRequestBodyOrNull(),
+                qrSource = request.qrSource.toRequestBodyOrNull(),
             )
         }.mapResult { it?.toDomain() }
     }

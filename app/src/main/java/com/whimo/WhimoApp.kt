@@ -36,6 +36,8 @@ import com.whimo.di.createTransactionsModule
 import com.whimo.di.dataBaseModule
 import com.whimo.di.geoDataModule
 import com.whimo.di.harvestSeasonsModule
+import com.whimo.data.appoptions.AppOptionsRepository
+import com.whimo.di.appOptionsModule
 import com.whimo.di.languagesModule
 import com.whimo.di.mainModule
 import com.whimo.di.networkModule
@@ -104,11 +106,13 @@ class WhimoApp : Application() {
                 geoDataModule,
                 notificationsModule,
                 settingsModule,
-                languagesModule
+                languagesModule,
+                appOptionsModule,
             )
         }
 
         syncLanguages()
+        syncAppOptions()
 
         // Register activity lifecycle callbacks
         registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
@@ -143,6 +147,12 @@ class WhimoApp : Application() {
     private fun syncLanguages() {
         appScope.launch {
             GlobalContext.get().get<LanguagesInteractor>().syncLanguages(this@WhimoApp)
+        }
+    }
+
+    private fun syncAppOptions() {
+        appScope.launch {
+            GlobalContext.get().get<AppOptionsRepository>().sync()
         }
     }
 

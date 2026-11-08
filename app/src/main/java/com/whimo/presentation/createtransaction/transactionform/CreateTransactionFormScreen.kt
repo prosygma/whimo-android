@@ -116,8 +116,8 @@ fun CreateTransactionFormScreen(
                         LocationProvider.GPS -> {
                             sharedTransactionViewModel?.setLocation(location)
                         }
-                        LocationProvider.QR -> {
-                            sharedTransactionViewModel?.setQR(qrData)
+                        LocationProvider.QR, LocationProvider.QRCicc -> {
+                            sharedTransactionViewModel?.setQR(qrData, locationProvider)
                             sharedTransactionViewModel?.setLocation(location)
                         }
                         LocationProvider.Manual -> {

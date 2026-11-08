@@ -62,10 +62,11 @@ class GeoDataRepositoryImpl(
         return handleResponse {
             service.updateTransactionGeoData(
                 transactionId = transactionId,
-                locationProvider = request.locationProvider?.providerName.toRequestBodyOrNull(),
+                locationProvider = request.locationProvider?.apiName.toRequestBodyOrNull(),
 //                latitude = request.latitude.toRequestBodyOrNull(),
 //                longitude = request.longitude.toRequestBodyOrNull(),
                 file = prepareFilePart(context, request.locationFile, "location_file"),
+                qrSource = request.locationProvider?.qrSource.toRequestBodyOrNull(),
             )
         }.mapResult { it?.success }
     }

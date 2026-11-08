@@ -38,12 +38,14 @@ import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.whimo.R
+import com.whimo.data.appoptions.AppOptionsRepository
 import com.whimo.navigation.Screens
 import com.whimo.presentation.createtransaction.components.CreateTransactionButton3
 import com.whimo.presentation.main.components.Toolbar2
 import com.whimo.presentation.ui.theme.TextStyleBodyS
 import com.whimo.presentation.ui.theme.TextStyleMediumL
 import com.whimo.presentation.ui.theme.WhimoTheme
+import org.koin.core.context.GlobalContext
 
 @Preview
 @Composable
@@ -105,7 +107,13 @@ fun CreateTransactionScreen3(
                 description = stringResource(R.string.buying_from_farmer_description)
             ) {
                 sharedTransactionViewModel?.setIsBuyingFromFarmer(true)
-                navController.navigate(Screens.CreateTransaction4.route)
+                // CamerTrace: the "Are you on the plot?" question can be turned off in the admin.
+                if (GlobalContext.get().get<AppOptionsRepository>().current().askOnPlot) {
+                    navController.navigate(Screens.CreateTransaction4.route)
+                } else {
+                    sharedTransactionViewModel?.setIsOnFarm(false)
+                    navController.navigate(Screens.CreateTransactionForm.route)
+                }
             }
 
             CreateTransactionButton3(

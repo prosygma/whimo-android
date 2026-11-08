@@ -23,6 +23,7 @@ package com.whimo.presentation.createtransaction.geodata.qr
 
 import android.content.Context
 import com.mapbox.geojson.Point
+import com.whimo.domain.createtransaction.models.LocationProvider
 import com.whimo.base.CoreViewBinding
 import com.whimo.base.CoreViewEvent
 import com.whimo.base.CoreViewSideEffect
@@ -35,12 +36,16 @@ object QrScanContract {
 
     sealed class Event : CoreViewEvent {
         data class OnCreate(val transactionModel: TransactionModel) : Event()
-        data class QrScanned(val context: Context, val qrData: String) : Event()
+        data class QrScanned(val context: Context, val qrData: String, val cicc: Boolean = false) : Event()
     }
 
     sealed class Effect : CoreViewSideEffect {
         data class ToggleLoader(val isLoading: Boolean): Effect()
         data class ShowMessage(val message: String): Effect()
-        data class QrResult(val qrData: String?, val location: Point?): Effect()
+        data class QrResult(
+            val qrData: String?,
+            val location: Point?,
+            val provider: LocationProvider = LocationProvider.QR,
+        ): Effect()
     }
 }
