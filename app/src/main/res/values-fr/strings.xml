@@ -187,6 +187,8 @@
     <string name="filter_icon">Icône de filtre</string>
     <string name="bought">Achats</string>
     <string name="sold">Ventes</string>
+    <string name="converted">Converties</string>
+    <string name="conversion_to_label">vers</string>
     <string name="please_wait">Veuillez patienter</string>
     <string name="full_traceability">Traçabilité complète</string>
     <string name="conditional_traceability">Traçabilité conditionnelle</string>
@@ -230,6 +232,10 @@
 
     <!-- Transaction Details Strings -->
     <string name="transaction_details">Détails de la transaction</string>
+    <string name="conversion_transaction">Transaction de conversion</string>
+    <string name="converted_from">Converti depuis</string>
+    <string name="converted_to">Converti en</string>
+    <string name="conversion_date">Date de conversion</string>
     <string name="commodity_type">Type de marchandise</string>
     <string name="all_commodity_groups">Tous les groupes de produits</string>
     <string name="harvest_season">Saison de récolte</string>
@@ -344,6 +350,7 @@
     <string name="check_inbox_instructions_verify">Nous vous avons envoyé un code à \n%s pour vérifier votre compte.</string>
 
     <string name="download">Télécharger</string>
+    <string name="download_failed">Échec du téléchargement</string>
     <string name="offline_transaction">Transaction hors ligne</string>
     <string name="offline_transactions_sync_title">Synchronisation des transactions hors ligne</string>
     <string name="offline_transactions_sync_progress">%1$d transaction(s) hors ligne traitée(s) sur %2$d</string>
@@ -354,7 +361,16 @@
     <string name="downloading_locations_data_for_trader">Vous allez télécharger les données de localisation pour le commerçant #%s, %.2f%s, y compris :\n• Fichiers GeoJSON fusionnés\n• Fichiers d’emplacements personnalisés</string>
     <string name="download_locations_dialog">Télécharger les emplacements ?</string>
     <string name="download_farm_geolocation">Télécharger la géolocalisation de la ferme</string>
+    <string name="download_farm_geolocation_q">Télécharger la géolocalisation de la ferme ?</string>
     <string name="download_transaction_details">Télécharger les détails de la transaction</string>
+    <string name="download_both">Tout télécharger</string>
+    <string name="download_both_q">Tout télécharger ?</string>
+    <string name="download_all_options_description">Veuillez sélectionner ce que vous souhaitez télécharger pour toute la période : les détails des transactions de tous les commerçants, les géolocalisations des fermes ou les deux.</string>
+    <string name="download_all_geolocations_confirmation">Vous allez télécharger les données de géolocalisation des fermes, y compris :</string>
+    <string name="download_all_both_confirmation">Vous allez télécharger les détails des transactions auprès de %1$d commerçants et les données de géolocalisation des fermes, y compris :</string>
+    <string name="download_all_merged_geojson_files">Fichiers GeoJSON fusionnés (%1$d)</string>
+    <string name="download_all_custom_location_files">Fichiers d’emplacements personnalisés (%1$d)</string>
+    <string name="download_all_without_geolocation">Fermes sans géolocalisation non incluses : %1$d</string>
     <string name="email_not_verified">E-mail non vérifié</string>
     <string name="phone_not_verified">Téléphone non vérifié</string>
     <string name="send_verification_code">Nous vous enverrons un code de vérification pour confirmer votre identité.</string>
@@ -371,6 +387,7 @@
     <string name="from">De</string>
     <string name="to">À</string>
     <string name="convert_commodity">Convertir le produit</string>
+    <string name="season_balance">Solde de la saison : %1$s</string>
     <string name="convert_commodity_info">Les informations sont présentées à l’aide d’équivalences standardisées. Vous pouvez les modifier si nécessaire.</string>
     <string name="no_recipes">Aucune recette</string>
     <string name="convert_commodity_text">Veuillez sélectionner comment vous souhaitez convertir ce type de marchandise.</string>

@@ -23,6 +23,7 @@ package com.whimo.data.transactions.model.mappers
 
 import com.whimo.data.commodity.model.response.Commodity
 import com.whimo.data.harvestseasons.model.response.HarvestSeasonData
+import com.whimo.data.transactions.model.response.ConversionTransactionData
 import com.whimo.data.transactions.model.response.TransactionData
 import com.whimo.extensions.toLocalDateTime
 import org.junit.Assert.assertEquals
@@ -84,24 +85,73 @@ class TransactionsMapperTest {
         assertEquals(4.0, result.location?.longitude)
     }
 
+    @Test
+    fun `toDomain maps grouped conversion inputs and outputs`() {
+        val result = transactionData(
+            id = null,
+            groupId = "conversion-group-id",
+            type = "conversion",
+            action = null,
+            commodity = null,
+            volume = null,
+            signedVolume = null,
+            inputs = listOf(
+                conversionTransactionData(
+                    commodityId = "input-id",
+                    commodityCode = "1234",
+                    commodityName = "Green bean",
+                    volume = 1000f,
+                    signedVolume = -1000f,
+                )
+            ),
+            outputs = listOf(
+                conversionTransactionData(
+                    commodityId = "output-id",
+                    commodityCode = "1801",
+                    commodityName = "Cocoa beans",
+                    volume = 850f,
+                    signedVolume = 850f,
+                )
+            ),
+        ).toDomain()
+
+        assertEquals("conversion-group-id", result.id)
+        assertEquals("conversion-group-id", result.groupId)
+        assertEquals("Green bean", result.commodity.name)
+        assertEquals(1, result.conversionInputs.size)
+        assertEquals(-1000f, result.conversionInputs.first().signedVolume)
+        assertEquals(1, result.conversionOutputs.size)
+        assertEquals("Cocoa beans", result.conversionOutputs.first().commodity.name)
+    }
+
     private fun transactionData(
+        id: String? = "transaction-id",
+        groupId: String? = null,
         createdAt: String = "2025-02-03T10:00:00Z",
         updatedAt: String? = "2025-02-03T12:30:45Z",
+        type: String? = "downstream",
+        action: String? = "buying",
         latitude: Double? = null,
         longitude: Double? = null,
         transactionLatitude: Double? = null,
         transactionLongitude: Double? = null,
         farmLatitude: Double? = null,
         farmLongitude: Double? = null,
+        commodity: Commodity? = commodity(),
+        volume: Float? = 10f,
+        signedVolume: Float? = null,
         harvestSeason: HarvestSeasonData? = null,
+        inputs: List<ConversionTransactionData>? = null,
+        outputs: List<ConversionTransactionData>? = null,
     ) = TransactionData(
-        id = "transaction-id",
+        id = id,
+        group_id = groupId,
         created_at = createdAt,
         updated_at = updatedAt,
         expires_at = null,
-        type = "downstream",
+        type = type,
         status = "accepted",
-        action = "buying",
+        action = action,
         location = "gps",
         latitude = latitude,
         longitude = longitude,
@@ -109,16 +159,9 @@ class TransactionsMapperTest {
         transaction_longitude = transactionLongitude,
         farm_latitude = farmLatitude,
         farm_longitude = farmLongitude,
-        commodity = Commodity(
-            id = "commodity-id",
-            code = "COCOA",
-            name = "Cocoa",
-            unit = "kg",
-            has_recipe = false,
-            group = null,
-            balance = null,
-        ),
-        volume = 10f,
+        commodity = commodity,
+        volume = volume,
+        signed_volume = signedVolume,
         traceability = "full",
         seller = null,
         buyer = null,
@@ -126,5 +169,39 @@ class TransactionsMapperTest {
         is_automatic = false,
         harvest_season = harvestSeason,
         created_by_id = "creator-id",
+        inputs = inputs,
+        outputs = outputs,
+    )
+
+    private fun conversionTransactionData(
+        commodityId: String,
+        commodityCode: String,
+        commodityName: String,
+        volume: Float,
+        signedVolume: Float,
+    ) = ConversionTransactionData(
+        id = null,
+        transaction_id = null,
+        commodity = commodity(
+            id = commodityId,
+            code = commodityCode,
+            name = commodityName,
+        ),
+        volume = volume,
+        signed_volume = signedVolume,
+    )
+
+    private fun commodity(
+        id: String = "commodity-id",
+        code: String = "COCOA",
+        name: String = "Cocoa",
+    ) = Commodity(
+        id = id,
+        code = code,
+        name = name,
+        unit = "kg",
+        has_recipe = false,
+        group = null,
+        balance = null,
     )
 }

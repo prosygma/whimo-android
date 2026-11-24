@@ -25,12 +25,15 @@ import com.whimo.base.CoreViewBinding
 import com.whimo.base.CoreViewEvent
 import com.whimo.base.CoreViewSideEffect
 import com.whimo.domain.commodity.models.ConvertQuantityModel
+import com.whimo.domain.harvestseasons.models.HarvestSeasonModel
 import com.whimo.presentation.balances.ConvertCommodityArgs
 
 object ConvertCommodityContract {
     data class Binding(
         var inputs: List<ConvertQuantityModel>? = null,
         var outputs: List<ConvertQuantityModel>? = null,
+        var harvestSeason: HarvestSeasonModel? = null,
+        var seasonBalances: Map<String, Float> = emptyMap(),
     ) : CoreViewBinding
 
     sealed class Event : CoreViewEvent {

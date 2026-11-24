@@ -28,12 +28,26 @@ import com.google.gson.JsonParser
 
 data class GeoJsonParseResult(
     val geoJson: String,
-    val firstCoordinate: GeoJsonCoordinate? = null
+    val firstCoordinate: GeoJsonCoordinate? = null,
+    val mapGeometry: GeoJsonMapGeometry = GeoJsonMapGeometry(),
 )
 
 data class GeoJsonCoordinate(
     val latitude: Double,
     val longitude: Double
+)
+
+data class GeoJsonMapGeometry(
+    val points: List<GeoJsonCoordinate> = emptyList(),
+    val polygons: List<GeoJsonPolygon> = emptyList(),
+) {
+    fun isEmpty(): Boolean {
+        return points.isEmpty() && polygons.all { it.points.isEmpty() }
+    }
+}
+
+data class GeoJsonPolygon(
+    val points: List<GeoJsonCoordinate> = emptyList(),
 )
 
 object GeoJsonParser {
@@ -49,7 +63,8 @@ object GeoJsonParser {
 
         return GeoJsonParseResult(
             geoJson = geoJson,
-            firstCoordinate = findFirstGeoJsonCoordinate(geoJsonObject)
+            firstCoordinate = findFirstGeoJsonCoordinate(geoJsonObject),
+            mapGeometry = collectMapGeometry(geoJsonObject),
         )
     }
 
@@ -162,6 +177,74 @@ object GeoJsonParser {
         }
 
         return null
+    }
+
+    private fun collectMapGeometry(jsonObject: JsonObject): GeoJsonMapGeometry {
+        return when (jsonObject.getString("type")) {
+            "FeatureCollection" -> jsonObject.get("features")
+                ?.asJsonArrayOrNull()
+                ?.mapNotNull { it.asJsonObjectOrNull()?.let(::collectMapGeometry) }
+                ?.merge()
+                ?: GeoJsonMapGeometry()
+            "Feature" -> jsonObject.get("geometry")
+                ?.takeUnless { it.isJsonNull }
+                ?.asJsonObjectOrNull()
+                ?.let(::collectMapGeometry)
+                ?: GeoJsonMapGeometry()
+            "GeometryCollection" -> jsonObject.get("geometries")
+                ?.asJsonArrayOrNull()
+                ?.mapNotNull { it.asJsonObjectOrNull()?.let(::collectMapGeometry) }
+                ?.merge()
+                ?: GeoJsonMapGeometry()
+            "Point" -> GeoJsonMapGeometry(
+                points = jsonObject.get("coordinates")
+                    ?.asJsonArrayOrNull()
+                    ?.toGeoJsonCoordinate()
+                    ?.let(::listOf)
+                    ?: emptyList()
+            )
+            "MultiPoint",
+            "LineString" -> GeoJsonMapGeometry(
+                points = jsonObject.get("coordinates")?.let { collectPositions(it, 1) } ?: emptyList()
+            )
+            "MultiLineString" -> GeoJsonMapGeometry(
+                points = jsonObject.get("coordinates")?.let { collectPositions(it, 2) } ?: emptyList()
+            )
+            "Polygon" -> GeoJsonMapGeometry(
+                polygons = jsonObject.get("coordinates")?.let { collectPolygons(it) } ?: emptyList()
+            )
+            "MultiPolygon" -> GeoJsonMapGeometry(
+                polygons = jsonObject.get("coordinates")
+                    ?.asJsonArrayOrNull()
+                    ?.flatMap { collectPolygons(it) }
+                    ?: emptyList()
+            )
+            else -> GeoJsonMapGeometry()
+        }
+    }
+
+    private fun List<GeoJsonMapGeometry>.merge(): GeoJsonMapGeometry {
+        return GeoJsonMapGeometry(
+            points = flatMap { it.points },
+            polygons = flatMap { it.polygons },
+        )
+    }
+
+    private fun collectPolygons(element: JsonElement): List<GeoJsonPolygon> {
+        val rings = element.asJsonArrayOrNull() ?: return emptyList()
+        val outerRing = rings.getOrNull(0)?.let { collectPositions(it, 1) } ?: return emptyList()
+
+        return listOf(GeoJsonPolygon(points = outerRing))
+    }
+
+    private fun collectPositions(element: JsonElement, depth: Int): List<GeoJsonCoordinate> {
+        if (depth == 0) {
+            return element.asJsonArrayOrNull()?.toGeoJsonCoordinate()?.let(::listOf) ?: emptyList()
+        }
+
+        return element.asJsonArrayOrNull()
+            ?.flatMap { collectPositions(it, depth - 1) }
+            ?: emptyList()
     }
 
     private fun JsonArray.toGeoJsonCoordinate(): GeoJsonCoordinate? {

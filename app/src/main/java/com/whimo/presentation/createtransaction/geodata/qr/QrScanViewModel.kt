@@ -22,12 +22,14 @@
 package com.whimo.presentation.createtransaction.geodata.qr
 
 import android.content.Context
+import com.google.android.gms.maps.model.LatLng
 import com.whimo.R
 import com.whimo.base.BaseViewModel
 import com.whimo.base.CoreViewEvent
 import com.whimo.data.base.common.onError
 import com.whimo.data.base.common.onSuccess
 import com.whimo.data.geodata.model.request.UpdateGeoDataRequest
+import com.whimo.domain.createtransaction.models.GeoDataMapGeometry
 import com.whimo.domain.createtransaction.models.LocationProvider
 import com.whimo.domain.createtransaction.models.MFile
 import com.whimo.domain.geodata.GeoDataInteractor
@@ -56,6 +58,12 @@ class QrScanViewModel(
         when (event) {
             is QrScanContract.Event.OnCreate -> onCreate(event.transactionModel)
             is QrScanContract.Event.QrScanned -> qrScanned(event.context, event.qrData)
+            is QrScanContract.Event.ConfirmQr -> confirmQr(
+                context = event.context,
+                qrData = event.qrData,
+                location = event.location,
+                mapGeometry = event.mapGeometry,
+            )
         }
     }
 
@@ -76,18 +84,58 @@ class QrScanViewModel(
             return
         }
 
-        if (transactionId == null) {
-            handleQr(qrData, qrGeoData)
-        } else {
-            uploadQr(context, qrData, qrGeoData)
-        }
+        handleQr(qrData, qrGeoData)
     }
 
     private fun handleQr(qrData: String, qrGeoData: QrGeoData) {
-        setEffect(QrScanContract.Effect.QrResult(qrData, qrGeoData.location))
+        setEffect(
+            QrScanContract.Effect.ShowQrConfirmation(
+                qrData = qrData,
+                location = qrGeoData.location,
+                mapGeometry = qrGeoData.mapGeometry,
+            )
+        )
     }
 
-    private fun uploadQr(context: Context, qrData: String, qrGeoData: QrGeoData) {
+    private fun confirmQr(
+        context: Context,
+        qrData: String,
+        location: LatLng?,
+        mapGeometry: GeoDataMapGeometry?,
+    ) {
+        val qrGeoData = parseQrGeoData(qrData)
+
+        if (qrGeoData.geoJson == null) {
+            setEffect(QrScanContract.Effect.ShowMessage(resourceProvider.getString(R.string.invalid_qr_geojson)))
+            return
+        }
+
+        if (transactionId == null) {
+            setEffect(
+                QrScanContract.Effect.QrResult(
+                    qrData = qrData,
+                    location = location ?: qrGeoData.location,
+                    mapGeometry = mapGeometry ?: qrGeoData.mapGeometry,
+                )
+            )
+        } else {
+            uploadQr(
+                context = context,
+                qrData = qrData,
+                qrGeoData = qrGeoData,
+                location = location,
+                mapGeometry = mapGeometry,
+            )
+        }
+    }
+
+    private fun uploadQr(
+        context: Context,
+        qrData: String,
+        qrGeoData: QrGeoData,
+        location: LatLng?,
+        mapGeometry: GeoDataMapGeometry?,
+    ) {
         launch {
             setEffect(QrScanContract.Effect.ToggleLoader(true))
 
@@ -111,7 +159,11 @@ class QrScanViewModel(
                     qrFile.first?.delete()
                     setEffect(
                         QrScanContract.Effect.ToggleLoader(false),
-                        QrScanContract.Effect.QrResult(qrData, qrGeoData.location)
+                        QrScanContract.Effect.QrResult(
+                            qrData = qrData,
+                            location = location ?: qrGeoData.location,
+                            mapGeometry = mapGeometry ?: qrGeoData.mapGeometry,
+                        )
                     )
                 }
                 .onError {

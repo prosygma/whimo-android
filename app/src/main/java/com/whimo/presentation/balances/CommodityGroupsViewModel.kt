@@ -26,6 +26,7 @@ import com.whimo.base.CoreViewEvent
 import com.whimo.data.base.common.onError
 import com.whimo.data.base.common.onSuccess
 import com.whimo.domain.commodity.CommodityInteractor
+import com.whimo.domain.commodity.refreshBalances
 import com.whimo.domain.commodity.models.CommodityBalanceFilter
 import com.whimo.domain.commodity.models.CommodityBalanceModel
 import com.whimo.domain.commodity.models.CommodityFilter
@@ -194,17 +195,17 @@ class CommodityGroupsViewModel(
         val requestFilter = balanceFilter.copy()
 
         launch {
-            val cachedBalances = interactor.getBalancesFromDB(requestFilter)
-            if (cachedBalances.isNotEmpty() && requestFilter.matchesBalanceFilter(balanceFilter)) {
-                updateBalances(cachedBalances)
-                updateView()
-            }
+            interactor.refreshBalances(requestFilter) { cachedBalances ->
+                if (cachedBalances.isNotEmpty() && requestFilter.matchesBalanceFilter(balanceFilter)) {
+                    updateBalances(cachedBalances)
+                    updateView()
+                }
 
-            updateRefreshing(
-                requestFilter = requestFilter,
-                isRefreshing = forceRefreshIndicator || (showRefresh && cachedBalances.isEmpty()),
-            )
-            interactor.getBalances(requestFilter)
+                updateRefreshing(
+                    requestFilter = requestFilter,
+                    isRefreshing = forceRefreshIndicator || (showRefresh && cachedBalances.isEmpty()),
+                )
+            }
                 .onSuccess {
                     if (!requestFilter.matchesBalanceFilter(balanceFilter)) return@onSuccess
 

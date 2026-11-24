@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -36,7 +37,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -47,8 +50,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.draw.clip
+import com.google.android.gms.maps.model.LatLng
 import com.whimo.R
+import com.whimo.domain.createtransaction.models.GeoDataMapGeometry
 import com.whimo.domain.harvestseasons.models.HarvestSeasonStatus
+import com.whimo.presentation.createtransaction.geodata.map.FarmGeoDataMapView
 import com.whimo.presentation.createtransaction.transactionform.CreateTransactionFormContract.CommodityVolumeBreakdown
 import com.whimo.presentation.main.components.HarvestSeasonStatusBadge
 import com.whimo.presentation.main.components.HarvestSeasonTag
@@ -104,7 +113,7 @@ private fun Preview() {
             CreateTransactionVolumeItem(
                 iconRes = R.drawable.ic_commodity_type,
                 title = stringResource(R.string.volume_commodities_required),
-                description = "300 kg",
+                description = "300kg",
                 harvestSeasonText = "2025/26",
             )
 
@@ -112,10 +121,10 @@ private fun Preview() {
                 iconRes = R.drawable.ic_commodity_type,
                 title = stringResource(R.string.volume_commodities_required),
                 breakdown = CommodityVolumeBreakdown(
-                    harvestSeasonAmountText = "500 kg",
+                    harvestSeasonAmountText = "500kg",
                     harvestSeasonText = "2026/27",
                     harvestSeasonStatus = HarvestSeasonStatus.Active,
-                    automaticTransactionAmountText = "700 kg",
+                    automaticTransactionAmountText = "700kg",
                     automaticTransactionStatus = HarvestSeasonStatus.Active,
                 ),
             )
@@ -223,6 +232,145 @@ fun CreateTransactionItem(
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
+    }
+}
+
+@Composable
+fun FarmGeoDataPreviewItem(
+    modifier: Modifier = Modifier,
+    iconRes: Int,
+    title: String,
+    description: String,
+    location: LatLng?,
+    mapGeometry: GeoDataMapGeometry?,
+    onClick: () -> Unit = {},
+    onExpandClick: () -> Unit = {},
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(16.dp),
+        verticalAlignment = Alignment.Top,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Icon(
+            modifier = Modifier.size(24.dp),
+            painter = painterResource(id = iconRes),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = title,
+                style = TextStyleMediumM,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = description,
+                style = TextStyleBodyS,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp))
+            ) {
+                FarmGeoDataMapView(
+                    modifier = Modifier.matchParentSize(),
+                    location = location,
+                    mapGeometry = mapGeometry,
+                )
+
+                IconButton(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(16.dp)
+                        .size(48.dp)
+                        .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp)),
+                    onClick = onExpandClick,
+                ) {
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        painter = painterResource(id = R.drawable.ic_expand),
+                        contentDescription = null,
+                        tint = Color.Unspecified,
+                    )
+                }
+            }
+        }
+
+        Icon(
+            modifier = Modifier.size(24.dp),
+            painter = painterResource(id = R.drawable.ic_chevron_forward),
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+fun FarmGeoDataMapDialog(
+    location: LatLng?,
+    mapGeometry: GeoDataMapGeometry?,
+    onDismiss: () -> Unit,
+) {
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(32.dp)
+        ) {
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .clip(RoundedCornerShape(8.dp)),
+                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.surface,
+            ) {
+                Box(modifier = Modifier.fillMaxSize()) {
+                    FarmGeoDataMapView(
+                        modifier = Modifier.matchParentSize(),
+                        location = location,
+                        mapGeometry = mapGeometry,
+                        gesturesEnabled = true,
+                    )
+
+                    IconButton(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(16.dp)
+                            .size(48.dp)
+                            .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
+                            .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(8.dp)),
+                        onClick = onDismiss,
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            painter = painterResource(id = R.drawable.ic_contract),
+                            contentDescription = null,
+                            tint = Color.Unspecified,
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 

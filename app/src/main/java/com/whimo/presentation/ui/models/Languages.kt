@@ -26,7 +26,8 @@ import com.whimo.R
 enum class Languages(val languageName: String, val languageCode: String, val languageIcon: Int) {
     ENGLISH("English", "en", languageIcon = R.drawable.ic_en),
     FRENCH("French", "fr", languageIcon = R.drawable.ic_fr),
-    SPANISH("Spanish", "es", languageIcon = R.drawable.ic_sp);
+    SPANISH("Spanish", "es", languageIcon = R.drawable.ic_sp),
+    PORTUGUESE("Portuguese", "pt", languageIcon = R.drawable.ic_pt);
 
     companion object {
         private val codeToLanguageMap = entries.associateBy { it.languageCode }

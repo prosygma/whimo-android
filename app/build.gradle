@@ -30,8 +30,8 @@ android {
         applicationId "com.whimo"
         minSdk 26
         targetSdk 36
-        versionCode 76
-        versionName "1.15"
+        versionCode 83
+        versionName "1.18"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

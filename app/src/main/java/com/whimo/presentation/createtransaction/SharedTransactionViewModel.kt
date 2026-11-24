@@ -28,6 +28,7 @@ import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
 import com.whimo.domain.commodity.models.CommodityModel
 import com.whimo.domain.createtransaction.models.CreateTransactionModel
+import com.whimo.domain.createtransaction.models.GeoDataMapGeometry
 import com.whimo.domain.createtransaction.models.LocationProvider
 import com.whimo.domain.createtransaction.models.MFile
 import com.whimo.domain.createtransaction.models.UserInfoModel
@@ -69,6 +70,7 @@ class SharedTransactionViewModel : ViewModel() {
         if (clearLocation) {
             setLocationProvider(null)
             setLocation(null)
+            setMapGeometry(null)
             setQR(null)
             setFile(null)
         }
@@ -82,12 +84,17 @@ class SharedTransactionViewModel : ViewModel() {
         transaction = transaction.copy(location = location)
     }
 
+    fun setMapGeometry(mapGeometry: GeoDataMapGeometry?) {
+        transaction = transaction.copy(mapGeometry = mapGeometry)
+    }
+
     fun setFile(file: MFile?) {
         val locationProvider = if (file != null) LocationProvider.File else null
 
         transaction = transaction.copy(
             locationProvider = locationProvider,
             file = file,
+            mapGeometry = null,
         )
     }
 
@@ -97,6 +104,7 @@ class SharedTransactionViewModel : ViewModel() {
                 locationProvider = null,
                 qr = null,
                 location = null,
+                mapGeometry = null,
             )
             return
         }

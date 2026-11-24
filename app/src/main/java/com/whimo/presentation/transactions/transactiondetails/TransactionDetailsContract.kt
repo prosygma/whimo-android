@@ -26,6 +26,7 @@ import com.whimo.base.CoreViewBinding
 import com.whimo.base.CoreViewEvent
 import com.whimo.base.CoreViewSideEffect
 import com.whimo.domain.createtransaction.models.LocationProvider
+import com.whimo.domain.transactions.models.ConversionTransactionItemModel
 import com.whimo.domain.transactions.models.HarvestSeasonModel
 import com.whimo.domain.transactions.models.TraceabilityCountsModel
 import com.whimo.domain.transactions.models.TraceabilityStatus
@@ -45,7 +46,11 @@ object TransactionDetailsContract {
 
         var toolbarTitle: String = "",
         var commodityText: String? = null,
+        var commodityVolume: String? = null,
         var commodityWarningText: String? = null,
+        var isConversion: Boolean = false,
+        var conversionInputs: List<ConversionTransactionItemModel> = emptyList(),
+        var conversionOutputs: List<ConversionTransactionItemModel> = emptyList(),
         var harvestSeason: HarvestSeasonModel? = null,
 
         var showLocation: Boolean = false,

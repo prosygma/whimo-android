@@ -24,14 +24,18 @@ package com.whimo.utils
 import android.content.Context
 import androidx.core.net.toUri
 import com.google.android.gms.maps.model.LatLng
+import com.whimo.domain.createtransaction.models.GeoDataMapGeometry
+import com.whimo.domain.createtransaction.models.GeoDataMapPolygon
 import com.whimo.domain.createtransaction.models.MFile
 import com.whimo.utils.geojson.GeoJsonCoordinate
+import com.whimo.utils.geojson.GeoJsonMapGeometry
 import com.whimo.utils.geojson.GeoJsonParser
 import java.io.File
 
 data class QrGeoData(
     val location: LatLng? = null,
-    val geoJson: String? = null
+    val geoJson: String? = null,
+    val mapGeometry: GeoDataMapGeometry? = null,
 )
 
 fun parseQrGeoData(qr: String): QrGeoData {
@@ -40,12 +44,29 @@ fun parseQrGeoData(qr: String): QrGeoData {
 
     return QrGeoData(
         location = location,
-        geoJson = geoJson.geoJson
+        geoJson = geoJson.geoJson,
+        mapGeometry = geoJson.mapGeometry.toMapGeometry(location),
     )
 }
 
 private fun GeoJsonCoordinate.toLatLng(): LatLng {
     return LatLng(latitude, longitude)
+}
+
+private fun GeoJsonMapGeometry.toMapGeometry(fallbackPoint: LatLng?): GeoDataMapGeometry? {
+    val polygons = polygons
+        .map { polygon ->
+            GeoDataMapPolygon(points = polygon.points.map { it.toLatLng() })
+        }
+        .filter { it.points.isNotEmpty() }
+
+    val point = points.firstOrNull()?.toLatLng() ?: fallbackPoint
+    val geometry = GeoDataMapGeometry(
+        point = if (polygons.isEmpty()) point else null,
+        polygons = polygons,
+    )
+
+    return geometry.takeUnless { it.isEmpty() }
 }
 
 fun writeQRDataToCacheFile(

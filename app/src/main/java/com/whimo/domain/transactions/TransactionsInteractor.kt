@@ -25,6 +25,7 @@ import android.content.Context
 import com.whimo.data.base.common.BaseResult
 import com.whimo.data.transactions.repository.TransactionsRepository
 import com.whimo.domain.transactions.models.HarvestSeasonModel
+import com.whimo.domain.transactions.models.TransactionListDownloadSummaryModel
 import com.whimo.domain.transactions.models.TransactionModel
 import com.whimo.domain.transactions.models.TransactionsFilter
 import com.whimo.domain.transactions.models.TransactionsState
@@ -37,12 +38,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import okhttp3.ResponseBody
 
 interface TransactionsInteractor {
     val stateFlow: SharedFlow<TransactionsState>
 
     suspend fun refresh(filter: TransactionsFilter, useCache: Boolean = true)
     suspend fun loadNextPage(filter: TransactionsFilter)
+    suspend fun getDownloadSummary(filter: TransactionsFilter): BaseResult<TransactionListDownloadSummaryModel>
+    suspend fun downloadTransactionListCSV(filter: TransactionsFilter): BaseResult<ResponseBody>
+    suspend fun downloadTransactionListLocationBundle(filter: TransactionsFilter): BaseResult<ResponseBody>
 }
 
 class TransactionsInteractorImpl(
@@ -68,6 +73,7 @@ class TransactionsInteractorImpl(
                 search = filter.query,
                 status = filter.status?.statusName,
                 action = filter.action?.actionName,
+                type = filter.type?.typeName,
                 createdAtFrom = filter.dateStart,
                 createdAtTo = filter.dateEnd,
                 commodityGroupId = filter.commodityGroup?.id,
@@ -102,6 +108,55 @@ class TransactionsInteractorImpl(
         loadPage(page + 1, filter, currentRequestVersion)?.let { state.emit(it) }
     }
 
+    override suspend fun getDownloadSummary(filter: TransactionsFilter): BaseResult<TransactionListDownloadSummaryModel> {
+        return repository.getTransactionListLocationSummary(
+            search = filter.query,
+            status = filter.status?.statusName,
+            action = filter.action?.actionName,
+            type = filter.type?.typeName,
+            groupConversions = filter.groupConversions,
+            createdAtFrom = filter.dateStart?.toUtcIsoString(),
+            createdAtTo = filter.dateEnd?.toUtcIsoString(),
+            commodityGroupId = filter.commodityGroup?.id,
+            commodityId = filter.commodity?.id,
+            buyerId = filter.user?.id,
+            harvestSeasonId = filter.harvestSeason?.id,
+        )
+    }
+
+    override suspend fun downloadTransactionListCSV(filter: TransactionsFilter): BaseResult<ResponseBody> {
+        return repository.downloadTransactionListCSV(
+            search = filter.query,
+            includeChain = true,
+            status = filter.status?.statusName,
+            action = filter.action?.actionName,
+            type = filter.type?.typeName,
+            groupConversions = filter.groupConversions,
+            createdAtFrom = filter.dateStart?.toUtcIsoString(),
+            createdAtTo = filter.dateEnd?.toUtcIsoString(),
+            commodityGroupId = filter.commodityGroup?.id,
+            commodityId = filter.commodity?.id,
+            buyerId = filter.user?.id,
+            harvestSeasonId = filter.harvestSeason?.id,
+        )
+    }
+
+    override suspend fun downloadTransactionListLocationBundle(filter: TransactionsFilter): BaseResult<ResponseBody> {
+        return repository.downloadTransactionListLocationBundle(
+            search = filter.query,
+            status = filter.status?.statusName,
+            action = filter.action?.actionName,
+            type = filter.type?.typeName,
+            groupConversions = filter.groupConversions,
+            createdAtFrom = filter.dateStart?.toUtcIsoString(),
+            createdAtTo = filter.dateEnd?.toUtcIsoString(),
+            commodityGroupId = filter.commodityGroup?.id,
+            commodityId = filter.commodity?.id,
+            buyerId = filter.user?.id,
+            harvestSeasonId = filter.harvestSeason?.id,
+        )
+    }
+
     private suspend fun loadPage(
         page: Int,
         filter: TransactionsFilter,
@@ -113,6 +168,8 @@ class TransactionsInteractorImpl(
             pageSize = DEFAULT_PAGE_SIZE,
             status = filter.status?.statusName,
             action = filter.action?.actionName,
+            type = filter.type?.typeName,
+            groupConversions = filter.groupConversions,
             createdAtFrom = filter.dateStart?.toUtcIsoString(),
             createdAtTo = filter.dateEnd?.toUtcIsoString(),
             commodityGroupId = filter.commodityGroup?.id,

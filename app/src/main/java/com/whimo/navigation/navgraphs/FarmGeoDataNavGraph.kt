@@ -26,9 +26,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import com.google.android.gms.maps.model.LatLng
 import com.whimo.domain.createtransaction.models.CreateTransactionModel
+import com.whimo.domain.createtransaction.models.GeoDataMapGeometry
 import com.whimo.domain.transactions.models.TransactionModel
 import com.whimo.navigation.Screens
+import com.whimo.presentation.createtransaction.geodata.FarmGeoDataActivity.Companion.QR_CONFIRMATION_LOCATION
+import com.whimo.presentation.createtransaction.geodata.FarmGeoDataActivity.Companion.QR_CONFIRMATION_MAP_GEOMETRY
+import com.whimo.presentation.createtransaction.geodata.FarmGeoDataActivity.Companion.QR_CONFIRMATION_QR_DATA
 import com.whimo.presentation.createtransaction.geodata.FarmGeoDataScreen
 import com.whimo.presentation.createtransaction.geodata.map.MapScreen
 import com.whimo.presentation.createtransaction.geodata.qr.QrScanScreen
@@ -65,9 +70,14 @@ fun FarmGeoDataNavGraph(
             )
         }
         composable(route = Screens.Map.route) {
+            val qrSavedStateHandle = navController.previousBackStackEntry?.savedStateHandle
             MapScreen(
                 modifier = modifier.fillMaxSize(),
                 navController = navController,
+                transactionModel = transactionModel,
+                qrData = qrSavedStateHandle?.get<String>(QR_CONFIRMATION_QR_DATA),
+                qrLocation = qrSavedStateHandle?.get<LatLng>(QR_CONFIRMATION_LOCATION),
+                qrMapGeometry = qrSavedStateHandle?.get<GeoDataMapGeometry>(QR_CONFIRMATION_MAP_GEOMETRY),
             )
         }
         composable(route = Screens.QrScan.route) {

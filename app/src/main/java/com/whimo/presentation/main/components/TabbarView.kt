@@ -32,8 +32,11 @@ import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -45,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import com.whimo.R
 import com.whimo.presentation.ui.theme.ColorGray40
 import com.whimo.presentation.ui.theme.TextStyleMediumM
+import com.whimo.presentation.ui.theme.TextStyleMediumS
 import com.whimo.presentation.ui.theme.WhimoTheme
 
 data class TabItem(
@@ -57,9 +61,10 @@ data class TabItem(
 @Composable
 private fun Preview() {
     val tabs = listOf(
-        TabItem(title = stringResource(R.string.all), icon = R.drawable.ic_home),
-        TabItem(title = stringResource(R.string.bought), icon =  R.drawable.ic_status_buy),
-        TabItem(title = stringResource(R.string.sold), icon =  R.drawable.ic_status_sell),
+        TabItem(title = stringResource(R.string.all), icon = R.drawable.ic_home_18),
+        TabItem(title = stringResource(R.string.bought), icon =  R.drawable.ic_buy_18),
+        TabItem(title = stringResource(R.string.sold), icon =  R.drawable.ic_sell_18),
+        TabItem(title = stringResource(R.string.converted), icon =  R.drawable.ic_convert_18),
     )
 
     WhimoTheme {
@@ -74,15 +79,13 @@ fun TabBar(
     tabs: List<TabItem>,
 ) {
 
-    TabRow(
+    PrimaryTabRow(
         selectedTabIndex = pagerState.settledPage,
         modifier = modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(start = 16.dp, end = 12.dp),
+            .background(MaterialTheme.colorScheme.surface),
         containerColor = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.primary,
-        divider = {}
     ) {
         tabs.forEachIndexed { index, tabItem ->
             Tab(
@@ -95,7 +98,7 @@ fun TabBar(
                 unselectedContentColor = MaterialTheme.colorScheme.surface,
             ) {
                 Row(
-                    modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp),
+                    modifier = Modifier.padding(vertical = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -107,7 +110,7 @@ fun TabBar(
 
                     if (tabItem.icon != null) {
                         Icon(
-                            modifier = Modifier.size(24.dp),
+                            modifier = Modifier.size(18.dp),
                             painter = painterResource(id = tabItem.icon),
                             contentDescription = null,
                             tint = color,
@@ -116,7 +119,7 @@ fun TabBar(
 
                     Text(
                         text = tabItem.title,
-                        style = TextStyleMediumM,
+                        style = TextStyleMediumS,
                         color = color
                     )
                 }

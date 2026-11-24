@@ -28,7 +28,8 @@ import com.whimo.domain.commodity.models.CommodityModel
 import com.whimo.domain.harvestseasons.models.HarvestSeasonModel
 import com.whimo.domain.transactions.models.TransactionAction
 import com.whimo.extensions.toText
-import com.whimo.extensions.toQuantityText
+import com.whimo.extensions.toQuantityTextWithSignAndUnit
+import com.whimo.extensions.toQuantityTextWithUnit
 import com.whimo.utils.stringOrNull
 import kotlinx.parcelize.Parcelize
 
@@ -40,6 +41,7 @@ data class CreateTransactionModel(
     val isOnFarm: Boolean = false,
     val locationProvider: LocationProvider? = null,
     val location: LatLng? = null,
+    val mapGeometry: GeoDataMapGeometry? = null,
     val file: MFile? = null,
     val qr: String? = null,
     val commodity: CommodityModel? = null,
@@ -47,6 +49,21 @@ data class CreateTransactionModel(
     val userInfo: UserInfoModel? = null,
     val creationLocation: LatLng? = null,
     val harvestSeason: HarvestSeasonModel? = null,
+) : Parcelable
+
+@Parcelize
+data class GeoDataMapGeometry(
+    val point: LatLng? = null,
+    val polygons: List<GeoDataMapPolygon> = emptyList(),
+) : Parcelable {
+    fun isEmpty(): Boolean {
+        return point == null && polygons.all { it.points.isEmpty() }
+    }
+}
+
+@Parcelize
+data class GeoDataMapPolygon(
+    val points: List<LatLng> = emptyList(),
 ) : Parcelable
 
 enum class LocationProvider(val providerName: String) {
@@ -61,6 +78,7 @@ data class MFile(
     var uri: Uri? = null,
     var name: String? = null,
     var size: Long? = null,
+    var mimeType: String? = null,
 ) : Parcelable
 
 @Parcelize
@@ -84,6 +102,10 @@ fun CreateTransactionModel?.getLocationText(): String? {
     }
 }
 
+fun CreateTransactionModel.getCommodityName(): String? {
+    return commodity?.name
+}
+
 fun CreateTransactionModel?.getCommodityText(): String? {
     if (this?.commodity == null) return null
 
@@ -93,7 +115,13 @@ fun CreateTransactionModel?.getCommodityText(): String? {
 fun CreateTransactionModel?.getCommodityVolumeText(): String? {
     if (this?.volume == null || commodity == null) return null
 
-    return "${volume.toQuantityText()} ${commodity.unit}"
+    return volume.toQuantityTextWithUnit(commodity.unit)
+}
+
+fun CreateTransactionModel?.getCommodityVolumeTextWithSign(): String? {
+    if (this?.volume == null || commodity == null) return null
+
+    return volume.toQuantityTextWithSignAndUnit(commodity.unit)
 }
 
 fun CreateTransactionModel?.getCommodityFullText(): String? {

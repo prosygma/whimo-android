@@ -60,6 +60,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.whimo.R
 import com.whimo.base.ObserveEffects
+import com.whimo.domain.transactions.models.ConversionTransactionItemModel
 import com.whimo.domain.transactions.models.HarvestSeasonModel
 import com.whimo.domain.transactions.models.HarvestSeasonStatus
 import com.whimo.domain.transactions.models.TraceabilityStatus
@@ -67,7 +68,9 @@ import com.whimo.domain.transactions.models.TransactionModel
 import com.whimo.domain.transactions.models.TransactionStatus
 import com.whimo.domain.transactions.models.UserModel
 import com.whimo.domain.transactions.models.getAccountText
+import com.whimo.domain.transactions.models.getCommodityText
 import com.whimo.domain.transactions.models.getShortName
+import com.whimo.domain.transactions.models.getVolumeTextWithSign
 import com.whimo.extensions.findActivity
 import com.whimo.extensions.toShortFormattedDateString
 import com.whimo.navigation.Screens
@@ -278,23 +281,32 @@ fun TransactionDetailsScreen(
                 onIconClick = onIconClick
             )
 
-            binding.commodityText?.let { commodityText ->
-                TitleDescriptionView(
-                    title = stringResource(R.string.commodity_type),
-                    description = commodityText,
-                    warningText = binding.commodityWarningText,
+            if (binding.isConversion) {
+                ConversionTransactionDetailsContent(
+                    binding = binding,
+                    onHarvestSeasonClick = { harvestSeason ->
+                        dialog = TransactionDetailsDialog.HarvestSeasonInfo(harvestSeason)
+                    },
                 )
-            }
-
-            binding.harvestSeason?.let { harvestSeason ->
-                TransactionInfoHarvestSeasonItem(
-                    season = harvestSeason,
-                ) {
-                    dialog = TransactionDetailsDialog.HarvestSeasonInfo(harvestSeason)
+            } else {
+                binding.commodityText?.let { commodityText ->
+                    TitleDescriptionView(
+                        title = stringResource(R.string.commodity_type),
+                        description = commodityText,
+                        volume = binding.commodityVolume ?: "",
+                        warningText = binding.commodityWarningText,
+                    )
                 }
-            }
 
-            if (binding.showLocation) {
+                binding.harvestSeason?.let { harvestSeason ->
+                    TransactionInfoHarvestSeasonItem(
+                        season = harvestSeason,
+                    ) {
+                        dialog = TransactionDetailsDialog.HarvestSeasonInfo(harvestSeason)
+                    }
+                }
+
+                if (binding.showLocation) {
 //                when (binding.locationProvider) {
 //                    LocationProvider.GPS, LocationProvider.QR, LocationProvider.Manual -> {
 //                        TransactionInfoItem1(
@@ -319,81 +331,82 @@ fun TransactionDetailsScreen(
                         viewModel?.setEvent(TransactionDetailsContract.Event.AddGeoDataClicked)
                     }
                 }
-            }
-
-            binding.traceability?.let { traceability ->
-                TransactionInfoTraceabilityItem(
-                    status = traceability,
-                    chartTitle = stringResource(R.string.traders),
-                    chartItems = binding.chartItems,
-                ) {
-                    dialog = TransactionDetailsDialog.TraceabilityStatusDialog(null)
                 }
-            }
 
-            binding.buyer?.let { buyer ->
-                if (binding.accountId == buyer.id) {
-                    TransactionInfoItem1(
-                        title = stringResource(R.string.buyer_id),
-                        description = stringResource(R.string.you, buyer.getAccountText()),
-                    )
-                } else {
-                    TransactionInfoItem2(
-                        title = stringResource(R.string.buyer_information),
-                        description = buyer.getAccountText(),
+                binding.traceability?.let { traceability ->
+                    TransactionInfoTraceabilityItem(
+                        status = traceability,
+                        chartTitle = stringResource(R.string.traders),
+                        chartItems = binding.chartItems,
                     ) {
-                        dialog = TransactionDetailsDialog.BuyerInfo(buyer)
+                        dialog = TransactionDetailsDialog.TraceabilityStatusDialog(null)
                     }
                 }
-            }
 
-            binding.seller?.let { seller ->
-                if (binding.accountId == seller.id) {
-                    TransactionInfoItem1(
-                        title = stringResource(R.string.seller_id),
-                        description = stringResource(R.string.you, seller.getAccountText()),
-                    )
-                } else {
-                    TransactionInfoItem2(
-                        title = stringResource(R.string.supplier_information),
-                        description = seller.getAccountText(),
+                binding.buyer?.let { buyer ->
+                    if (binding.accountId == buyer.id) {
+                        TransactionInfoItem1(
+                            title = stringResource(R.string.buyer_id),
+                            description = stringResource(R.string.you, buyer.getAccountText()),
+                        )
+                    } else {
+                        TransactionInfoItem2(
+                            title = stringResource(R.string.buyer_information),
+                            description = buyer.getAccountText(),
+                        ) {
+                            dialog = TransactionDetailsDialog.BuyerInfo(buyer)
+                        }
+                    }
+                }
+
+                binding.seller?.let { seller ->
+                    if (binding.accountId == seller.id) {
+                        TransactionInfoItem1(
+                            title = stringResource(R.string.seller_id),
+                            description = stringResource(R.string.you, seller.getAccountText()),
+                        )
+                    } else {
+                        TransactionInfoItem2(
+                            title = stringResource(R.string.supplier_information),
+                            description = seller.getAccountText(),
+                        ) {
+                            dialog = TransactionDetailsDialog.SellerInfo(seller)
+                        }
+                    }
+                }
+
+                binding.status?.let { status ->
+                    TransactionInfoStatusItem(
+                        status = status,
                     ) {
-                        dialog = TransactionDetailsDialog.SellerInfo(seller)
+                        dialog = TransactionDetailsDialog.TransactionStatusDialog(status)
                     }
                 }
-            }
 
-            binding.status?.let { status ->
-                TransactionInfoStatusItem(
-                    status = status,
-                ) {
-                    dialog = TransactionDetailsDialog.TransactionStatusDialog(status)
+                binding.createdDateText?.let { createdDateText ->
+                    TransactionInfoItem1(
+                        title = stringResource(R.string.transaction_date),
+                        description = createdDateText,
+                    )
                 }
-            }
 
-            binding.createdDateText?.let { createdDateText ->
-                TransactionInfoItem1(
-                    title = stringResource(R.string.transaction_date),
-                    description = createdDateText,
-                )
-            }
+                binding.expiryDateText?.let { expiryDateText ->
+                    TransactionInfoItem1(
+                        title = stringResource(R.string.expiry_date),
+                        description = expiryDateText,
+                    )
+                }
 
-            binding.expiryDateText?.let { expiryDateText ->
-                TransactionInfoItem1(
-                    title = stringResource(R.string.expiry_date),
-                    description = expiryDateText,
-                )
-            }
-
-            if (historyBinding.transactions.isNotEmpty()) {
-                SuppliersList(
-                    viewModel = viewModel,
-                    transactionModel = transactionModel,
-                    transactions = historyBinding.transactions,
-                    onTraceabilityStatusClick = {
-                        dialog = TransactionDetailsDialog.TraceabilityStatusDialog(it)
-                    }
-                )
+                if (historyBinding.transactions.isNotEmpty()) {
+                    SuppliersList(
+                        viewModel = viewModel,
+                        transactionModel = transactionModel,
+                        transactions = historyBinding.transactions,
+                        onTraceabilityStatusClick = {
+                            dialog = TransactionDetailsDialog.TraceabilityStatusDialog(it)
+                        }
+                    )
+                }
             }
         }
 
@@ -446,6 +459,56 @@ fun TransactionDetailsScreen(
     if (downloadLocationsLoading) {
         LoadingState()
     }
+}
+
+@Composable
+private fun ConversionTransactionDetailsContent(
+    binding: TransactionDetailsContract.Binding,
+    onHarvestSeasonClick: (HarvestSeasonModel) -> Unit,
+) {
+    binding.conversionInputs.forEach { input ->
+        ConversionTransactionInfoItem(
+            title = stringResource(R.string.converted_from),
+            item = input,
+            defaultSign = -1,
+        )
+    }
+
+    binding.conversionOutputs.forEach { output ->
+        ConversionTransactionInfoItem(
+            title = stringResource(R.string.converted_to),
+            item = output,
+            defaultSign = 1,
+        )
+    }
+
+    binding.harvestSeason?.let { harvestSeason ->
+        TransactionInfoHarvestSeasonItem(
+            season = harvestSeason,
+        ) {
+            onHarvestSeasonClick(harvestSeason)
+        }
+    }
+
+    binding.createdDateText?.let { createdDateText ->
+        TransactionInfoItem1(
+            title = stringResource(R.string.conversion_date),
+            description = createdDateText,
+        )
+    }
+}
+
+@Composable
+private fun ConversionTransactionInfoItem(
+    title: String,
+    item: ConversionTransactionItemModel,
+    defaultSign: Int,
+) {
+    TitleDescriptionView(
+        title = title,
+        description = item.getCommodityText(),
+        volume = item.getVolumeTextWithSign(defaultSign = defaultSign),
+    )
 }
 
 @Composable

@@ -27,6 +27,9 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import okio.BufferedSink
+import okio.source
+import java.io.IOException
 
 fun String?.toRequestBodyOrNull(): RequestBody? {
     return this?.toRequestBody("text/plain".toMediaTypeOrNull())
@@ -53,10 +56,18 @@ fun prepareFilePart(
 
     val contentResolver = context.contentResolver
     val fileName = file.name
-    val inputStream = contentResolver.openInputStream(file.uri!!)!!
-    val fileBytes = inputStream.readBytes()
-    val requestFile = fileBytes.toRequestBody(
-        contentResolver.getType(file.uri!!)?.toMediaTypeOrNull() ?: "application/octet-stream".toMediaTypeOrNull()
-    )
+    val uri = file.uri!!
+    val mediaType = (file.mimeType ?: contentResolver.getType(uri))?.toMediaTypeOrNull()
+        ?: "application/octet-stream".toMediaTypeOrNull()
+    val requestFile = object : RequestBody() {
+        override fun contentType() = mediaType
+        override fun contentLength() = file.size ?: -1L
+
+        override fun writeTo(sink: BufferedSink) {
+            val input = contentResolver.openInputStream(uri)
+                ?: throw IOException("Cannot open attachment: $uri")
+            input.use { sink.writeAll(it.source()) }
+        }
+    }
     return MultipartBody.Part.createFormData(fieldName, fileName, requestFile)
 }

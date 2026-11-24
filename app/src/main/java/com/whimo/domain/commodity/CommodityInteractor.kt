@@ -27,6 +27,8 @@ import com.whimo.domain.commodity.models.CommodityBalanceFilter
 import com.whimo.domain.commodity.models.CommodityBalanceModel
 import com.whimo.domain.commodity.models.CommodityFilter
 import com.whimo.domain.commodity.models.CommodityGroupModel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 
 interface CommodityInteractor {
     suspend fun getCommodities(filter: CommodityFilter): BaseResult<List<CommodityGroupModel>>
@@ -80,4 +82,19 @@ class CommodityInteractorImpl(
         private const val FIRST_PAGE = 1
         private const val DEFAULT_PAGE_SIZE = 1000
     }
+}
+
+/** Publishes the local snapshot before refreshing through the existing repository/cache policy. */
+suspend fun CommodityInteractor.refreshBalances(
+    filter: CommodityBalanceFilter,
+    onCached: (List<CommodityBalanceModel>) -> Unit,
+): BaseResult<List<CommodityBalanceModel>> {
+    val requestFilter = filter.copy()
+    val cached = getBalancesFromDB(requestFilter)
+    currentCoroutineContext().ensureActive()
+    onCached(cached)
+    val result = getBalances(requestFilter)
+    // The network layer can turn cancellation into a cache fallback result.
+    currentCoroutineContext().ensureActive()
+    return result
 }

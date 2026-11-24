@@ -49,8 +49,12 @@ import com.whimo.base.ObserveEffects
 import com.whimo.domain.createtransaction.models.LocationProvider
 import com.whimo.domain.transactions.models.TransactionModel
 import com.whimo.extensions.findActivity
+import com.whimo.navigation.Screens
 import com.whimo.presentation.createtransaction.components.CameraPreview
 import com.whimo.presentation.createtransaction.geodata.FarmGeoDataActivity
+import com.whimo.presentation.createtransaction.geodata.FarmGeoDataActivity.Companion.QR_CONFIRMATION_LOCATION
+import com.whimo.presentation.createtransaction.geodata.FarmGeoDataActivity.Companion.QR_CONFIRMATION_MAP_GEOMETRY
+import com.whimo.presentation.createtransaction.geodata.FarmGeoDataActivity.Companion.QR_CONFIRMATION_QR_DATA
 import com.whimo.presentation.main.components.EmptyState
 import com.whimo.presentation.main.components.Toolbar2
 import com.whimo.presentation.ui.theme.WhimoTheme
@@ -90,9 +94,25 @@ fun QrScanScreen(
                     activity.setResult(
                         locationProvider = LocationProvider.QR,
                         location = effect.location,
+                        mapGeometry = effect.mapGeometry,
                         qrData = effect.qrData,
                     )
                     activity.finish()
+                }
+                is QrScanContract.Effect.ShowQrConfirmation -> {
+                    navController.currentBackStackEntry?.savedStateHandle?.set(
+                        QR_CONFIRMATION_QR_DATA,
+                        effect.qrData,
+                    )
+                    navController.currentBackStackEntry?.savedStateHandle?.set(
+                        QR_CONFIRMATION_LOCATION,
+                        effect.location,
+                    )
+                    navController.currentBackStackEntry?.savedStateHandle?.set(
+                        QR_CONFIRMATION_MAP_GEOMETRY,
+                        effect.mapGeometry,
+                    )
+                    navController.navigate(Screens.Map.route)
                 }
                 is QrScanContract.Effect.ShowMessage -> {
                     Toast.makeText(context, effect.message, Toast.LENGTH_LONG).show()
@@ -113,6 +133,10 @@ fun QrScanScreen(
         if (transactionModel != null) {
             viewModel?.setEvent(QrScanContract.Event.OnCreate(transactionModel))
         }
+    }
+
+    LifecycleEventEffect(event = Lifecycle.Event.ON_RESUME) {
+        mResult = false
     }
 
     Column(modifier = modifier) {

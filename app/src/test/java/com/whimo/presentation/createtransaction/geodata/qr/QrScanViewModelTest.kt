@@ -24,14 +24,18 @@ package com.whimo.presentation.createtransaction.geodata.qr
 import android.content.Context
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
+import com.google.android.gms.maps.model.LatLng
 import com.whimo.R
 import com.whimo.data.base.common.BaseResult
 import com.whimo.data.geodata.model.request.UpdateGeoDataRequest
+import com.whimo.domain.createtransaction.models.GeoDataMapGeometry
 import com.whimo.domain.geodata.GeoDataInteractor
 import com.whimo.domain.geodata.models.DownloadGeoDataModel
 import com.whimo.domain.transactions.models.BaseModel
+import com.whimo.domain.transactions.models.TransactionModel
 import com.whimo.network.ErrorHandler
 import com.whimo.providers.ResourceProvider
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -47,11 +51,16 @@ import okhttp3.ResponseBody
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.io.File
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@RunWith(RobolectricTestRunner::class)
 class QrScanViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
@@ -91,6 +100,67 @@ class QrScanViewModelTest {
         assertFalse(interactor.updateTransactionGeoDataCalled)
     }
 
+    @Test
+    fun `valid GeoJSON QR emits confirmation and does not upload before confirm`() = runTest {
+        val geoJson = """{"type":"Feature","geometry":{"type":"Point","coordinates":[12.65,4.94]},"properties":{}}"""
+        val confirmation = async {
+            viewModel.effect
+                .filterIsInstance<QrScanContract.Effect.ShowQrConfirmation>()
+                .first()
+        }
+
+        viewModel.setEvent(QrScanContract.Event.QrScanned(mockk<Context>(), geoJson))
+        advanceUntilIdle()
+
+        val effect = confirmation.await()
+        assertEquals(geoJson, effect.qrData)
+        assertCoordinate(effect.location, latitude = 4.94, longitude = 12.65)
+        assertCoordinate(effect.mapGeometry?.point, latitude = 4.94, longitude = 12.65)
+        assertFalse(interactor.updateTransactionGeoDataCalled)
+    }
+
+    @Test
+    fun `confirm QR for existing transaction uploads geodata and emits result`() = runTest {
+        val geoJson = """{"type":"Feature","geometry":{"type":"Point","coordinates":[12.65,4.94]},"properties":{}}"""
+        val location = LatLng(4.94, 12.65)
+        val mapGeometry = GeoDataMapGeometry(point = location)
+        val result = async {
+            viewModel.effect
+                .filterIsInstance<QrScanContract.Effect.QrResult>()
+                .first()
+        }
+        val cacheDir = File(System.getProperty("java.io.tmpdir"), "qr-test-${System.nanoTime()}").apply {
+            mkdirs()
+        }
+        val context = mockk<Context>()
+        every { context.cacheDir } returns cacheDir
+        val transaction = mockk<TransactionModel> {
+            every { id } returns "transaction-1"
+        }
+
+        viewModel.setEvent(QrScanContract.Event.OnCreate(transaction))
+        viewModel.setEvent(
+            QrScanContract.Event.ConfirmQr(
+                context = context,
+                qrData = geoJson,
+                location = location,
+                mapGeometry = mapGeometry,
+            )
+        )
+        advanceUntilIdle()
+
+        val effect = result.await()
+        assertTrue(interactor.updateTransactionGeoDataCalled)
+        assertEquals("transaction-1", interactor.transactionId)
+        assertEquals("qr", interactor.request?.locationProvider?.providerName)
+        assertEquals("qr.geojson", interactor.request?.locationFile?.name)
+        assertEquals(geoJson, effect.qrData)
+        assertEquals(mapGeometry, effect.mapGeometry)
+        assertCoordinate(effect.location, latitude = 4.94, longitude = 12.65)
+
+        cacheDir.deleteRecursively()
+    }
+
     private class TestResourceProvider : ResourceProvider {
         val invalidQrMessage = "QR code must contain GeoJSON data"
 
@@ -120,12 +190,16 @@ class QrScanViewModelTest {
 
     private class TestGeoDataInteractor : GeoDataInteractor {
         var updateTransactionGeoDataCalled = false
+        var transactionId: String? = null
+        var request: UpdateGeoDataRequest? = null
 
         override suspend fun updateTransactionGeoData(
             transactionId: String,
             request: UpdateGeoDataRequest
         ): BaseResult<Boolean> {
             updateTransactionGeoDataCalled = true
+            this.transactionId = transactionId
+            this.request = request
             return BaseResult.Success(true)
         }
 
@@ -148,5 +222,15 @@ class QrScanViewModelTest {
         override suspend fun downloadTransactionBundle(transactionId: String): BaseResult<ResponseBody> {
             throw NotImplementedError()
         }
+    }
+
+    private fun assertCoordinate(
+        coordinate: LatLng?,
+        latitude: Double,
+        longitude: Double,
+    ) {
+        assertNotNull(coordinate)
+        assertEquals(latitude, coordinate!!.latitude, 0.000001)
+        assertEquals(longitude, coordinate.longitude, 0.000001)
     }
 }

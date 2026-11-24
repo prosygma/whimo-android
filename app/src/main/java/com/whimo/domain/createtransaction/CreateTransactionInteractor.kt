@@ -22,8 +22,9 @@
 package com.whimo.domain.createtransaction
 
 import android.content.Context
+import android.net.Uri
+import android.util.Log
 import com.whimo.data.base.common.BaseResult
-import com.whimo.data.createtransaction.model.entity.PendingTransactionEntity
 import com.whimo.data.createtransaction.model.mappers.toEntity
 import com.whimo.data.createtransaction.model.mappers.toModel
 import com.whimo.data.createtransaction.model.request.CreateDownstreamTransactionRequest
@@ -41,6 +42,8 @@ import com.whimo.utils.parseQrGeoData
 import com.whimo.utils.toJsonArgs
 import com.whimo.utils.writeQRDataToCacheFile
 import java.io.File
+import java.io.IOException
+import java.util.UUID
 
 interface CreateTransactionInteractor {
     suspend fun createTransaction(transaction: CreateTransactionModel): BaseResult<TransactionModel>
@@ -65,17 +68,33 @@ class CreateTransactionInteractorImpl(
         if (context.isNetworkAvailable()) {
             return create(transaction)
         } else {
-            repository.addPendingTransaction(transaction.toEntity())
-            return BaseResult.Success(null)
+            var localFile: MFile? = null
+            return try {
+                localFile = transaction.file?.let(::copyPendingAttachment)
+                repository.addPendingTransaction(transaction.copy(file = localFile).toEntity())
+                BaseResult.Success(null)
+            } catch (e: Exception) {
+                deletePendingAttachment(localFile)
+                BaseResult.Error(e)
+            }
         }
     }
 
     override suspend fun getPendingTransactions(): List<PendingTransactionModel> {
-        return repository.getPendingTransactions().map { it.toModel() }
+        return repository.getPendingTransactions().mapNotNull { entity ->
+            try {
+                entity.toModel()
+            } catch (e: Exception) {
+                // Keep the original database row so a damaged legacy attachment is never discarded.
+                Log.e("PendingTransactions", "Cannot read pending transaction ${entity.id}", e)
+                null
+            }
+        }
     }
 
     override suspend fun clearPendingTransactions() {
         repository.clearPendingTransactions()
+        pendingAttachmentsDir().listFiles()?.forEach(File::delete)
     }
 
     override suspend fun sendPendingTransactions(): Boolean {
@@ -89,6 +108,7 @@ class CreateTransactionInteractorImpl(
 
         if (context.isNetworkAvailable()) {
             val pendingTransactions = getPendingTransactions()
+            if (pendingTransactions.size != repository.getPendingTransactions().size) result = false
             val totalTransactions = pendingTransactions.size
 
             if (totalTransactions > 0) {
@@ -107,6 +127,7 @@ class CreateTransactionInteractorImpl(
 
                 if (createResult is BaseResult.Success) {
                     repository.removePendingTransaction(pendingTransaction.id)
+                    deletePendingAttachment(pendingTransaction.transactionModel.file)
                 } else {
                     result = false
                 }
@@ -123,6 +144,38 @@ class CreateTransactionInteractorImpl(
         }
 
         return result
+    }
+
+    private fun pendingAttachmentsDir(): File = File(context.filesDir, "pending-transaction-files")
+
+    private fun copyPendingAttachment(file: MFile): MFile {
+        val source = file.uri ?: throw IOException("Attachment URI is missing")
+        val directory = pendingAttachmentsDir()
+        if (!directory.exists() && !directory.mkdirs()) {
+            throw IOException("Cannot create pending attachment directory")
+        }
+        val target = File(directory, UUID.randomUUID().toString())
+        try {
+            val input = context.contentResolver.openInputStream(source)
+                ?: throw IOException("Cannot open attachment: $source")
+            input.use { stream -> target.outputStream().use { output -> stream.copyTo(output) } }
+            return file.copy(
+                uri = Uri.fromFile(target),
+                size = target.length(),
+                mimeType = file.mimeType ?: context.contentResolver.getType(source),
+            )
+        } catch (e: Exception) {
+            target.delete()
+            throw e
+        }
+    }
+
+    private fun deletePendingAttachment(file: MFile?) {
+        val uri = file?.uri ?: return
+        if (uri.scheme != "file") return
+        val path = uri.path ?: return
+        val local = File(path)
+        if (local.parentFile == pendingAttachmentsDir()) local.delete()
     }
 
     private suspend fun create(transaction: CreateTransactionModel): BaseResult<TransactionModel> {

@@ -25,14 +25,13 @@ import com.whimo.data.base.common.BaseResult
 import com.whimo.data.commodity.model.request.ConvertCommodityRequest
 import com.whimo.data.commodity.repository.CommodityRepository
 import com.whimo.data.commodity.repository.ConvertCommodityRepository
+import com.whimo.domain.commodity.models.CommodityBalanceModel
+import com.whimo.domain.commodity.models.CommodityGroupModel
 import com.whimo.domain.commodity.models.CommodityModel
 import com.whimo.domain.commodity.models.ConvertQuantityModel
+import com.whimo.domain.commodity.models.ConvertRecipeModel
 import com.whimo.domain.harvestseasons.models.HarvestSeasonModel
 import com.whimo.domain.transactions.models.BaseModel
-import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.mockk
-import io.mockk.slot
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -40,37 +39,106 @@ import org.junit.Test
 class ConvertCommodityInteractorImplTest {
 
     @Test
-    fun `convertCommodity adds selected harvest season id to request`() = runTest {
-        val requestSlot = slot<ConvertCommodityRequest>()
-        val repository = mockk<ConvertCommodityRepository>()
-        coEvery { repository.convertCommodity(capture(requestSlot)) } returns
-                BaseResult.Success(BaseModel(success = true, message = ""))
+    fun `convertCommodity sends selected harvest season id`() = runTest {
+        val convertRepository = FakeConvertCommodityRepository()
         val interactor = ConvertCommodityInteractorImpl(
-            repository = repository,
-            commodityRepository = mockk<CommodityRepository>(relaxed = true),
+            repository = convertRepository,
+            commodityRepository = FakeCommodityRepository(),
         )
-        val quantity = ConvertQuantityModel(
-            id = "quantity-id",
-            commodity = CommodityModel(
-                id = "commodity-id",
-                code = "1801",
-                name = "Cocoa beans",
-                unit = "kg",
-                hasRecipe = true,
-                group = null,
-                balance = 100f,
-            ),
-            quantity = 50f,
+        val input = ConvertQuantityModel(
+            id = "input",
+            commodity = commodity("input-commodity"),
+            quantity = 1000f,
+        )
+        val output = ConvertQuantityModel(
+            id = "output",
+            commodity = commodity("output-commodity"),
+            quantity = 850f,
+        )
+        val harvestSeason = HarvestSeasonModel(
+            id = "season-id",
+            name = "2026/27",
         )
 
         interactor.convertCommodity(
             recipeId = "recipe-id",
-            inputs = listOf(quantity),
-            outputs = listOf(quantity),
-            harvestSeason = HarvestSeasonModel(id = "season-id"),
+            inputs = listOf(input),
+            outputs = listOf(output),
+            harvestSeason = harvestSeason,
         )
 
-        coVerify(exactly = 1) { repository.convertCommodity(any()) }
-        assertEquals("season-id", requestSlot.captured.harvest_season_id)
+        val request = convertRepository.lastRequest
+        assertEquals("recipe-id", request?.recipe_id)
+        assertEquals("season-id", request?.harvest_season_id)
+        assertEquals("input-commodity", request?.input_overrides?.firstOrNull()?.commodity_id)
+        assertEquals("output-commodity", request?.output_overrides?.firstOrNull()?.commodity_id)
+    }
+
+    private fun commodity(id: String): CommodityModel {
+        return CommodityModel(
+            id = id,
+            code = id,
+            name = id,
+            unit = "kg",
+            hasRecipe = true,
+            group = null,
+            balance = null,
+        )
+    }
+
+    private class FakeConvertCommodityRepository : ConvertCommodityRepository {
+        var lastRequest: ConvertCommodityRequest? = null
+
+        override suspend fun getRecipes(
+            search: String?,
+            commodityId: String?,
+            page: Int,
+            pageSize: Int,
+        ): BaseResult<List<ConvertRecipeModel>> {
+            return BaseResult.Success(emptyList())
+        }
+
+        override suspend fun convertCommodity(
+            request: ConvertCommodityRequest,
+        ): BaseResult<BaseModel> {
+            lastRequest = request
+            return BaseResult.Success(BaseModel(success = true, message = ""))
+        }
+    }
+
+    private class FakeCommodityRepository : CommodityRepository {
+        override suspend fun getCommodities(
+            search: String?,
+            page: Int,
+            pageSize: Int,
+        ): BaseResult<List<CommodityGroupModel>> {
+            return BaseResult.Success(emptyList())
+        }
+
+        override suspend fun getCommoditiesFromDB(): List<CommodityGroupModel> {
+            return emptyList()
+        }
+
+        override suspend fun updateCommoditiesDB(items: List<CommodityGroupModel>?) = Unit
+
+        override suspend fun getBalancesFromDB(
+            search: String?,
+            commodityGroupId: String?,
+            commodityId: String?,
+            harvestSeasonId: String?,
+        ): List<CommodityBalanceModel> {
+            return emptyList()
+        }
+
+        override suspend fun getBalances(
+            search: String?,
+            page: Int,
+            pageSize: Int,
+            commodityGroupId: String?,
+            commodityId: String?,
+            harvestSeasonId: String?,
+        ): BaseResult<List<CommodityBalanceModel>> {
+            return BaseResult.Success(emptyList())
+        }
     }
 }
