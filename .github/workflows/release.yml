@@ -38,6 +38,9 @@ jobs:
           java-version: '17'
 
       - uses: android-actions/setup-android@v3
+        with:
+          # The default also asks for the obsolete 'tools' package, which no longer exists.
+          packages: platform-tools
 
       - name: Install SDK 36
         run: |
