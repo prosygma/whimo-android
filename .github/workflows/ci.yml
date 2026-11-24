@@ -43,6 +43,17 @@ jobs:
           set -euo pipefail
           cp config/build.properties.example config/build.properties
           cp app/google-services.json.example app/google-services.json
+          # app/build.gradle needs signing configs; a throwaway key, created for this run only.
+          keytool -genkeypair -keystore config/ci.jks -storepass ci-pass -keypass ci-pass \
+            -alias ci -keyalg RSA -keysize 2048 -validity 1 -dname "CN=CI" -noprompt
+          {
+            for t in release debug; do
+              echo "${t}_storeFile=config/ci.jks"
+              echo "${t}_storePassword=ci-pass"
+              echo "${t}_keyAlias=ci"
+              echo "${t}_keyPassword=ci-pass"
+            done
+          } > config/signing.properties
 
       - name: Unit tests and debug build (CamerTrace flavor)
         run: ./gradlew --no-daemon testCamertraceDebugUnitTest assembleCamertraceDebug
