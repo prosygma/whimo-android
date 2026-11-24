@@ -1,3 +1,9 @@
+> **CamerTrace** (Android app): the cocoa and coffee traceability platform of the CICC, Cameroon,
+> built on [WHIMO](https://github.com/EuropeanForestInstitute/whimo-android) by the European Forest Institute.
+>
+> Contributing: [CONTRIBUTING.md](CONTRIBUTING.md) · Branches: [FORK.md](FORK.md) · Security: [SECURITY.md](SECURITY.md).
+> The rest of this README comes from WHIMO.
+
 # 🌍 WHIMO App
 
 Mobile and web application designed to help supply chain actors collect and transfer geolocation data of commodity production areas to support compliance with the **EU Regulation on Deforestation-Free Products (EUDR)**.

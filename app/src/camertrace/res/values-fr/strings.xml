@@ -5,4 +5,14 @@
     <string name="tap_to_invite_user">Appuyez pour inviter un utilisateur sur CamerTrace</string>
     <string name="counterparty_info_instruction">Veuillez saisir des informations précises sur la contrepartie afin que nous puissions l\'inviter sur CamerTrace.</string>
     <string name="whimo_app_feedback">Retour d’application CamerTrace</string>
+    <!-- CICC wording: « produit » instead of « marchandise », « Quantité » for the volume field -->
+    <string name="buy_commodity">Acheter ou collecter un produit</string>
+    <string name="sell_commodity">Vendre ou livrer un produit</string>
+    <string name="buying_from_farmer_description">Achat direct auprès du producteur qui a récolté les produits.</string>
+    <string name="select_commodity_type">Sélectionner le type de produit</string>
+    <string name="commodity_type">Type de produit</string>
+    <string name="select_commodity_type_to_buy">Veuillez sélectionner le type de produit que vous voulez acheter.</string>
+    <string name="select_commodity_type_to_sell">Veuillez sélectionner le type de produit que vous voulez vendre.</string>
+    <string name="convert_commodity_text">Veuillez sélectionner comment vous souhaitez convertir ce type de produit.</string>
+    <string name="number">Quantité</string>
 </resources>
