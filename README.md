@@ -177,7 +177,7 @@ settings in the files above; `release` uses `release_*` / `RELEASE_*`.
    corresponding **Web application** client IDs accepted by each backend. Both
    builds may share a Web client ID if both backends accept it.
 4. **Maps:** maps use Mapbox. Put a public `pk.*` token in `MAPBOX_PUBLIC_TOKEN`
-   in `config/secrets.properties` (the release workflow refuses any other value).
+   in `config/secrets.properties`; a release build must use a real `pk.` token.
 
 If using a separate development Firebase project, also configure its OAuth clients,
 Remote Config parameters, and backend FCM credentials.
