@@ -1,0 +1,27 @@
+# Copy to config/build.properties (gitignored) and fill in.
+#
+# String values are injected verbatim into buildConfigField, so they MUST keep
+# their double quotes; latitude/longitude are doubles and stay unquoted.
+# base_url MUST end in "/" and include /api/v1/.
+#
+# For a local backend on the emulator use "http://10.0.2.2:8000/api/v1/"
+# (debug builds then also need cleartext traffic allowed).
+# Empty captcha_url ("") = no captcha page; codes are sent without a token.
+
+release_base_url="https://api.example.com/api/v1/"
+release_test_base_url="https://api.example.com/api/v1/test/"
+release_default_country_code="CM"
+release_default_location_latitude=4.106729
+release_default_location_longitude=9.3972812
+release_terms_of_use="https://example.com/terms"
+release_feedback_email="support@example.com"
+release_captcha_url=""
+
+debug_base_url="https://api.example.com/api/v1/"
+debug_test_base_url="https://api.example.com/api/v1/test/"
+debug_default_country_code="CM"
+debug_default_location_latitude=4.106729
+debug_default_location_longitude=9.3972812
+debug_terms_of_use="https://example.com/terms"
+debug_feedback_email="support@example.com"
+debug_captcha_url=""

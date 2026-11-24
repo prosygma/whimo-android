@@ -1,0 +1,68 @@
+name: CI
+
+# Runs without any repository secret: the gitignored build inputs are replaced by
+# test-only placeholders, so pull requests from forks build the same way.
+on:
+  pull_request:
+  push:
+    branches: [camertrace]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install SDK 36
+        run: |
+          yes | sdkmanager --licenses > /dev/null
+          sdkmanager --install "platforms;android-36" "build-tools;36.0.0"
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Write placeholder build inputs
+        run: |
+          set -euo pipefail
+          cp config/build.properties.example config/build.properties
+          cp app/google-services.json.example app/google-services.json
+
+      - name: Unit tests and debug build (CamerTrace flavor)
+        run: ./gradlew --no-daemon testCamertraceDebugUnitTest assembleCamertraceDebug
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-reports
+          path: app/build/reports/tests/
+          retention-days: 7
+
+  upstream-clean:
+    # Generic branches are candidates for EuropeanForestInstitute: they must carry no CamerTrace content.
+    if: github.event_name == 'pull_request' && (startsWith(github.head_ref, 'feat/') || startsWith(github.head_ref, 'fix/'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Fetch EFI main
+        run: |
+          git remote add upstream https://github.com/EuropeanForestInstitute/${{ github.event.repository.name }}.git
+          git fetch --no-tags upstream main
+      # Check the PR's own commits, not the merge with the base branch.
+      - run: scripts/check-upstream-clean.sh ${{ github.event.pull_request.head.sha }} upstream/main

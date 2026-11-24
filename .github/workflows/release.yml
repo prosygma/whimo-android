@@ -25,6 +25,8 @@ jobs:
   bundle:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    # Signing key and Play credentials: a maintainer must approve each run.
+    environment: release
     # No MAPBOX_DOWNLOADS_TOKEN: Maps SDK v11 is served anonymously, and a
     # token without DOWNLOADS:READ turns that into a 403 (see settings.gradle).
     steps:
