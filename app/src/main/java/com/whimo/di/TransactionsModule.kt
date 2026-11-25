@@ -63,9 +63,12 @@ val transactionsModule = module {
             allTabInteractor = get(),
             boughtTabInteractor = get(),
             soldTabInteractor = get(),
+            convertedTabInteractor = get(),
             createTransactionInteractor = get(),
             harvestSeasonsInteractor = get(),
             commodityInteractor = get(),
+            errorHandler = get(),
+            resourceProvider = get(),
         )
     }
     viewModel {

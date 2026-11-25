@@ -193,6 +193,8 @@
     <string name="filter_icon">Filter Icon</string>
     <string name="bought">Bought</string>
     <string name="sold">Sold</string>
+    <string name="converted">Converted</string>
+    <string name="conversion_to_label">to</string>
     <string name="please_wait">Please wait</string>
     <string name="full_traceability">Full traceability</string>
     <string name="conditional_traceability">Conditional traceability</string>
@@ -236,6 +238,10 @@
 
     <!-- Transaction Details Strings -->
     <string name="transaction_details">Transaction details</string>
+    <string name="conversion_transaction">Conversion transaction</string>
+    <string name="converted_from">Converted from</string>
+    <string name="converted_to">Converted to</string>
+    <string name="conversion_date">Conversion date</string>
     <string name="commodity_type">Commodity type</string>
     <string name="all_commodity_groups">All commodity groups</string>
     <string name="harvest_season">Harvest season</string>
@@ -359,6 +365,7 @@
     <string name="user_already_exist_description">We recommend you to create a downstream transaction and we will recover a traceability information from your supplier.\n\nYou can proceed with initial transaction and become a first point in the chain, however you will lose your supplier’s locations information.</string>
 
     <string name="download">Download</string>
+    <string name="download_failed">Download failed</string>
     <string name="offline_transaction">Offline transaction</string>
     <string name="offline_transactions_sync_title">Syncing offline transactions</string>
     <string name="offline_transactions_sync_progress">Processed %1$d of %2$d offline transactions</string>
@@ -369,7 +376,16 @@
     <string name="downloading_locations_data_for_trader">You will be downloading locations data for Trader #%s, %.2f%s, including:\n• Merged GeoJSON files\n• Custom location files</string>
     <string name="download_locations_dialog">Download locations?</string>
     <string name="download_farm_geolocation">Download farm geolocation</string>
+    <string name="download_farm_geolocation_q">Download farm geolocation?</string>
     <string name="download_transaction_details">Download transaction details</string>
+    <string name="download_both">Download both</string>
+    <string name="download_both_q">Download both?</string>
+    <string name="download_all_options_description">Please select what exactly you want to download for the entire period: transaction details from all traders, farm geolocations or both?</string>
+    <string name="download_all_geolocations_confirmation">You will be downloading farm geolocation data, including:</string>
+    <string name="download_all_both_confirmation">You will be downloading transaction details from %1$d traders and farm geolocation data, including:</string>
+    <string name="download_all_merged_geojson_files">Merged GeoJSON files (%1$d)</string>
+    <string name="download_all_custom_location_files">Custom location files (%1$d)</string>
+    <string name="download_all_without_geolocation">Farms without geolocation are not included: %1$d</string>
     <string name="email_not_verified">Email not verified</string>
     <string name="phone_not_verified">Phone not verified</string>
     <string name="send_verification_code">We will send you a verification code to verify that it’s you.</string>
@@ -386,6 +402,7 @@
     <string name="from">From</string>
     <string name="to">To</string>
     <string name="convert_commodity">Convert commodity</string>
+    <string name="season_balance">Season balance: %1$s</string>
     <string name="convert_commodity_info">Information is presented using standardized equivalents. You may edit it as required.</string>
     <string name="no_recipes">No recipes</string>
     <string name="convert_commodity_text">Please select how do you want to convert this commodity type.</string>

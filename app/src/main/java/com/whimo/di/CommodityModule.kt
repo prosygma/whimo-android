@@ -87,5 +87,5 @@ val commodityModule = module {
     viewModel { CommodityGroupBalancesViewModel(interactor = get(), errorHandler = get()) }
     viewModel { BalanceDetailsViewModel(interactor = get()) }
     viewModel { ConvertRecipesViewModel(interactor = get(), errorHandler = get()) }
-    viewModel { ConvertCommodityViewModel(interactor = get(), errorHandler = get()) }
+    viewModel { ConvertCommodityViewModel(interactor = get(), errorHandler = get(), commodityInteractor = get()) }
 }

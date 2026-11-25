@@ -21,8 +21,12 @@
  */
 package com.whimo.utils
 
+import android.net.Uri
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonElement
+import com.google.gson.JsonParseException
+import com.google.gson.JsonParser
 import com.google.gson.TypeAdapter
 import com.google.gson.stream.JsonReader
 import com.google.gson.stream.JsonWriter
@@ -31,9 +35,44 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 val gson: Gson = GsonBuilder()
+    .registerTypeAdapter(Uri::class.java, UriAdapter())
     .registerTypeAdapter(LocalDate::class.java, LocalDateAdapter())
     .registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeAdapter())
     .create()
+
+/** Stores a URI as a string while accepting records written before this adapter existed. */
+class UriAdapter : TypeAdapter<Uri>() {
+    override fun write(out: JsonWriter, value: Uri?) {
+        if (value == null) out.nullValue() else out.value(value.toString())
+    }
+
+    override fun read(`in`: JsonReader): Uri? {
+        val value = JsonParser.parseReader(`in`)
+        if (value.isJsonNull) return null
+        if (value.isJsonPrimitive) return Uri.parse(value.asString)
+
+        // Old Gson versions reflected Uri.StringUri and Uri.HierarchicalUri fields.
+        val obj = value.asJsonObject
+        obj.get("uriString")?.takeIf { it.isJsonPrimitive }?.let { return Uri.parse(it.asString) }
+        val scheme = component(obj.get("scheme"))
+            ?: throw JsonParseException("Stored URI has no scheme")
+        val authority = component(obj.get("authority"))
+            ?: throw JsonParseException("Stored URI has no authority")
+        val builder = Uri.Builder().scheme(scheme).encodedAuthority(authority)
+        component(obj.get("path"))?.let(builder::encodedPath)
+        component(obj.get("query"))?.let(builder::encodedQuery)
+        component(obj.get("fragment"))?.let(builder::encodedFragment)
+        return builder.build()
+    }
+
+    private fun component(value: JsonElement?): String? {
+        if (value == null || value.isJsonNull) return null
+        if (value.isJsonPrimitive) return value.asString
+        if (!value.isJsonObject) return null
+        val obj = value.asJsonObject
+        return component(obj.get("encoded")) ?: component(obj.get("decoded"))
+    }
+}
 
 class LocalDateAdapter : TypeAdapter<LocalDate>() {
     private val formatter = DateTimeFormatter.ISO_LOCAL_DATE

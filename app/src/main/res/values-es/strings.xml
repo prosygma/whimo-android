@@ -192,6 +192,8 @@
     <string name="filter_icon">Ícono de filtro</string>
     <string name="bought">Comprado</string>
     <string name="sold">Vendido</string>
+    <string name="converted">Convertidas</string>
+    <string name="conversion_to_label">a</string>
     <string name="please_wait">Por favor espera</string>
     <string name="full_traceability">Trazabilidad completa</string>
     <string name="conditional_traceability">Trazabilidad condicional</string>
@@ -235,6 +237,10 @@
 
     <!-- Transaction Details Strings -->
     <string name="transaction_details">Detalles de la transacción</string>
+    <string name="conversion_transaction">Transacción de conversión</string>
+    <string name="converted_from">Convertido desde</string>
+    <string name="converted_to">Convertido a</string>
+    <string name="conversion_date">Fecha de conversión</string>
     <string name="commodity_type">Tipo de producto</string>
     <string name="all_commodity_groups">Todos los grupos de productos</string>
     <string name="harvest_season">Temporada de cosecha</string>
@@ -349,6 +355,7 @@
     <string name="check_inbox_instructions_verify">Te enviamos un código a \n%s para verificar tu cuenta.</string>
 
     <string name="download">Descargar</string>
+    <string name="download_failed">Error en la descarga</string>
     <string name="offline_transaction">Transacción sin conexión</string>
     <string name="offline_transactions_sync_title">Sincronizando transacciones sin conexión</string>
     <string name="offline_transactions_sync_progress">%1$d de %2$d transacciones sin conexión procesadas</string>
@@ -359,7 +366,16 @@
     <string name="downloading_locations_data_for_trader">Vas a descargar datos de ubicación para el comerciante #%s, %.2f%s, incluyendo:\n• Archivos GeoJSON combinados\n• Archivos de ubicación personalizados</string>
     <string name="download_locations_dialog">¿Descargar ubicaciones?</string>
     <string name="download_farm_geolocation">Descargar geolocalización de la finca</string>
+    <string name="download_farm_geolocation_q">¿Descargar geolocalización de la finca?</string>
     <string name="download_transaction_details">Descargar detalles de la transacción</string>
+    <string name="download_both">Descargar ambos</string>
+    <string name="download_both_q">¿Descargar ambos?</string>
+    <string name="download_all_options_description">Selecciona exactamente qué quieres descargar para todo el período: detalles de transacciones de todos los comerciantes, geolocalizaciones de fincas o ambos.</string>
+    <string name="download_all_geolocations_confirmation">Vas a descargar datos de geolocalización de fincas, incluyendo:</string>
+    <string name="download_all_both_confirmation">Vas a descargar detalles de transacciones de %1$d comerciantes y datos de geolocalización de fincas, incluyendo:</string>
+    <string name="download_all_merged_geojson_files">Archivos GeoJSON combinados (%1$d)</string>
+    <string name="download_all_custom_location_files">Archivos de ubicación personalizados (%1$d)</string>
+    <string name="download_all_without_geolocation">Fincas sin geolocalización no incluidas: %1$d</string>
     <string name="email_not_verified">Correo electrónico no verificado</string>
     <string name="phone_not_verified">Teléfono no verificado</string>
     <string name="send_verification_code">Te enviaremos un código de verificación para confirmar que eres tú.</string>
@@ -376,6 +392,7 @@
     <string name="from">De</string>
     <string name="to">A</string>
     <string name="convert_commodity">Convertir producto</string>
+    <string name="season_balance">Saldo de la temporada: %1$s</string>
     <string name="convert_commodity_info">La información se presenta utilizando equivalencias estandarizadas. Puedes editarla según sea necesario.</string>
     <string name="no_recipes">Sin recetas</string>
     <string name="convert_commodity_text">Por favor, selecciona cómo deseas convertir este tipo de mercancía.</string>

@@ -59,52 +59,59 @@ private fun Preview() {
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             TransactionItem(
-                iconRes = R.drawable.ic_status_buy,
-                title = "Cocoa, 300kg",
+                iconRes = R.drawable.ic_buy_28,
+                title = "Cocoa",
+                volume = "-300kg",
                 description = "April 22, 2025 11:10am",
                 harvestSeasonText = "2025/26",
                 status = TransactionStatus.Accepted
             )
 
             TransactionItem(
-                iconRes = R.drawable.ic_status_sell,
-                title = "Cattle, 200pcs",
+                iconRes = R.drawable.ic_sell_28,
+                title = "Cattle",
+                volume = "+200pcs",
                 description = "April 22, 2025 11:10am",
                 status = TransactionStatus.Rejected
             )
 
             TransactionItem(
-                iconRes = R.drawable.ic_status_buy,
-                title = "Cocoa, 100kg",
+                iconRes = R.drawable.ic_buy_28,
+                title = "Cocoa",
+                volume = "-100kg",
                 description = "April 22, 2025 11:10am",
                 status = TransactionStatus.Pending
             )
 
             TransactionItem(
-                iconRes = R.drawable.ic_status_sell,
-                title = "Cocoa, 100kg",
+                iconRes = R.drawable.ic_sell_28,
+                title = "Cocoa",
+                volume = "+100kg",
                 description = "April 22, 2025 11:10am",
                 status = TransactionStatus.Recorded
             )
 
             TransactionItem(
-                iconRes = R.drawable.ic_status_buy,
-                title = "Cocoa, 100kg",
+                iconRes = R.drawable.ic_buy_28,
+                title = "Cocoa",
+                volume = "-100kg",
                 description = "April 22, 2025 11:10am",
                 status = TransactionStatus.NoResponse
             )
 
             TransactionItem(
-                iconRes = R.drawable.ic_status_buy,
-                title = "Cocoa, 100kg",
+                iconRes = R.drawable.ic_buy_28,
+                title = "Cocoa",
+                volume = "-100kg",
                 description = "April 22, 2025 11:10am",
                 status = TransactionStatus.Automatic,
                 showAddLocation = true,
             )
 
             TransactionItem(
-                iconRes = R.drawable.ic_status_buy,
-                title = "Cocoa, 100kg",
+                iconRes = R.drawable.ic_buy_28,
+                title = "Cocoa",
+                volume = "-100kg",
                 description = "April 22, 2025 11:10am",
             )
         }
@@ -116,6 +123,7 @@ fun TransactionItem(
     modifier: Modifier = Modifier,
     iconRes: Int,
     title: String,
+    volume: String,
     description: String,
     harvestSeasonText: String? = null,
     harvestSeasonStatus: HarvestSeasonStatus? = null,
@@ -142,27 +150,31 @@ fun TransactionItem(
 
         Column(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(2.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
             Text(
                 modifier = modifier.fillMaxWidth(),
                 text = title,
                 style = TextStyleMediumM,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
             )
 
-            Text(
-                modifier = modifier.fillMaxWidth(),
-                text = description,
-                style = TextStyleBodyS,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                if (!harvestSeasonText.isNullOrBlank()) {
+                    HarvestSeasonTag(
+                        text = harvestSeasonText,
+                        status = harvestSeasonStatus,
+                    )
+                }
 
-            if (!harvestSeasonText.isNullOrBlank()) {
-                HarvestSeasonTag(
-                    modifier = Modifier.padding(top = 2.dp),
-                    text = harvestSeasonText,
-                    status = harvestSeasonStatus,
+                Text(
+                    modifier = Modifier.weight(1f),
+                    text = description,
+                    style = TextStyleBodyS,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -181,10 +193,21 @@ fun TransactionItem(
             }
         }
 
-        if (status != null) {
-            TransactionStatusView(
-                status = status,
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalAlignment = Alignment.End
+        ) {
+            Text(
+                text = volume,
+                style = TextStyleMediumM,
+                color = MaterialTheme.colorScheme.onSurface,
             )
+
+            if (status != null) {
+                TransactionStatusView(
+                    status = status,
+                )
+            }
         }
     }
 }

@@ -25,22 +25,31 @@ import com.whimo.base.BaseViewModel
 import com.whimo.base.CoreViewEvent
 import com.whimo.data.base.common.onError
 import com.whimo.data.base.common.onSuccess
+import com.whimo.domain.commodity.CommodityInteractor
+import com.whimo.domain.commodity.refreshBalances
 import com.whimo.domain.commodity.ConvertCommodityInteractor
+import com.whimo.domain.commodity.models.CommodityBalanceFilter
+import com.whimo.domain.commodity.models.CommodityBalanceModel
 import com.whimo.domain.commodity.models.ConvertQuantityModel
 import com.whimo.domain.commodity.models.ConvertRecipeModel
 import com.whimo.domain.harvestseasons.models.HarvestSeasonModel
 import com.whimo.network.ErrorHandler
 import com.whimo.presentation.balances.ConvertCommodityArgs
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 class ConvertCommodityViewModel(
     private val interactor: ConvertCommodityInteractor,
     private val errorHandler: ErrorHandler,
+    private val commodityInteractor: CommodityInteractor,
 ) : BaseViewModel<ConvertCommodityContract.Binding>() {
 
     private var recipe: ConvertRecipeModel? = null
     private var inputs: List<ConvertQuantityModel>? = null
     private var outputs: List<ConvertQuantityModel>? = null
     private var harvestSeason: HarvestSeasonModel? = null
+    private var seasonBalances: Map<String, Float> = emptyMap()
+    private var balancesJob: Job? = null
 
     override fun createBinding(): ConvertCommodityContract.Binding {
         return ConvertCommodityContract.Binding()
@@ -64,17 +73,54 @@ class ConvertCommodityViewModel(
         updateBinding { b ->
             b.inputs = inputs
             b.outputs = outputs
+            b.harvestSeason = harvestSeason
+            b.seasonBalances = seasonBalances
         }
     }
 
     private fun onCreate(args: ConvertCommodityArgs?) {
+        balancesJob?.cancel()
+        seasonBalances = emptyMap()
         val recipe = args?.recipe
+
         this.recipe = recipe
         harvestSeason = args?.harvestSeason
 
         inputs = recipe?.inputs
         outputs = recipe?.outputs
 
+        updateView()
+        loadSeasonBalances()
+    }
+
+    private fun loadSeasonBalances() {
+        val season = harvestSeason ?: return
+        val filters = inputs.orEmpty().map { it.commodity.id }.distinct().map { commodityId ->
+            CommodityBalanceFilter(commodityId = commodityId, harvestSeason = season)
+        }
+        balancesJob = launch {
+            filters.forEach { filter ->
+                // Each input can display its cache while other inputs refresh over the network.
+                this.launch {
+                    commodityInteractor.refreshBalances(filter) { cached ->
+                        updateSeasonBalance(filter, cached)
+                    }.onSuccess { balances ->
+                        updateSeasonBalance(filter, balances.orEmpty())
+                    }
+                }
+            }
+        }
+    }
+
+    private fun updateSeasonBalance(
+        filter: CommodityBalanceFilter,
+        balances: List<CommodityBalanceModel>,
+    ) {
+        // Recipes contain aggregate balances; only use a matching per-season row.
+        val balance = balances.firstOrNull {
+            it.commodity.id == filter.commodityId && it.harvestSeason?.id == filter.harvestSeason?.id
+        } ?: return
+        seasonBalances = seasonBalances + (balance.commodity.id to balance.volume)
         updateView()
     }
 

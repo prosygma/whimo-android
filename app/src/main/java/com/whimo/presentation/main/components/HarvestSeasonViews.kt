@@ -646,7 +646,10 @@ fun HarvestSeasonTag(
 
     Box(
         modifier = modifier
-            .background(color = colors.background, shape = RoundedCornerShape(4.dp))
+            .background(
+                color = colors.background,
+                shape = RoundedCornerShape(4.dp)
+            )
             .padding(horizontal = 6.dp, vertical = 2.dp),
         contentAlignment = Alignment.Center,
     ) {

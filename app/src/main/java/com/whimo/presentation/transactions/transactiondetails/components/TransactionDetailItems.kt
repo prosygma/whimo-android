@@ -57,9 +57,9 @@ import com.whimo.domain.transactions.models.HarvestSeasonStatus
 import com.whimo.domain.transactions.models.TraceabilityStatus
 import com.whimo.domain.transactions.models.TransactionModel
 import com.whimo.domain.transactions.models.TransactionStatus
-import com.whimo.domain.transactions.models.getCommodityVolumeText
+import com.whimo.domain.transactions.models.getCommodityVolumeTextWithSign
 import com.whimo.domain.transactions.models.getShortName
-import com.whimo.extensions.toFormattedDateString
+import com.whimo.extensions.toFormattedDateString2
 import com.whimo.presentation.main.components.HarvestSeasonStatusBadge
 import com.whimo.presentation.main.components.TraceabilityStatusView
 import com.whimo.presentation.main.components.TransactionStatusView
@@ -93,7 +93,9 @@ private fun Preview() {
 
             TitleDescriptionView(
                 title = "Commodity type",
-                description = "1801 Cocoa beans, whole or broken, raw or roasted, 800kg"
+                description = "1801 Cocoa beans, whole or broken, raw or roasted, 800kg",
+                volume = "+3000kg",
+                warningText = "warning"
             )
 
             TransactionInfoItem1(
@@ -160,6 +162,7 @@ private fun Preview() {
 fun TitleDescriptionView(
     title: String,
     description: String,
+    volume: String,
     warningText: String? = null,
 ) {
     Column(
@@ -177,12 +180,22 @@ fun TitleDescriptionView(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        Text(
-            text = description,
-            modifier = Modifier.fillMaxWidth(),
-            style = TextStyleBodyM,
-            color = MaterialTheme.colorScheme.onSurface
-        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            Text(
+                modifier = Modifier.weight(1f),
+                text = description,
+                style = TextStyleBodyM,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Text(
+                text = volume,
+                style = TextStyleMediumM,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
 
         if (!warningText.isNullOrBlank()) {
             Text(
@@ -528,7 +541,7 @@ fun SupplierHistoryItem(
     onClick: (() -> Unit)? = null,
 ) {
 
-    val value = transaction.getCommodityVolumeText()
+    val value = transaction.getCommodityVolumeTextWithSign()
     val title = if (transaction.isBuyingFromFarmer) {
         stringResource(R.string.from_initial_seller)
     } else if (transaction.seller != null) {
@@ -541,7 +554,7 @@ fun SupplierHistoryItem(
         modifier = modifier,
         status = transaction.traceability,
         title = title,
-        description = transaction.createdDate.toFormattedDateString(),
+        description = transaction.createdDate.toFormattedDateString2(),
         value = value,
         onTraceabilityStatusClick = onTraceabilityStatusClick,
         onClick = onClick,

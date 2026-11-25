@@ -22,11 +22,13 @@
 package com.whimo.presentation.balances
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import com.whimo.data.base.common.BaseResult
 import com.whimo.domain.commodity.models.CommodityGroupModel
 import com.whimo.domain.commodity.models.CommodityModel
 import com.whimo.domain.harvestseasons.models.HarvestSeasonModel
 import com.whimo.domain.harvestseasons.models.HarvestSeasonStatus
 import com.whimo.domain.transactions.TransactionsInteractor
+import com.whimo.domain.transactions.models.TransactionListDownloadSummaryModel
 import com.whimo.domain.transactions.models.TransactionsFilter
 import com.whimo.domain.transactions.models.TransactionsState
 import kotlinx.coroutines.Dispatchers
@@ -43,6 +45,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import okhttp3.ResponseBody
 import java.time.LocalDate
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -96,6 +99,18 @@ class BalanceDetailsViewModelTest {
         }
 
         override suspend fun loadNextPage(filter: TransactionsFilter) = Unit
+
+        override suspend fun getDownloadSummary(filter: TransactionsFilter): BaseResult<TransactionListDownloadSummaryModel> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun downloadTransactionListCSV(filter: TransactionsFilter): BaseResult<ResponseBody> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun downloadTransactionListLocationBundle(filter: TransactionsFilter): BaseResult<ResponseBody> {
+            throw NotImplementedError()
+        }
     }
 
     companion object {

@@ -21,6 +21,8 @@
  */
 package com.whimo.presentation.transactions
 
+import android.content.Context
+import android.net.Uri
 import androidx.annotation.StringRes
 import com.whimo.R
 import com.whimo.base.CoreViewBinding
@@ -30,15 +32,23 @@ import com.whimo.domain.commodity.models.CommodityGroupModel
 import com.whimo.domain.createtransaction.models.PendingTransactionModel
 import com.whimo.domain.createtransaction.models.PendingTransactionsSyncProgress
 import com.whimo.domain.transactions.models.HarvestSeasonModel
+import com.whimo.domain.transactions.models.TransactionListDownloadSummaryModel
 import com.whimo.domain.transactions.models.TransactionModel
 import com.whimo.domain.transactions.models.TransactionStatus
 import com.whimo.domain.transactions.models.TransactionsState
 import java.time.LocalDateTime
 
 enum class TransactionsTab(@StringRes val titleResId: Int, val icon: Int) {
-    All(R.string.all, R.drawable.ic_home),
-    Bought(R.string.bought, R.drawable.ic_status_buy),
-    Sold(R.string.sold, R.drawable.ic_status_sell)
+    All(R.string.all, R.drawable.ic_home_18),
+    Bought(R.string.bought, R.drawable.ic_buy_28),
+    Sold(R.string.sold, R.drawable.ic_sell_28),
+    Converted(R.string.converted, R.drawable.ic_convert_28),
+}
+
+enum class TransactionsDownloadOption {
+    TransactionDetails,
+    FarmGeolocations,
+    Both,
 }
 
 object TransactionsContract {
@@ -85,6 +95,10 @@ object TransactionsContract {
         data class TransactionClicked(val transaction: TransactionModel) : Event()
         data class AddGeoDataClicked(val transaction: TransactionModel) : Event()
         data object NotificationsClicked : Event()
+        data class DownloadOptionSelected(val option: TransactionsDownloadOption) : Event()
+        data class DownloadConfirmed(val option: TransactionsDownloadOption) : Event()
+        data class SaveDownloadedFile(val context: Context, val uri: Uri) : Event()
+        data object SaveDownloadedFileCancelled : Event()
         data class NetworkAvailabilityChanged(val isAvailable: Boolean) : Event()
     }
 
@@ -92,5 +106,13 @@ object TransactionsContract {
         data class NavigateTransactionDetails(val transaction: TransactionModel): Effect()
         data class NavigateAddGeolocation(val transaction: TransactionModel): Effect()
         data object NavigateNotifications: Effect()
+        data class ShowDownloadConfirmation(
+            val option: TransactionsDownloadOption,
+            val summary: TransactionListDownloadSummaryModel,
+        ) : Effect()
+        data class ShowMessage(val message: String) : Effect()
+        data class ToggleDownloadLoader(val isLoading: Boolean) : Effect()
+        data class CSVDataDownloaded(val filename: String) : Effect()
+        data class ZipDataDownloaded(val filename: String) : Effect()
     }
 }

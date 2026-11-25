@@ -27,6 +27,7 @@ import com.whimo.base.CoreViewEvent
 import com.whimo.data.base.common.onError
 import com.whimo.data.base.common.onSuccess
 import com.whimo.domain.commodity.CommodityInteractor
+import com.whimo.domain.commodity.refreshBalances
 import com.whimo.domain.commodity.models.CommodityBalanceFilter
 import com.whimo.domain.geodata.GeoDataInteractor
 import com.whimo.domain.harvestseasons.models.HarvestSeasonStatus
@@ -37,10 +38,14 @@ import com.whimo.domain.transactions.models.TraceabilityCountsModel
 import com.whimo.domain.transactions.models.TransactionModel
 import com.whimo.domain.transactions.models.TransactionStatus
 import com.whimo.domain.transactions.models.TransactionType
-import com.whimo.domain.transactions.models.getCommodityFullText
+import com.whimo.domain.transactions.models.getConversionInputs
+import com.whimo.domain.transactions.models.getConversionOutputs
+import com.whimo.domain.transactions.models.getCommodityText
 import com.whimo.domain.transactions.models.getCommodityVolumeText
-import com.whimo.extensions.toQuantityText
+import com.whimo.domain.transactions.models.getCommodityVolumeTextWithSign
+import com.whimo.domain.transactions.models.isConversion
 import com.whimo.extensions.toFormattedDateString
+import com.whimo.extensions.toQuantityTextWithUnit
 import com.whimo.network.ErrorHandler
 import com.whimo.presentation.transactions.transactiondetails.components.PieChartItem
 import com.whimo.presentation.ui.theme.ColorMidnightBlue
@@ -106,18 +111,29 @@ class TransactionDetailsViewModel(
 
             refresh()
 
-            setEffect(TransactionDetailsContract.Effect.RefreshHistory(transactionModel!!))
+            if (transactionModel?.isConversion() != true) {
+                setEffect(TransactionDetailsContract.Effect.RefreshHistory(transactionModel!!))
+            }
         }
     }
 
     private fun refresh() {
         getTransactionDetails()
-        getTransactionTraceability()
+        if (transactionModel?.isConversion() != true) {
+            getTransactionTraceability()
+        }
     }
 
     private fun getTransactionDetails() {
         launch {
-            interactor.getTransactionDetails(transactionId)
+            val detailsResult = if (transactionModel?.isConversion() == true) {
+                val groupId = transactionModel?.groupId ?: transactionId
+                interactor.getConversionTransactionDetails(groupId)
+            } else {
+                interactor.getTransactionDetails(transactionId)
+            }
+
+            detailsResult
                 .onSuccess {
                     if (it != null) {
                         transactionModel = it
@@ -128,7 +144,9 @@ class TransactionDetailsViewModel(
                             setEffect(TransactionDetailsContract.Effect.RefreshHistory(it))
                         }
 
-                        getTransactionTraceability()
+                        if (!it.isConversion()) {
+                            getTransactionTraceability()
+                        }
 
                         updateView()
                         loadAcceptBalanceIfNeeded()
@@ -141,6 +159,8 @@ class TransactionDetailsViewModel(
     }
 
     private fun getTransactionTraceability() {
+        if (transactionModel?.isConversion() == true) return
+
         if (transactionModel?.traceability != null
             && (transactionModel?.status == TransactionStatus.Accepted
                     || transactionModel?.status == TransactionStatus.Recorded)) {
@@ -164,26 +184,31 @@ class TransactionDetailsViewModel(
     private fun updateView() {
         updateBinding { b ->
             b.toolbarTitle = getToolbarTitle()
-            b.commodityText = transactionModel?.getCommodityFullText()
+            b.commodityText = transactionModel?.getCommodityText()
+            b.commodityVolume = transactionModel?.getCommodityVolumeTextWithSign()
             b.commodityWarningText = getCommodityWarningText()
+            b.isConversion = transactionModel?.isConversion() == true
+            b.conversionInputs = transactionModel?.getConversionInputs().orEmpty()
+            b.conversionOutputs = transactionModel?.getConversionOutputs().orEmpty()
             b.harvestSeason = transactionModel?.harvestSeason
 
-            b.showLocation = transactionModel?.type == TransactionType.Producer || transactionModel?.isAutomatic == true
+            b.showLocation = !b.isConversion &&
+                    (transactionModel?.type == TransactionType.Producer || transactionModel?.isAutomatic == true)
             b.locationProvider = transactionModel?.locationProvider
             b.location = transactionModel?.location
 
-            b.traceability = transactionModel?.traceability
+            b.traceability = if (b.isConversion) null else transactionModel?.traceability
 
             b.accountId = accountModel?.id
-            b.buyer = transactionModel?.buyer
-            b.seller = transactionModel?.seller
+            b.buyer = if (b.isConversion) null else transactionModel?.buyer
+            b.seller = if (b.isConversion) null else transactionModel?.seller
 
-            b.status = transactionModel?.status
+            b.status = if (b.isConversion) null else transactionModel?.status
 
             b.createdDateText = transactionModel?.createdDate?.toFormattedDateString()
-            b.expiryDateText = transactionModel?.expiresDate?.toFormattedDateString()
+            b.expiryDateText = if (b.isConversion) null else transactionModel?.expiresDate?.toFormattedDateString()
 
-            if (transactionModel?.status == TransactionStatus.Pending && accountModel != null) {
+            if (!b.isConversion && transactionModel?.status == TransactionStatus.Pending && accountModel != null) {
                 val isInitiator = transactionModel?.createdById == accountModel!!.id
                 b.showInitiatorActionButtons = isInitiator
                 b.showRecipientActionButtons = !isInitiator
@@ -201,6 +226,15 @@ class TransactionDetailsViewModel(
     }
 
     private fun updateChartItemsView() {
+        if (transactionModel?.isConversion() == true) {
+            updateBinding { b ->
+                b.chartItems = emptyList()
+                b.downloadEnabled = false
+                b.dialogDescription = ""
+            }
+            return
+        }
+
         val chartItems = traceabilityCounts?.let {
             listOf(
                 PieChartItem("Full", it.full, ColorSuccess),
@@ -311,6 +345,10 @@ class TransactionDetailsViewModel(
     }
 
     private fun getToolbarTitle(): String {
+        if (transactionModel?.isConversion() == true) {
+            return resourceProvider.getString(R.string.conversion_transaction)
+        }
+
         return if (isCurrentUserSeller()) {
             resourceProvider.getString(R.string.sales_transaction)
         } else {
@@ -344,7 +382,7 @@ class TransactionDetailsViewModel(
 
         return resourceProvider.getString(
             R.string.accept_transaction_insufficient_balance_dialog,
-            "${availableVolume.coerceAtLeast(0f).toQuantityText()} ${transaction.commodity.unit}".trim(),
+            availableVolume.coerceAtLeast(0f).toQuantityTextWithUnit(transaction.commodity.unit),
             seasonText,
             transaction.getCommodityVolumeText(),
         )
@@ -399,7 +437,7 @@ class TransactionDetailsViewModel(
         val balance = acceptBalance ?: 0f
         val missingVolume = (transaction.volume - balance).coerceAtLeast(0f)
 
-        return "${missingVolume.toQuantityText()} ${transaction.commodity.unit}".trim()
+        return missingVolume.toQuantityTextWithUnit(transaction.commodity.unit)
     }
 
     private fun loadAcceptBalanceIfNeeded() {
@@ -425,18 +463,17 @@ class TransactionDetailsViewModel(
         )
 
         launch {
-            val cachedBalances = commodityInteractor.getBalancesFromDB(requestFilter)
-            val cachedBalance = cachedBalances
-                .firstOrNull { it.harvestSeason?.id == requestKey.harvestSeasonId }
-                ?.volume
+            commodityInteractor.refreshBalances(requestFilter) { cachedBalances ->
+                val cachedBalance = cachedBalances
+                    .firstOrNull { it.harvestSeason?.id == requestKey.harvestSeasonId }
+                    ?.volume
 
-            if (cachedBalance != null && acceptBalanceKey == requestKey) {
-                acceptBalance = cachedBalance
-                isAcceptBalanceLoading = false
-                updateView()
+                if (cachedBalance != null && acceptBalanceKey == requestKey) {
+                    acceptBalance = cachedBalance
+                    isAcceptBalanceLoading = false
+                    updateView()
+                }
             }
-
-            commodityInteractor.getBalances(requestFilter)
                 .onSuccess { balances ->
                     if (acceptBalanceKey != requestKey) return@onSuccess
 

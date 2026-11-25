@@ -91,9 +91,12 @@ private fun Preview() {
 fun Toolbar(
     modifier: Modifier = Modifier,
     title: String,
+    startIconRes: Int? = null,
+    startIconTint: Color = Color.Unspecified,
     iconRes: Int? = null,
     iconTint: Color = Color.Unspecified,
     showOfflineBanner: Boolean = true,
+    onStartIconClick: (() -> Unit)? = null,
     onIconClick: (() -> Unit)? = null,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -112,6 +115,18 @@ fun Toolbar(
                 style = TextStyleH2,
                 color = MaterialTheme.colorScheme.onSurface,
             )
+
+            if (startIconRes != null && onStartIconClick != null) {
+                Icon(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clickable { onStartIconClick() }
+                        .padding(16.dp),
+                    painter = painterResource(id = startIconRes),
+                    tint = startIconTint,
+                    contentDescription = "Option button",
+                )
+            }
 
             if (iconRes != null && onIconClick != null) {
                 Icon(

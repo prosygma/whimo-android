@@ -27,6 +27,7 @@ import com.whimo.base.CoreViewEvent
 import com.whimo.data.base.common.onError
 import com.whimo.data.base.common.onSuccess
 import com.whimo.domain.commodity.CommodityInteractor
+import com.whimo.domain.commodity.refreshBalances
 import com.whimo.domain.commodity.models.CommodityBalanceFilter
 import com.whimo.domain.commodity.models.CommodityModel
 import com.whimo.domain.createtransaction.models.CreateTransactionModel
@@ -36,7 +37,7 @@ import com.whimo.domain.harvestseasons.models.HarvestSeasonModel
 import com.whimo.domain.harvestseasons.models.HarvestSeasonStatus
 import com.whimo.domain.harvestseasons.models.getYearRangeText
 import com.whimo.domain.transactions.models.TransactionAction
-import com.whimo.extensions.toQuantityText
+import com.whimo.extensions.toQuantityTextWithUnit
 import com.whimo.network.ErrorHandler
 import com.whimo.providers.ResourceProvider
 
@@ -236,19 +237,18 @@ class CommodityVolumeViewModel(
         updateView()
 
         launch {
-            val cachedBalances = commodityInteractor.getBalancesFromDB(requestFilter)
-            val cachedBalance = cachedBalances
-                .firstOrNull { it.harvestSeason?.id == requestSeason.id }
-                ?.volume
+            commodityInteractor.refreshBalances(requestFilter) { cachedBalances ->
+                val cachedBalance = cachedBalances
+                    .firstOrNull { it.harvestSeason?.id == requestSeason.id }
+                    ?.volume
 
-            if (cachedBalance != null && isCurrentBalanceRequest(requestCommodityId, requestSeason.id)) {
-                balance = cachedBalance
-                isBalanceLoading = false
-                updateTransactionCommodityBalance()
-                updateView()
+                if (cachedBalance != null && isCurrentBalanceRequest(requestCommodityId, requestSeason.id)) {
+                    balance = cachedBalance
+                    isBalanceLoading = false
+                    updateTransactionCommodityBalance()
+                    updateView()
+                }
             }
-
-            commodityInteractor.getBalances(requestFilter)
                 .onSuccess { balances ->
                     if (!isCurrentBalanceRequest(requestCommodityId, requestSeason.id)) return@onSuccess
 
@@ -334,7 +334,7 @@ class CommodityVolumeViewModel(
         val missingVolume = ((volume ?: 0f) - (balance ?: 0f)).coerceAtLeast(0f)
         val unit = transaction?.commodity?.unit.orEmpty()
 
-        return "${missingVolume.toQuantityText()} $unit".trim()
+        return missingVolume.toQuantityTextWithUnit(unit)
     }
 
     private fun confirmedCommodity(): CommodityModel? {

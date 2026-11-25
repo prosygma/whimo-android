@@ -29,6 +29,7 @@ import com.whimo.data.base.common.onError
 import com.whimo.data.base.common.onSuccess
 import com.whimo.domain.createtransaction.CreateTransactionInteractor
 import com.whimo.domain.createtransaction.models.CreateTransactionModel
+import com.whimo.domain.createtransaction.models.GeoDataMapGeometry
 import com.whimo.domain.createtransaction.models.getCommodityText
 import com.whimo.domain.createtransaction.models.getCommodityVolumeText
 import com.whimo.domain.createtransaction.models.getLocationText
@@ -38,7 +39,7 @@ import com.whimo.domain.harvestseasons.models.getYearRangeText
 import com.whimo.domain.transactions.models.TransactionAction
 import com.whimo.domain.transactions.models.getShortName
 import com.whimo.extensions.toPoint
-import com.whimo.extensions.toQuantityText
+import com.whimo.extensions.toQuantityTextWithUnit
 import com.whimo.network.ErrorHandler
 import com.whimo.providers.ResourceProvider
 import com.whimo.providers.TestEnvironmentManager
@@ -89,6 +90,10 @@ class CreateTransactionFormViewModel(
 
             b.farmGeoDataVisible = transaction.isProducerTransaction
             b.farmGeoDataText = transaction.getLocationText() ?: resourceProvider.getString(R.string.tap_to_add_data)
+            b.farmGeoDataLocation = transaction.location
+            b.farmGeoDataMapGeometry = transaction.mapGeometry ?: transaction.location?.let {
+                GeoDataMapGeometry(point = it)
+            }
 
             b.commodityTypeText = transaction.getCommodityText() ?: resourceProvider.getString(R.string.tap_to_add_data)
             b.commodityVolumeText = transaction.getCommodityVolumeText()
@@ -198,10 +203,10 @@ class CreateTransactionFormViewModel(
         val missingVolume = (volume - availableVolume).coerceAtLeast(0f)
 
         return CreateTransactionFormContract.CommodityVolumeBreakdown(
-            harvestSeasonAmountText = "${availableVolume.toQuantityText()} ${commodity.unit}",
+            harvestSeasonAmountText = availableVolume.toQuantityTextWithUnit(commodity.unit),
             harvestSeasonText = harvestSeason.getYearRangeText(),
             harvestSeasonStatus = harvestSeason.status,
-            automaticTransactionAmountText = "${missingVolume.toQuantityText()} ${commodity.unit}",
+            automaticTransactionAmountText = missingVolume.toQuantityTextWithUnit(commodity.unit),
             automaticTransactionStatus = harvestSeason.status,
         )
     }

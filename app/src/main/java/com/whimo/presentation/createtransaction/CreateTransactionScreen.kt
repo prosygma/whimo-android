@@ -89,7 +89,7 @@ fun CreateTransactionScreen(
         ) {
             CreateTransactionButton1(
                 modifier = Modifier.weight(1f),
-                iconRes = R.drawable.ic_status_buy,
+                iconRes = R.drawable.ic_buy_28,
                 title = stringResource(R.string.buy_commodity),
             ) {
                 CreateTransactionActivity.openCreateTransaction(navController.context, launcher, TransactionAction.Buying)
@@ -97,7 +97,7 @@ fun CreateTransactionScreen(
 
             CreateTransactionButton1(
                 modifier = Modifier.weight(1f),
-                iconRes = R.drawable.ic_status_sell,
+                iconRes = R.drawable.ic_sell_28,
                 title = stringResource(R.string.sell_commodity),
             ) {
                 CreateTransactionActivity.openCreateTransaction(navController.context, launcher, TransactionAction.Selling)

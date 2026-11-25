@@ -74,7 +74,7 @@ private fun Preview() {
             verticalArrangement = Arrangement.spacedBy(2.dp)
         ) {
             CreateTransactionButton1(
-                iconRes = R.drawable.ic_status_buy,
+                iconRes = R.drawable.ic_buy_28,
                 title = stringResource(R.string.buy_commodity)
             )
 

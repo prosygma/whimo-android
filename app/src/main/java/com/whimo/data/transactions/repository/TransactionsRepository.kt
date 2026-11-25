@@ -30,10 +30,12 @@ import com.whimo.data.transactions.service.TransactionsDao
 import com.whimo.data.transactions.service.TransactionsService
 import com.whimo.domain.common.PaginationModel
 import com.whimo.domain.transactions.models.TraceabilityCountsModel
+import com.whimo.domain.transactions.models.TransactionListDownloadSummaryModel
 import com.whimo.domain.transactions.models.TransactionModel
 import com.whimo.domain.transactions.models.getCommodityFullText
 import com.whimo.network.handleResponse
 import com.whimo.network.mapResult
+import okhttp3.ResponseBody
 import java.time.LocalDateTime
 
 interface TransactionsRepository {
@@ -43,6 +45,8 @@ interface TransactionsRepository {
         pageSize: Int,
         status: String?,
         action: String?,
+        type: String?,
+        groupConversions: Boolean,
         createdAtFrom: String?,
         createdAtTo: String?,
         commodityGroupId: String?,
@@ -51,10 +55,54 @@ interface TransactionsRepository {
         harvestSeasonId: String?,
     ): BaseResult<Pair<PaginationModel, List<TransactionModel>>>
 
+    suspend fun downloadTransactionListCSV(
+        search: String?,
+        includeChain: Boolean,
+        status: String?,
+        action: String?,
+        type: String?,
+        groupConversions: Boolean,
+        createdAtFrom: String?,
+        createdAtTo: String?,
+        commodityGroupId: String?,
+        commodityId: String?,
+        buyerId: String?,
+        harvestSeasonId: String?,
+    ): BaseResult<ResponseBody>
+
+    suspend fun downloadTransactionListLocationBundle(
+        search: String?,
+        status: String?,
+        action: String?,
+        type: String?,
+        groupConversions: Boolean,
+        createdAtFrom: String?,
+        createdAtTo: String?,
+        commodityGroupId: String?,
+        commodityId: String?,
+        buyerId: String?,
+        harvestSeasonId: String?,
+    ): BaseResult<ResponseBody>
+
+    suspend fun getTransactionListLocationSummary(
+        search: String?,
+        status: String?,
+        action: String?,
+        type: String?,
+        groupConversions: Boolean,
+        createdAtFrom: String?,
+        createdAtTo: String?,
+        commodityGroupId: String?,
+        commodityId: String?,
+        buyerId: String?,
+        harvestSeasonId: String?,
+    ): BaseResult<TransactionListDownloadSummaryModel>
+
     suspend fun getTransactionsFromDB(
         search: String?,
         status: String?,
         action: String?,
+        type: String?,
         createdAtFrom: LocalDateTime?,
         createdAtTo: LocalDateTime?,
         commodityGroupId: String?,
@@ -66,6 +114,8 @@ interface TransactionsRepository {
     suspend fun updateTransactionsDB(items: List<TransactionModel>?)
 
     suspend fun getTransactionDetails(transactionId: String): BaseResult<TransactionModel>
+
+    suspend fun getConversionTransactionDetails(groupId: String): BaseResult<TransactionModel>
 
     suspend fun getTransactionFromDB(transactionId: String?): TransactionModel?
 
@@ -104,6 +154,8 @@ class TransactionsRepositoryImpl(
         pageSize: Int,
         status: String?,
         action: String?,
+        type: String?,
+        groupConversions: Boolean,
         createdAtFrom: String?,
         createdAtTo: String?,
         commodityGroupId: String?,
@@ -118,6 +170,100 @@ class TransactionsRepositoryImpl(
                 pageSize = pageSize,
                 status = status,
                 action = action,
+                type = type,
+                groupConversions = groupConversions,
+                createdAtFrom = createdAtFrom,
+                createdAtTo = createdAtTo,
+                commodityGroupId = commodityGroupId,
+                commodityId = commodityId,
+                buyerId = buyerId,
+                harvestSeasonId = harvestSeasonId,
+            )
+        }.mapResult { it?.toDomain() }
+    }
+
+    override suspend fun downloadTransactionListCSV(
+        search: String?,
+        includeChain: Boolean,
+        status: String?,
+        action: String?,
+        type: String?,
+        groupConversions: Boolean,
+        createdAtFrom: String?,
+        createdAtTo: String?,
+        commodityGroupId: String?,
+        commodityId: String?,
+        buyerId: String?,
+        harvestSeasonId: String?,
+    ): BaseResult<ResponseBody> {
+        return handleResponse {
+            service.downloadTransactionListCSV(
+                search = search,
+                includeChain = includeChain,
+                status = status,
+                action = action,
+                type = type,
+                groupConversions = groupConversions,
+                createdAtFrom = createdAtFrom,
+                createdAtTo = createdAtTo,
+                commodityGroupId = commodityGroupId,
+                commodityId = commodityId,
+                buyerId = buyerId,
+                harvestSeasonId = harvestSeasonId,
+            )
+        }
+    }
+
+    override suspend fun downloadTransactionListLocationBundle(
+        search: String?,
+        status: String?,
+        action: String?,
+        type: String?,
+        groupConversions: Boolean,
+        createdAtFrom: String?,
+        createdAtTo: String?,
+        commodityGroupId: String?,
+        commodityId: String?,
+        buyerId: String?,
+        harvestSeasonId: String?,
+    ): BaseResult<ResponseBody> {
+        return handleResponse {
+            service.downloadTransactionListLocationBundle(
+                search = search,
+                status = status,
+                action = action,
+                type = type,
+                groupConversions = groupConversions,
+                createdAtFrom = createdAtFrom,
+                createdAtTo = createdAtTo,
+                commodityGroupId = commodityGroupId,
+                commodityId = commodityId,
+                buyerId = buyerId,
+                harvestSeasonId = harvestSeasonId,
+            )
+        }
+    }
+
+    override suspend fun getTransactionListLocationSummary(
+        search: String?,
+        status: String?,
+        action: String?,
+        type: String?,
+        groupConversions: Boolean,
+        createdAtFrom: String?,
+        createdAtTo: String?,
+        commodityGroupId: String?,
+        commodityId: String?,
+        buyerId: String?,
+        harvestSeasonId: String?,
+    ): BaseResult<TransactionListDownloadSummaryModel> {
+        return handleResponse {
+            service.getTransactionListLocationSummary(
+                search = search,
+                status = status,
+                action = action,
+                type = type,
+                groupConversions = groupConversions,
                 createdAtFrom = createdAtFrom,
                 createdAtTo = createdAtTo,
                 commodityGroupId = commodityGroupId,
@@ -132,6 +278,7 @@ class TransactionsRepositoryImpl(
         search: String?,
         status: String?,
         action: String?,
+        type: String?,
         createdAtFrom: LocalDateTime?,
         createdAtTo: LocalDateTime?,
         commodityGroupId: String?,
@@ -149,10 +296,11 @@ class TransactionsRepositoryImpl(
                 val validCommodityGroup = commodityGroupId == null || it.commodity.group?.id == commodityGroupId
                 val validCommodity = commodityId == null || it.commodity.id == commodityId
                 val validHarvestSeason = harvestSeasonId == null || it.harvestSeason?.id == harvestSeasonId
+                val validType = type == null || it.type?.typeName == type
                 val validStartDate = createdAtFrom == null || it.createdDate.isAfter(createdAtFrom)
                 val validEndDate = createdAtTo == null || it.createdDate.isBefore(createdAtTo)
 
-                validSearch && validCommodityGroup && validCommodity && validHarvestSeason && validStartDate && validEndDate
+                validSearch && validCommodityGroup && validCommodity && validHarvestSeason && validType && validStartDate && validEndDate
             }
     }
 
@@ -166,6 +314,12 @@ class TransactionsRepositoryImpl(
     override suspend fun getTransactionDetails(transactionId: String): BaseResult<TransactionModel> {
         return handleResponse {
             service.getTransactionDetails(transactionId = transactionId)
+        }.mapResult { it?.toDomain() }
+    }
+
+    override suspend fun getConversionTransactionDetails(groupId: String): BaseResult<TransactionModel> {
+        return handleResponse {
+            service.getConversionTransactionDetails(groupId = groupId)
         }.mapResult { it?.toDomain() }
     }
 

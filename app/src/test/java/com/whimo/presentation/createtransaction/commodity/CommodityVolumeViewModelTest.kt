@@ -119,7 +119,7 @@ class CommodityVolumeViewModelTest {
 
         assertEquals(activeSeason, binding.selectedHarvestSeason)
         assertEquals(listOf(activeSeason, pastSeason), binding.harvestSeasons)
-        assertEquals("Your balance: 500 kg", binding.supportingText)
+        assertEquals("Your balance: 500kg", binding.supportingText)
         assertEquals(listOf("commodity-id"), harvestSeasonsInteractor.requestedCommodityIds)
         assertEquals(activeSeason.id, commodityInteractor.requestedHarvestSeasonIds.last())
     }
@@ -146,7 +146,7 @@ class CommodityVolumeViewModelTest {
         assertTrue(binding.insufficientBalance)
         assertTrue(binding.buttonEnabled)
         assertEquals(
-            "Not enough available balance.\n\nAn automatic transaction will be created for the missing 700 kg. This amount will have incomplete traceability.",
+            "Not enough available balance.\n\nAn automatic transaction will be created for the missing 700kg. This amount will have incomplete traceability.",
             binding.insufficientBalanceMessage,
         )
 
@@ -180,7 +180,7 @@ class CommodityVolumeViewModelTest {
         assertEquals(pastSeason, binding.selectedHarvestSeason)
         assertTrue(binding.insufficientBalance)
         assertFalse(binding.buttonEnabled)
-        assertEquals("Your balance: 60 kg", binding.warningText)
+        assertEquals("Your balance: 60kg", binding.warningText)
         assertEquals(
             "Not enough available balance for the 2025/26 harvest season.",
             binding.insufficientBalanceMessage,

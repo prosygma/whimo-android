@@ -23,6 +23,7 @@ package com.whimo.presentation.balances.convert
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.whimo.data.base.common.BaseResult
+import com.whimo.domain.commodity.CommodityInteractor
 import com.whimo.domain.commodity.ConvertCommodityInteractor
 import com.whimo.domain.commodity.models.CommodityModel
 import com.whimo.domain.commodity.models.ConvertQuantityModel
@@ -63,6 +64,10 @@ class ConvertCommodityViewModelTest {
         viewModel = ConvertCommodityViewModel(
             interactor = interactor,
             errorHandler = ErrorHandler(mockk(relaxed = true)),
+            commodityInteractor = mockk<CommodityInteractor> {
+                coEvery { getBalancesFromDB(any()) } returns emptyList()
+                coEvery { getBalances(any()) } returns BaseResult.Success(emptyList())
+            },
         )
     }
 

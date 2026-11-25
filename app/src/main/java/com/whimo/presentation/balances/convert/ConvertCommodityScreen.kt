@@ -40,13 +40,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -56,15 +54,16 @@ import androidx.navigation.compose.rememberNavController
 import com.whimo.R
 import com.whimo.base.ObserveEffects
 import com.whimo.domain.commodity.models.ConvertQuantityModel
+import com.whimo.domain.harvestseasons.models.HarvestSeasonModel
 import com.whimo.extensions.findActivity
 import com.whimo.presentation.balances.ConvertCommodityArgs
+import com.whimo.presentation.balances.components.HarvestSeasonBalance
 import com.whimo.presentation.createtransaction.components.CreateTransactionDialog
 import com.whimo.presentation.createtransaction.components.CreateTransactionWarning
 import com.whimo.presentation.main.components.Toolbar2
 import com.whimo.presentation.ui.baseScreen.LoadingButton
 import com.whimo.presentation.ui.components.BaseTextField
 import com.whimo.presentation.ui.theme.TextStyleBodyS
-import com.whimo.presentation.ui.theme.TextStyleBodyXS
 import com.whimo.presentation.ui.theme.WhimoTheme
 import org.koin.androidx.compose.koinViewModel
 
@@ -140,17 +139,14 @@ fun ConvertCommodityScreen(
             )
 
             if (!binding.inputs.isNullOrEmpty()) {
-                val balances = binding.inputs!!.joinToString(separator = ", ") {
-                    it.commodity.getBalanceText()
-                }
-
                 QuantitiesList(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(color = MaterialTheme.colorScheme.surface)
                         .padding(horizontal = 16.dp, vertical = 24.dp),
                     header = stringResource(R.string.from),
-                    headerText = stringResource(R.string.your_balance, balances),
+                    harvestSeason = binding.harvestSeason,
+                    seasonBalances = binding.seasonBalances,
                     items = binding.inputs!!,
                     onQuantityChange = { model, quantity ->
                         viewModel?.setEvent(ConvertCommodityContract.Event.OnQuantityChange(model, quantity))
@@ -206,7 +202,8 @@ fun ConvertCommodityScreen(
 fun QuantitiesList(
     modifier: Modifier = Modifier,
     header: String,
-    headerText: String = "",
+    harvestSeason: HarvestSeasonModel? = null,
+    seasonBalances: Map<String, Float> = emptyMap(),
     items: List<ConvertQuantityModel>,
     onQuantityChange: (ConvertQuantityModel, String) -> Unit,
 ) {
@@ -214,36 +211,32 @@ fun QuantitiesList(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Bottom,
-        ) {
-            Text(
-                text = header,
-                style = TextStyleBodyS,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-
-            Text(
-                text = headerText,
-                textAlign = TextAlign.End,
-                style = TextStyleBodyXS,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
+        Text(
+            text = header,
+            style = TextStyleBodyS,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
 
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             items.forEach { item ->
-                QuantityItem(
-                    model = item,
-                    onQuantityChange = {
-                        onQuantityChange(item, it)
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    QuantityItem(
+                        model = item,
+                        onQuantityChange = {
+                            onQuantityChange(item, it)
+                        }
+                    )
+                    harvestSeason?.let { season ->
+                        HarvestSeasonBalance(
+                            season = season,
+                            balance = seasonBalances[item.commodity.id],
+                            unit = item.commodity.unit,
+                        )
                     }
-                )
+                }
             }
         }
     }

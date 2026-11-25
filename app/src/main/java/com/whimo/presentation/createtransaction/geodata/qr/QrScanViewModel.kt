@@ -22,19 +22,20 @@
 package com.whimo.presentation.createtransaction.geodata.qr
 
 import android.content.Context
+import com.mapbox.geojson.Point
 import com.whimo.R
 import com.whimo.base.BaseViewModel
 import com.whimo.base.CoreViewEvent
 import com.whimo.data.base.common.onError
 import com.whimo.data.base.common.onSuccess
 import com.whimo.data.geodata.model.request.UpdateGeoDataRequest
+import com.whimo.domain.createtransaction.models.GeoDataMapGeometry
 import com.whimo.domain.createtransaction.models.LocationProvider
 import com.whimo.domain.createtransaction.models.MFile
 import com.whimo.domain.geodata.GeoDataInteractor
 import com.whimo.domain.transactions.models.TransactionModel
 import com.whimo.network.ErrorHandler
 import com.whimo.providers.ResourceProvider
-import com.mapbox.geojson.Point
 import com.whimo.utils.QrCiccParser
 import com.whimo.utils.QrGeoData
 import com.whimo.utils.parseQrGeoData
@@ -58,10 +59,17 @@ class QrScanViewModel(
         when (event) {
             is QrScanContract.Event.OnCreate -> onCreate(event.transactionModel)
             is QrScanContract.Event.QrScanned -> if (event.cicc) {
-                ciccQrScanned(event.context, event.qrData)
+                ciccQrScanned(event.qrData)
             } else {
-                qrScanned(event.context, event.qrData)
+                qrScanned(event.qrData)
             }
+            is QrScanContract.Event.ConfirmQr -> confirmQr(
+                context = event.context,
+                qrData = event.qrData,
+                location = event.location,
+                mapGeometry = event.mapGeometry,
+                provider = event.provider,
+            )
         }
     }
 
@@ -74,7 +82,7 @@ class QrScanViewModel(
     }
 
 
-    private fun qrScanned(context: Context, qrData: String) {
+    private fun qrScanned(qrData: String) {
         val qrGeoData = parseQrGeoData(qrData)
 
         if (qrGeoData.geoJson == null) {
@@ -82,15 +90,14 @@ class QrScanViewModel(
             return
         }
 
-        if (transactionId == null) {
-            handleQr(qrData, qrGeoData)
-        } else {
-            uploadQr(context, qrData, qrGeoData)
-        }
+        handleQr(qrData, qrGeoData)
     }
 
-    /** CamerTrace: the CICC card's text becomes GeoJSON here, then follows the generic QR path. */
-    private fun ciccQrScanned(context: Context, qrData: String) {
+    /**
+     * CamerTrace: the CICC card's text becomes GeoJSON here, then follows the generic QR path
+     * (map confirmation, then result or upload) with the QRCicc provider.
+     */
+    private fun ciccQrScanned(qrData: String) {
         when (val result = QrCiccParser.parse(qrData)) {
             is QrCiccParser.Result.Invalid -> {
                 val message = if (QrCiccParser.KEY_COORDINATES in result.missingKeys) {
@@ -102,25 +109,66 @@ class QrScanViewModel(
             }
             is QrCiccParser.Result.Success -> {
                 val (latitude, longitude) = result.firstCorner
-                val qrGeoData = QrGeoData(location = Point.fromLngLat(longitude, latitude), geoJson = result.geoJson)
-                if (transactionId == null) {
-                    handleQr(result.geoJson, qrGeoData, LocationProvider.QRCicc)
-                } else {
-                    uploadQr(context, result.geoJson, qrGeoData, LocationProvider.QRCicc)
-                }
+                val qrGeoData = parseQrGeoData(result.geoJson)
+                    .copy(location = Point.fromLngLat(longitude, latitude), geoJson = result.geoJson)
+                handleQr(result.geoJson, qrGeoData, LocationProvider.QRCicc)
             }
         }
     }
 
     private fun handleQr(qrData: String, qrGeoData: QrGeoData, provider: LocationProvider = LocationProvider.QR) {
-        setEffect(QrScanContract.Effect.QrResult(qrData, qrGeoData.location, provider))
+        setEffect(
+            QrScanContract.Effect.ShowQrConfirmation(
+                qrData = qrData,
+                location = qrGeoData.location,
+                mapGeometry = qrGeoData.mapGeometry,
+                provider = provider,
+            )
+        )
+    }
+
+    private fun confirmQr(
+        context: Context,
+        qrData: String,
+        location: Point?,
+        mapGeometry: GeoDataMapGeometry?,
+        provider: LocationProvider,
+    ) {
+        val qrGeoData = parseQrGeoData(qrData)
+
+        if (qrGeoData.geoJson == null) {
+            setEffect(QrScanContract.Effect.ShowMessage(resourceProvider.getString(R.string.invalid_qr_geojson)))
+            return
+        }
+
+        if (transactionId == null) {
+            setEffect(
+                QrScanContract.Effect.QrResult(
+                    qrData = qrData,
+                    location = location ?: qrGeoData.location,
+                    mapGeometry = mapGeometry ?: qrGeoData.mapGeometry,
+                    provider = provider,
+                )
+            )
+        } else {
+            uploadQr(
+                context = context,
+                qrData = qrData,
+                qrGeoData = qrGeoData,
+                location = location,
+                mapGeometry = mapGeometry,
+                provider = provider,
+            )
+        }
     }
 
     private fun uploadQr(
         context: Context,
         qrData: String,
         qrGeoData: QrGeoData,
-        provider: LocationProvider = LocationProvider.QR,
+        location: Point?,
+        mapGeometry: GeoDataMapGeometry?,
+        provider: LocationProvider,
     ) {
         launch {
             setEffect(QrScanContract.Effect.ToggleLoader(true))
@@ -145,7 +193,12 @@ class QrScanViewModel(
                     qrFile.first?.delete()
                     setEffect(
                         QrScanContract.Effect.ToggleLoader(false),
-                        QrScanContract.Effect.QrResult(qrData, qrGeoData.location, provider)
+                        QrScanContract.Effect.QrResult(
+                            qrData = qrData,
+                            location = location ?: qrGeoData.location,
+                            mapGeometry = mapGeometry ?: qrGeoData.mapGeometry,
+                            provider = provider,
+                        )
                     )
                 }
                 .onError {

@@ -52,3 +52,18 @@ object NullablePointParceler : Parceler<Point?> {
         parcel.writeDouble(latitude())
     }
 }
+
+/** Same as [NullablePointParceler] for non-null points, e.g. the vertices of a polygon. */
+object PointParceler : Parceler<Point> {
+
+    override fun create(parcel: Parcel): Point {
+        val longitude = parcel.readDouble()
+        val latitude = parcel.readDouble()
+        return Point.fromLngLat(longitude, latitude)
+    }
+
+    override fun Point.write(parcel: Parcel, flags: Int) {
+        parcel.writeDouble(longitude())
+        parcel.writeDouble(latitude())
+    }
+}
