@@ -82,12 +82,21 @@ private class GeoJsonParser : GeoParserStrategy {
 private class GeoIdParser : GeoParserStrategy {
     override fun parse(context: Context, uri: Uri): List<Point> {
         return context.contentResolver.openInputStream(uri)?.bufferedReader()?.useLines { lines ->
-            lines.mapNotNull {
-                val (lat, lon) = it.split(",").mapNotNull(String::toDoubleOrNull)
-                if (lat != null && lon != null) Point.fromLngLat(lon, lat) else null
-            }.toList()
+            parseGeoIdLines(lines)
         } ?: emptyList()
     }
+}
+
+/**
+ * One "latitude,longitude" pair per line. Blank lines, headers and lines with fewer
+ * than two numbers are skipped instead of failing the whole file.
+ */
+internal fun parseGeoIdLines(lines: Sequence<String>): List<Point> {
+    return lines.mapNotNull { line ->
+        val values = line.split(",").mapNotNull { it.trim().toDoubleOrNull() }
+        if (values.size < 2) return@mapNotNull null
+        Point.fromLngLat(values[1], values[0])
+    }.toList()
 }
 
 private class CsvParser : GeoParserStrategy {
