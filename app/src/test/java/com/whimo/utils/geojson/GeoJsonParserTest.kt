@@ -36,6 +36,9 @@ class GeoJsonParserTest {
 
         assertEquals(geoJson, result?.geoJson)
         assertCoordinate(result?.firstCoordinate, latitude = 52.52, longitude = 13.405)
+        assertEquals(1, result?.mapGeometry?.polygons?.size)
+        assertEquals(4, result?.mapGeometry?.polygons?.first()?.points?.size)
+        assertCoordinate(result?.mapGeometry?.polygons?.first()?.points?.first(), latitude = 52.52, longitude = 13.405)
     }
 
     @Test
@@ -46,6 +49,8 @@ class GeoJsonParserTest {
 
         assertEquals(geoJson, result?.geoJson)
         assertCoordinate(result?.firstCoordinate, latitude = 36.8219, longitude = -1.2921)
+        assertEquals(1, result?.mapGeometry?.points?.size)
+        assertCoordinate(result?.mapGeometry?.points?.first(), latitude = 36.8219, longitude = -1.2921)
     }
 
     @Test

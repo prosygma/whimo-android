@@ -30,6 +30,7 @@ import com.whimo.domain.transactions.models.TransactionModel
 interface TransactionDetailsInteractor {
     suspend fun getTransactions(): List<TransactionModel>
     suspend fun getTransactionDetails(transactionId: String): BaseResult<TransactionModel>
+    suspend fun getConversionTransactionDetails(groupId: String): BaseResult<TransactionModel>
     suspend fun getTransactionDetailsFromDB(transactionId: String): TransactionModel?
     suspend fun saveTransactionDetailsToDB(transactionModel: TransactionModel)
 
@@ -49,6 +50,7 @@ class TransactionDetailsInteractorImpl(
             search = null,
             status = null,
             action = null,
+            type = null,
             createdAtFrom = null,
             createdAtTo = null,
             commodityGroupId = null,
@@ -60,6 +62,10 @@ class TransactionDetailsInteractorImpl(
 
     override suspend fun getTransactionDetails(transactionId: String): BaseResult<TransactionModel> {
         return repository.getTransactionDetails(transactionId = transactionId)
+    }
+
+    override suspend fun getConversionTransactionDetails(groupId: String): BaseResult<TransactionModel> {
+        return repository.getConversionTransactionDetails(groupId = groupId)
     }
 
     override suspend fun getTransactionDetailsFromDB(transactionId: String): TransactionModel? {

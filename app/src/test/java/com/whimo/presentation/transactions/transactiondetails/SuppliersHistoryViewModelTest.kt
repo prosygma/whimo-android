@@ -38,6 +38,7 @@ import com.whimo.domain.transactions.TransactionsInteractor
 import com.whimo.domain.transactions.models.BaseModel
 import com.whimo.domain.transactions.models.TraceabilityStatus
 import com.whimo.domain.transactions.models.TransactionAction
+import com.whimo.domain.transactions.models.TransactionListDownloadSummaryModel
 import com.whimo.domain.transactions.models.TransactionModel
 import com.whimo.domain.transactions.models.TransactionStatus
 import com.whimo.domain.transactions.models.TransactionType
@@ -198,6 +199,18 @@ class SuppliersHistoryViewModelTest {
 
         override suspend fun loadNextPage(filter: TransactionsFilter) {
             nextPageHarvestSeasonId = filter.harvestSeason?.id
+        }
+
+        override suspend fun getDownloadSummary(filter: TransactionsFilter): BaseResult<TransactionListDownloadSummaryModel> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun downloadTransactionListCSV(filter: TransactionsFilter): BaseResult<ResponseBody> {
+            throw NotImplementedError()
+        }
+
+        override suspend fun downloadTransactionListLocationBundle(filter: TransactionsFilter): BaseResult<ResponseBody> {
+            throw NotImplementedError()
         }
     }
 

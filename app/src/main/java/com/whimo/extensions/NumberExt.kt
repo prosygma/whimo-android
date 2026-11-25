@@ -30,3 +30,27 @@ fun Float.toQuantityText(): String {
         String.format(Locale.ENGLISH, "%.2f", this).trimEnd('0').trimEnd('.')
     }
 }
+
+fun Float.toQuantityTextWithSign(): String {
+    return if (this > 0f) {
+        "+${toQuantityText()}"
+    } else {
+        toQuantityText()
+    }
+}
+
+fun Float.toQuantityTextWithUnit(unit: String): String {
+    return if (unit.isBlank()) {
+        toQuantityText()
+    } else {
+        "${toQuantityText()}$unit"
+    }
+}
+
+fun Float.toQuantityTextWithSignAndUnit(unit: String): String {
+    return if (unit.isBlank()) {
+        toQuantityTextWithSign()
+    } else {
+        "${toQuantityTextWithSign()}$unit"
+    }
+}

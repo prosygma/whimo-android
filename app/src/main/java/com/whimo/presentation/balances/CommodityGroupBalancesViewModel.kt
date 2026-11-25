@@ -26,6 +26,7 @@ import com.whimo.base.CoreViewEvent
 import com.whimo.data.base.common.onError
 import com.whimo.data.base.common.onSuccess
 import com.whimo.domain.commodity.CommodityInteractor
+import com.whimo.domain.commodity.refreshBalances
 import com.whimo.domain.commodity.models.CommodityBalanceFilter
 import com.whimo.domain.commodity.models.CommodityGroupModel
 import com.whimo.network.ErrorHandler
@@ -64,14 +65,14 @@ class CommodityGroupBalancesViewModel(
 
     private fun getBalances() {
         launch {
-            val cachedBalances = interactor.getBalancesFromDB(filter)
-            if (cachedBalances.isNotEmpty()) {
-                balances = cachedBalances.map { balance -> balance.toBalanceCommodityItemModel() }
-                updateView()
-            }
+            interactor.refreshBalances(filter) { cachedBalances ->
+                if (cachedBalances.isNotEmpty()) {
+                    balances = cachedBalances.map { balance -> balance.toBalanceCommodityItemModel() }
+                    updateView()
+                }
 
-            setEffect(CommodityGroupBalancesContract.Effect.ToggleLoader(balances.isNullOrEmpty()))
-            interactor.getBalances(filter)
+                setEffect(CommodityGroupBalancesContract.Effect.ToggleLoader(balances.isNullOrEmpty()))
+            }
                 .onSuccess {
                     balances = it.orEmpty().map { balance -> balance.toBalanceCommodityItemModel() }
                     setEffect(CommodityGroupBalancesContract.Effect.ToggleLoader(false))

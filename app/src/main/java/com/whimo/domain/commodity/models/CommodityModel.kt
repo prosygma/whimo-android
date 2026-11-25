@@ -24,7 +24,7 @@ package com.whimo.domain.commodity.models
 import android.os.Parcelable
 import com.whimo.domain.harvestseasons.models.HarvestSeasonModel
 import com.whimo.domain.transactions.models.TraceabilityStatus
-import com.whimo.extensions.toQuantityText
+import com.whimo.extensions.toQuantityTextWithUnit
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
@@ -50,7 +50,7 @@ data class CommodityModel(
     }
 
     fun getBalanceText(): String {
-        return "${(balance ?: 0f).toQuantityText()} $unit"
+        return (balance ?: 0f).toQuantityTextWithUnit(unit)
     }
 }
 
@@ -82,6 +82,6 @@ data class CommodityBalanceModel(
     val traceabilityStatus: TraceabilityStatus? = null,
 ) : Parcelable {
     fun getBalanceText(): String {
-        return "${volume.toQuantityText()} ${commodity.unit}"
+        return volume.toQuantityTextWithUnit(commodity.unit)
     }
 }

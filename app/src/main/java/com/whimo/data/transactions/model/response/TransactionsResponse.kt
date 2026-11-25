@@ -38,19 +38,33 @@ data class TransactionDetailsResponse(
     val message: String
 )
 
+data class TransactionListLocationSummaryResponse(
+    val success: Boolean,
+    val data: TransactionListLocationSummaryData?,
+    val message: String,
+)
+
+data class TransactionListLocationSummaryData(
+    val full_traceability_farms: Int?,
+    val manually_added_farms: Int?,
+    val farms_without_geolocation: Int?,
+    val traders: Int?,
+)
+
 data class BaseResponse(
     val success: Boolean,
     val message: String
 )
 
 data class TransactionData(
-    val id: String,
+    val id: String?,
+    val group_id: String?,
     val created_at: String,
     val updated_at: String?,
     val expires_at: String?,
-    val type: String,
-    val status: String,
-    val action: String,
+    val type: String?,
+    val status: String?,
+    val action: String?,
     val location: String?,
     val latitude: Double?,
     val longitude: Double?,
@@ -58,15 +72,26 @@ data class TransactionData(
     val transaction_longitude: Double?,
     val farm_latitude: Double?,
     val farm_longitude: Double?,
-    val commodity: Commodity,
-    val volume: Float,
+    val commodity: Commodity?,
+    val volume: Float?,
+    val signed_volume: Float?,
     val traceability: String?,
     val seller: User?,
     val buyer: User?,
-    val is_buying_from_farmer: Boolean,
-    val is_automatic: Boolean,
+    val is_buying_from_farmer: Boolean?,
+    val is_automatic: Boolean?,
     val harvest_season: HarvestSeasonData?,
     val created_by_id: String?,
+    val inputs: List<ConversionTransactionData>?,
+    val outputs: List<ConversionTransactionData>?,
+)
+
+data class ConversionTransactionData(
+    val id: String?,
+    val transaction_id: String?,
+    val commodity: Commodity?,
+    val volume: Float?,
+    val signed_volume: Float?,
 )
 
 data class User(

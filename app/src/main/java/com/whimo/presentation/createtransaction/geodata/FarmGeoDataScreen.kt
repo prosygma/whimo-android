@@ -43,6 +43,7 @@ import androidx.navigation.compose.rememberNavController
 import com.whimo.R
 import com.whimo.base.ObserveEffects
 import com.whimo.domain.createtransaction.models.CreateTransactionModel
+import com.whimo.domain.createtransaction.models.GeoDataMapGeometry
 import com.whimo.domain.createtransaction.models.LocationProvider
 import com.whimo.domain.transactions.models.TransactionModel
 import com.whimo.extensions.findActivity
@@ -91,6 +92,7 @@ fun FarmGeoDataScreen(
                     activity.setResult(
                         locationProvider = LocationProvider.GPS,
                         location = effect.location,
+                        mapGeometry = GeoDataMapGeometry(point = effect.location),
                     )
                     activity.finish()
                 }

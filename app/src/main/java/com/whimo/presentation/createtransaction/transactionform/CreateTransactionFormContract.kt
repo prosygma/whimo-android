@@ -22,10 +22,12 @@
 package com.whimo.presentation.createtransaction.transactionform
 
 import android.content.Context
+import com.mapbox.geojson.Point
 import com.whimo.base.CoreViewBinding
 import com.whimo.base.CoreViewEvent
 import com.whimo.base.CoreViewSideEffect
 import com.whimo.domain.createtransaction.models.CreateTransactionModel
+import com.whimo.domain.createtransaction.models.GeoDataMapGeometry
 import com.whimo.domain.harvestseasons.models.HarvestSeasonStatus
 
 object CreateTransactionFormContract {
@@ -33,6 +35,8 @@ object CreateTransactionFormContract {
         var toolbarTitle: String = "Producer transaction",
         var farmGeoDataVisible: Boolean = true,
         var farmGeoDataText: String = "Tap to add data",
+        var farmGeoDataLocation: Point? = null,
+        var farmGeoDataMapGeometry: GeoDataMapGeometry? = null,
         var commodityTypeText: String = "Tap to add data",
         var commodityVolumeText: String = "Tap to add data",
         var commodityVolumeBreakdown: CommodityVolumeBreakdown? = null,

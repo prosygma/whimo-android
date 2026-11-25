@@ -22,30 +22,18 @@
 package com.whimo.domain.transactions.models
 
 import android.os.Parcelable
-import androidx.compose.ui.graphics.Color
 import com.mapbox.geojson.Point
-import com.whimo.R
 import com.whimo.domain.commodity.models.CommodityGroupModel
 import com.whimo.domain.commodity.models.CommodityModel
 import com.whimo.domain.createtransaction.models.LocationProvider
 import com.whimo.domain.harvestseasons.models.getYearRangeText
-import com.whimo.presentation.ui.theme.ColorBerryBlue
-import com.whimo.presentation.ui.theme.ColorError
-import com.whimo.presentation.ui.theme.ColorGray10
-import com.whimo.presentation.ui.theme.ColorGray5
-import com.whimo.presentation.ui.theme.ColorGray50
-import com.whimo.presentation.ui.theme.ColorGray90
-import com.whimo.presentation.ui.theme.ColorLightBlue
-import com.whimo.presentation.ui.theme.ColorLightGreen
-import com.whimo.presentation.ui.theme.ColorLightOrange
-import com.whimo.presentation.ui.theme.ColorLightRed
-import com.whimo.presentation.ui.theme.ColorSuccess
-import com.whimo.presentation.ui.theme.ColorWarning
-import com.whimo.extensions.toQuantityText
+import com.whimo.extensions.toQuantityTextWithSignAndUnit
+import com.whimo.extensions.toQuantityTextWithUnit
 import com.whimo.utils.geo.NullablePointParceler
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
 import java.time.LocalDateTime
+import kotlin.math.absoluteValue
 
 typealias HarvestSeasonModel = com.whimo.domain.harvestseasons.models.HarvestSeasonModel
 typealias HarvestSeasonStatus = com.whimo.domain.harvestseasons.models.HarvestSeasonStatus
@@ -76,6 +64,18 @@ data class TransactionModel(
     val isAutomatic: Boolean,
     val createdById: String?,
     val harvestSeason: HarvestSeasonModel? = null,
+    val groupId: String? = null,
+    val signedVolume: Float? = null,
+    val conversionInputs: List<ConversionTransactionItemModel> = emptyList(),
+    val conversionOutputs: List<ConversionTransactionItemModel> = emptyList(),
+) : Parcelable
+
+@Parcelize
+data class ConversionTransactionItemModel(
+    val id: String?,
+    val commodity: CommodityModel,
+    val volume: Float,
+    val signedVolume: Float?,
 ) : Parcelable
 
 @Parcelize
@@ -129,6 +129,8 @@ data class TransactionsFilter(
     var query: String? = null,
     var status: TransactionStatus? = null,
     var action: TransactionAction? = null,
+    var type: TransactionType? = null,
+    var groupConversions: Boolean = false,
     var dateStart: LocalDateTime? = null,
     var dateEnd: LocalDateTime? = null,
     var commodityGroup: CommodityGroupModel? = null,
@@ -136,10 +138,12 @@ data class TransactionsFilter(
     var user: UserModel? = null,
     var harvestSeason: HarvestSeasonModel? = null,
 )
+
 fun TransactionsFilter.allFieldsNull(): Boolean {
     return query == null &&
             status == null &&
             action == null &&
+            type == null &&
             dateStart == null &&
             dateEnd == null &&
             commodityGroup == null &&
@@ -147,12 +151,21 @@ fun TransactionsFilter.allFieldsNull(): Boolean {
             user == null &&
             harvestSeason == null
 }
+
+fun TransactionModel.getCommodityName(): String {
+    return commodity.name
+}
+
 fun TransactionModel.getCommodityText(): String {
     return "${commodity.code} ${commodity.name}"
 }
 
 fun TransactionModel.getCommodityVolumeText(): String {
-    return "${volume.toQuantityText()} ${commodity.unit}"
+    return volume.toQuantityTextWithUnit(commodity.unit)
+}
+
+fun TransactionModel.getCommodityVolumeTextWithSign(): String {
+    return (signedVolume ?: volume).toQuantityTextWithSignAndUnit(commodity.unit)
 }
 
 fun TransactionModel.getCommodityFullText(): String {
@@ -161,6 +174,47 @@ fun TransactionModel.getCommodityFullText(): String {
 
 fun TransactionModel.getCommodityShortText(): String {
     return "${commodity.group?.name}, ${getCommodityVolumeText()}"
+}
+
+fun TransactionModel.isConversion(): Boolean {
+    return type == TransactionType.Conversion ||
+            conversionInputs.isNotEmpty() ||
+            conversionOutputs.isNotEmpty()
+}
+
+fun TransactionModel.getConversionInputs(): List<ConversionTransactionItemModel> {
+    if (conversionInputs.isNotEmpty()) return conversionInputs
+
+    val fallbackVolume = volume.absoluteValue
+    return listOf(
+        ConversionTransactionItemModel(
+            id = id,
+            commodity = commodity,
+            volume = fallbackVolume,
+            signedVolume = signedVolume ?: -fallbackVolume,
+        )
+    )
+}
+
+fun TransactionModel.getConversionOutputs(): List<ConversionTransactionItemModel> {
+    return conversionOutputs
+}
+
+fun ConversionTransactionItemModel.getCommodityName(): String {
+    return commodity.name
+}
+
+fun ConversionTransactionItemModel.getCommodityText(): String {
+    return "${commodity.code} ${commodity.name}"
+}
+
+fun ConversionTransactionItemModel.getVolumeTextWithSign(defaultSign: Int): String {
+    val fallbackVolume = when {
+        defaultSign < 0 -> -volume.absoluteValue
+        defaultSign > 0 -> volume.absoluteValue
+        else -> volume
+    }
+    return (signedVolume ?: fallbackVolume).toQuantityTextWithSignAndUnit(commodity.unit)
 }
 
 fun HarvestSeasonModel.getShortName(): String {

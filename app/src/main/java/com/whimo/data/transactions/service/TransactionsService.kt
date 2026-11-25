@@ -24,8 +24,10 @@ package com.whimo.data.transactions.service
 import com.whimo.data.transactions.model.request.UpdateTransactionStatusRequest
 import com.whimo.data.transactions.model.response.BaseResponse
 import com.whimo.data.transactions.model.response.TransactionDetailsResponse
+import com.whimo.data.transactions.model.response.TransactionListLocationSummaryResponse
 import com.whimo.data.transactions.model.response.TransactionTraceabilityCountsResponse
 import com.whimo.data.transactions.model.response.TransactionsResponse
+import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -33,6 +35,7 @@ import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.Streaming
 
 interface TransactionsService {
     @GET("transactions/")
@@ -42,6 +45,8 @@ interface TransactionsService {
         @Query("page_size") pageSize: Int?,
         @Query("status") status: String?,
         @Query("action") action: String?,
+        @Query("type") type: String?,
+        @Query("group_conversions") groupConversions: Boolean?,
         @Query("created_at_from") createdAtFrom: String?,
         @Query("created_at_to") createdAtTo: String?,
         @Query("commodity_group_id") commodityGroupId: String?,
@@ -50,9 +55,62 @@ interface TransactionsService {
         @Query("harvest_season_id") harvestSeasonId: String?,
     ): Response<TransactionsResponse>
 
+    @Streaming
+    @GET("transactions/download/csv/")
+    suspend fun downloadTransactionListCSV(
+        @Query("search") search: String?,
+        @Query("include_chain") includeChain: Boolean?,
+        @Query("status") status: String?,
+        @Query("action") action: String?,
+        @Query("type") type: String?,
+        @Query("group_conversions") groupConversions: Boolean?,
+        @Query("created_at_from") createdAtFrom: String?,
+        @Query("created_at_to") createdAtTo: String?,
+        @Query("commodity_group_id") commodityGroupId: String?,
+        @Query("commodity_id") commodityId: String?,
+        @Query("buyer_id") buyerId: String?,
+        @Query("harvest_season_id") harvestSeasonId: String?,
+    ): Response<ResponseBody>
+
+    @Streaming
+    @GET("transactions/download/bundle/")
+    suspend fun downloadTransactionListLocationBundle(
+        @Query("search") search: String?,
+        @Query("status") status: String?,
+        @Query("action") action: String?,
+        @Query("type") type: String?,
+        @Query("group_conversions") groupConversions: Boolean?,
+        @Query("created_at_from") createdAtFrom: String?,
+        @Query("created_at_to") createdAtTo: String?,
+        @Query("commodity_group_id") commodityGroupId: String?,
+        @Query("commodity_id") commodityId: String?,
+        @Query("buyer_id") buyerId: String?,
+        @Query("harvest_season_id") harvestSeasonId: String?,
+    ): Response<ResponseBody>
+
+    @GET("transactions/download/summary/")
+    suspend fun getTransactionListLocationSummary(
+        @Query("search") search: String?,
+        @Query("status") status: String?,
+        @Query("action") action: String?,
+        @Query("type") type: String?,
+        @Query("group_conversions") groupConversions: Boolean?,
+        @Query("created_at_from") createdAtFrom: String?,
+        @Query("created_at_to") createdAtTo: String?,
+        @Query("commodity_group_id") commodityGroupId: String?,
+        @Query("commodity_id") commodityId: String?,
+        @Query("buyer_id") buyerId: String?,
+        @Query("harvest_season_id") harvestSeasonId: String?,
+    ): Response<TransactionListLocationSummaryResponse>
+
     @GET("transactions/{transaction_id}/")
     suspend fun getTransactionDetails(
         @Path("transaction_id") transactionId: String,
+    ): Response<TransactionDetailsResponse>
+
+    @GET("transactions/conversion/{group_id}/")
+    suspend fun getConversionTransactionDetails(
+        @Path("group_id") groupId: String,
     ): Response<TransactionDetailsResponse>
 
     @GET("transactions/{transaction_id}/traceability-counts/")

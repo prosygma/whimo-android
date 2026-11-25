@@ -47,6 +47,7 @@ import androidx.navigation.compose.rememberNavController
 import com.whimo.R
 import com.whimo.base.ObserveEffects
 import com.whimo.domain.createtransaction.models.CreateTransactionModel
+import com.whimo.domain.createtransaction.models.GeoDataMapGeometry
 import com.whimo.domain.createtransaction.models.LocationProvider
 import com.whimo.domain.transactions.models.TransactionModel
 import com.whimo.extensions.findActivity
@@ -91,6 +92,7 @@ fun UploadFileScreen(
                     activity.setResult(
                         locationProvider = LocationProvider.File,
                         location = effect.location,
+                        mapGeometry = effect.location?.let { GeoDataMapGeometry(point = it) },
                         file = effect.file,
                     )
                     activity.finish()

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- values-pt in main names the product; locale-specific main strings win over
+         this flavor's default values, so the product name is overridden here too. -->
+    <string name="app_name">CamerTrace</string>
+    <string name="seller_not_using_app_description2">Selecione esta opção se o vendedor não possui uma conta no CamerTrace.</string>
+    <string name="seller_using_app_description2">Selecione esta opção se o vendedor possui uma conta no CamerTrace.</string>
+</resources>

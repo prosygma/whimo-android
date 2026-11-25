@@ -46,6 +46,7 @@ import androidx.navigation.compose.rememberNavController
 import com.mapbox.geojson.Point
 import com.whimo.R
 import com.whimo.base.ObserveEffects
+import com.whimo.domain.createtransaction.models.GeoDataMapGeometry
 import com.whimo.domain.createtransaction.models.LocationProvider
 import com.whimo.domain.createtransaction.models.MFile
 import com.whimo.extensions.findActivity
@@ -53,6 +54,8 @@ import com.whimo.extensions.getParcelableCompatExtra
 import com.whimo.navigation.Screens
 import com.whimo.presentation.createtransaction.SharedTransactionViewModel
 import com.whimo.presentation.createtransaction.components.CreateTransactionDialog
+import com.whimo.presentation.createtransaction.components.FarmGeoDataMapDialog
+import com.whimo.presentation.createtransaction.components.FarmGeoDataPreviewItem
 import com.whimo.presentation.createtransaction.components.CreateTransactionItem
 import com.whimo.presentation.createtransaction.components.CreateTransactionMessage
 import com.whimo.presentation.createtransaction.components.CreateTransactionVolumeBreakdownItem
@@ -62,6 +65,7 @@ import com.whimo.presentation.createtransaction.geodata.FarmGeoDataActivity
 import com.whimo.presentation.createtransaction.geodata.FarmGeoDataActivity.Companion.RESULT_FILE
 import com.whimo.presentation.createtransaction.geodata.FarmGeoDataActivity.Companion.RESULT_LOCATION_LAT
 import com.whimo.presentation.createtransaction.geodata.FarmGeoDataActivity.Companion.RESULT_LOCATION_LNG
+import com.whimo.presentation.createtransaction.geodata.FarmGeoDataActivity.Companion.RESULT_MAP_GEOMETRY
 import com.whimo.presentation.createtransaction.geodata.FarmGeoDataActivity.Companion.RESULT_LOCATION_PROVIDER
 import com.whimo.presentation.createtransaction.geodata.FarmGeoDataActivity.Companion.RESULT_QR_DATA
 import com.whimo.presentation.main.components.Toolbar2
@@ -96,6 +100,7 @@ fun CreateTransactionFormScreen(
     var errorMessage by remember { mutableStateOf("") }
     var showConfirmDialog by remember { mutableStateOf(false) }
     var showGeoDataDialog by remember { mutableStateOf(false) }
+    var showFarmGeoDataMapDialog by remember { mutableStateOf(false) }
     var requestPermission by remember { mutableStateOf(false) }
 
     val launcher = rememberLauncherForActivityResult(
@@ -107,6 +112,7 @@ fun CreateTransactionFormScreen(
                     val lng = data.getDoubleExtra(RESULT_LOCATION_LNG, Double.NaN)
                     val lat = data.getDoubleExtra(RESULT_LOCATION_LAT, Double.NaN)
                     val location = if (lng.isNaN() || lat.isNaN()) null else Point.fromLngLat(lng, lat)
+                    val mapGeometry = data.getParcelableCompatExtra<GeoDataMapGeometry>(RESULT_MAP_GEOMETRY)
                     val qrData = data.getStringExtra(RESULT_QR_DATA)
                     val file = data.getParcelableCompatExtra<MFile>(RESULT_FILE)
 
@@ -115,17 +121,25 @@ fun CreateTransactionFormScreen(
                     when (locationProvider) {
                         LocationProvider.GPS -> {
                             sharedTransactionViewModel?.setLocation(location)
+                            sharedTransactionViewModel?.setMapGeometry(location?.let { GeoDataMapGeometry(point = it) })
                         }
                         LocationProvider.QR, LocationProvider.QRCicc -> {
                             sharedTransactionViewModel?.setQR(qrData, locationProvider)
                             sharedTransactionViewModel?.setLocation(location)
+                            sharedTransactionViewModel?.setMapGeometry(
+                                mapGeometry ?: location?.let { GeoDataMapGeometry(point = it) }
+                            )
                         }
                         LocationProvider.Manual -> {
                             sharedTransactionViewModel?.setLocation(location)
+                            sharedTransactionViewModel?.setMapGeometry(
+                                mapGeometry ?: location?.let { GeoDataMapGeometry(point = it) }
+                            )
                         }
                         LocationProvider.File -> {
                             sharedTransactionViewModel?.setFile(file)
                             sharedTransactionViewModel?.setLocation(location)
+                            sharedTransactionViewModel?.setMapGeometry(location?.let { GeoDataMapGeometry(point = it) })
                         }
                         null -> {}
                     }
@@ -195,12 +209,28 @@ fun CreateTransactionFormScreen(
             )
 
             if (binding.farmGeoDataVisible) {
-                CreateTransactionItem(
-                    iconRes = R.drawable.ic_map_marker,
-                    title = stringResource(R.string.farm_geodata),
-                    description = binding.farmGeoDataText,
-                ) {
-                    viewModel?.setEvent(CreateTransactionFormContract.Event.OnFarmGeoDataClick)
+                if (binding.farmGeoDataLocation != null || binding.farmGeoDataMapGeometry != null) {
+                    FarmGeoDataPreviewItem(
+                        iconRes = R.drawable.ic_map_marker,
+                        title = stringResource(R.string.farm_geodata),
+                        description = binding.farmGeoDataText,
+                        location = binding.farmGeoDataLocation,
+                        mapGeometry = binding.farmGeoDataMapGeometry,
+                        onClick = {
+                            viewModel?.setEvent(CreateTransactionFormContract.Event.OnFarmGeoDataClick)
+                        },
+                        onExpandClick = {
+                            showFarmGeoDataMapDialog = true
+                        },
+                    )
+                } else {
+                    CreateTransactionItem(
+                        iconRes = R.drawable.ic_map_marker,
+                        title = stringResource(R.string.farm_geodata),
+                        description = binding.farmGeoDataText,
+                    ) {
+                        viewModel?.setEvent(CreateTransactionFormContract.Event.OnFarmGeoDataClick)
+                    }
                 }
             }
 
@@ -300,6 +330,16 @@ fun CreateTransactionFormScreen(
             onDismiss = {
                 showGeoDataDialog = false
             }
+        )
+    }
+
+    if (showFarmGeoDataMapDialog) {
+        FarmGeoDataMapDialog(
+            location = binding.farmGeoDataLocation,
+            mapGeometry = binding.farmGeoDataMapGeometry,
+            onDismiss = {
+                showFarmGeoDataMapDialog = false
+            },
         )
     }
 

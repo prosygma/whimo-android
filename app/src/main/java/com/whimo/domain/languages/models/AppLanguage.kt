@@ -41,6 +41,7 @@ data class AppLanguage(
             AppLanguage(code = "en", name = "English"),
             AppLanguage(code = "fr", name = "French"),
             AppLanguage(code = "es", name = "Spanish"),
+            AppLanguage(code = "pt", name = "Portuguese"),
         )
 
         fun bundled(code: String?): AppLanguage? {

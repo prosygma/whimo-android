@@ -21,6 +21,9 @@
  */
 package com.whimo.presentation.transactions
 
+import android.content.Context
+import android.net.Uri
+import com.whimo.R
 import com.whimo.base.BaseViewModel
 import com.whimo.base.CoreViewEvent
 import com.whimo.data.base.common.onError
@@ -36,12 +39,18 @@ import com.whimo.domain.harvestseasons.models.HarvestSeasonFilter
 import com.whimo.domain.transactions.TransactionsInteractor
 import com.whimo.domain.transactions.models.HarvestSeasonModel
 import com.whimo.domain.transactions.models.TransactionAction
+import com.whimo.domain.transactions.models.TransactionListDownloadSummaryModel
 import com.whimo.domain.transactions.models.TransactionModel
 import com.whimo.domain.transactions.models.TransactionStatus
+import com.whimo.domain.transactions.models.TransactionType
 import com.whimo.domain.transactions.models.TransactionsFilter
 import com.whimo.domain.transactions.models.TransactionsState
+import com.whimo.network.ErrorHandler
+import com.whimo.providers.ResourceProvider
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import okhttp3.ResponseBody
+import java.io.InputStream
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -49,9 +58,12 @@ class TransactionsViewModel(
     private val allTabInteractor: TransactionsInteractor,
     private val boughtTabInteractor: TransactionsInteractor,
     private val soldTabInteractor: TransactionsInteractor,
+    private val convertedTabInteractor: TransactionsInteractor,
     private val createTransactionInteractor: CreateTransactionInteractor,
     private val harvestSeasonsInteractor: HarvestSeasonsInteractor,
     private val commodityInteractor: CommodityInteractor,
+    private val errorHandler: ErrorHandler,
+    private val resourceProvider: ResourceProvider,
 ) : BaseViewModel<TransactionsContract.Binding>() {
 
     private var searchJob: Job? = null
@@ -65,6 +77,10 @@ class TransactionsViewModel(
     private var harvestSeasons: List<HarvestSeasonModel> = emptyList()
     private var harvestSeasonCommodityIds: List<String>? = null
     private val filter = TransactionsFilter()
+    private var downloadedCSV: ResponseBody? = null
+    private var downloadedBundle: ResponseBody? = null
+    private var downloadedFileName = ""
+    private var downloadBundleAfterCsvSave = false
 
     override fun createBinding(): TransactionsContract.Binding {
         return TransactionsContract.Binding()
@@ -90,6 +106,10 @@ class TransactionsViewModel(
             is TransactionsContract.Event.TransactionClicked -> transactionClicked(event.transaction)
             is TransactionsContract.Event.AddGeoDataClicked -> addGeoDataClicked(event.transaction)
             is TransactionsContract.Event.NotificationsClicked -> notificationsClicked()
+            is TransactionsContract.Event.DownloadOptionSelected -> downloadOptionSelected(event.option)
+            is TransactionsContract.Event.DownloadConfirmed -> downloadConfirmed(event.option)
+            is TransactionsContract.Event.SaveDownloadedFile -> saveDownloadedFile(event.context, event.uri)
+            is TransactionsContract.Event.SaveDownloadedFileCancelled -> clearDownloadedFiles()
             is TransactionsContract.Event.NetworkAvailabilityChanged -> {
                 networkAvailabilityChanged(event.isAvailable)
             }
@@ -130,6 +150,15 @@ class TransactionsViewModel(
         launch {
             soldTabInteractor.stateFlow.collect { state ->
                 tabStates[TransactionsTab.Sold] = state
+
+                delay(100)
+                updateHarvestSeasonsFromTransactionsIfNeeded()
+                updateTabs()
+            }
+        }
+        launch {
+            convertedTabInteractor.stateFlow.collect { state ->
+                tabStates[TransactionsTab.Converted] = state
 
                 delay(100)
                 updateHarvestSeasonsFromTransactionsIfNeeded()
@@ -256,9 +285,10 @@ class TransactionsViewModel(
     private fun refreshTransactions(tab: TransactionsTab) {
         launch {
             when (tab) {
-                TransactionsTab.All -> allTabInteractor.refresh(filter)
-                TransactionsTab.Bought -> boughtTabInteractor.refresh(filter.copy(action = TransactionAction.Buying))
-                TransactionsTab.Sold -> soldTabInteractor.refresh(filter.copy(action = TransactionAction.Selling))
+                TransactionsTab.All -> allTabInteractor.refresh(filter.forTab(tab))
+                TransactionsTab.Bought -> boughtTabInteractor.refresh(filter.forTab(tab))
+                TransactionsTab.Sold -> soldTabInteractor.refresh(filter.forTab(tab))
+                TransactionsTab.Converted -> convertedTabInteractor.refresh(filter.forTab(tab))
             }
         }
     }
@@ -266,9 +296,10 @@ class TransactionsViewModel(
     private fun nextPage(tab: TransactionsTab) {
         launch {
             when (tab) {
-                TransactionsTab.All -> allTabInteractor.loadNextPage(filter)
-                TransactionsTab.Bought -> boughtTabInteractor.loadNextPage(filter.copy(action = TransactionAction.Buying))
-                TransactionsTab.Sold -> soldTabInteractor.loadNextPage(filter.copy(action = TransactionAction.Selling))
+                TransactionsTab.All -> allTabInteractor.loadNextPage(filter.forTab(tab))
+                TransactionsTab.Bought -> boughtTabInteractor.loadNextPage(filter.forTab(tab))
+                TransactionsTab.Sold -> soldTabInteractor.loadNextPage(filter.forTab(tab))
+                TransactionsTab.Converted -> convertedTabInteractor.loadNextPage(filter.forTab(tab))
             }
         }
     }
@@ -328,6 +359,158 @@ class TransactionsViewModel(
         setEffect(TransactionsContract.Effect.NavigateNotifications)
     }
 
+    private fun downloadOptionSelected(option: TransactionsDownloadOption) {
+        setEffect(TransactionsContract.Effect.ToggleDownloadLoader(true))
+
+        launch {
+            getInteractor(currentTab).getDownloadSummary(filter.forTab(currentTab))
+                .onSuccess { summary ->
+                    setEffect(
+                        TransactionsContract.Effect.ToggleDownloadLoader(false),
+                        TransactionsContract.Effect.ShowDownloadConfirmation(
+                            option = option,
+                            summary = summary ?: TransactionListDownloadSummaryModel(),
+                        )
+                    )
+                }
+                .onError {
+                    setEffect(
+                        TransactionsContract.Effect.ToggleDownloadLoader(false),
+                        TransactionsContract.Effect.ShowMessage(errorHandler.parseError(it))
+                    )
+                }
+        }
+    }
+
+    private fun downloadConfirmed(option: TransactionsDownloadOption) {
+        clearDownloadedFiles()
+
+        when (option) {
+            TransactionsDownloadOption.TransactionDetails -> {
+                downloadBundleAfterCsvSave = false
+                downloadTransactionDetails()
+            }
+            TransactionsDownloadOption.FarmGeolocations -> downloadFarmGeolocations()
+            TransactionsDownloadOption.Both -> {
+                downloadBundleAfterCsvSave = true
+                downloadTransactionDetails()
+            }
+        }
+    }
+
+    private fun downloadTransactionDetails() {
+        setEffect(TransactionsContract.Effect.ToggleDownloadLoader(true))
+
+        launch {
+            getInteractor(currentTab).downloadTransactionListCSV(filter.forTab(currentTab))
+                .onSuccess { body ->
+                    if (body == null) {
+                        setEffect(
+                            TransactionsContract.Effect.ToggleDownloadLoader(false),
+                            TransactionsContract.Effect.ShowMessage(resourceProvider.getString(R.string.download_failed))
+                        )
+                        return@onSuccess
+                    }
+
+                    downloadedCSV = body
+                    downloadedFileName = "Whimo-transactions.csv"
+
+                    setEffect(
+                        TransactionsContract.Effect.ToggleDownloadLoader(false),
+                        TransactionsContract.Effect.CSVDataDownloaded(downloadedFileName)
+                    )
+                }
+                .onError {
+                    setEffect(
+                        TransactionsContract.Effect.ToggleDownloadLoader(false),
+                        TransactionsContract.Effect.ShowMessage(errorHandler.parseError(it))
+                    )
+                }
+        }
+    }
+
+    private fun downloadFarmGeolocations() {
+        setEffect(TransactionsContract.Effect.ToggleDownloadLoader(true))
+
+        launch {
+            getInteractor(currentTab).downloadTransactionListLocationBundle(filter.forTab(currentTab))
+                .onSuccess { body ->
+                    if (body == null) {
+                        setEffect(
+                            TransactionsContract.Effect.ToggleDownloadLoader(false),
+                            TransactionsContract.Effect.ShowMessage(resourceProvider.getString(R.string.download_failed))
+                        )
+                        return@onSuccess
+                    }
+
+                    downloadedBundle = body
+                    downloadedFileName = "Whimo-farm-geolocations.zip"
+
+                    setEffect(
+                        TransactionsContract.Effect.ToggleDownloadLoader(false),
+                        TransactionsContract.Effect.ZipDataDownloaded(downloadedFileName)
+                    )
+                }
+                .onError {
+                    setEffect(
+                        TransactionsContract.Effect.ToggleDownloadLoader(false),
+                        TransactionsContract.Effect.ShowMessage(errorHandler.parseError(it))
+                    )
+                }
+        }
+    }
+
+    private fun saveDownloadedFile(context: Context, uri: Uri) {
+        setEffect(TransactionsContract.Effect.ToggleDownloadLoader(true))
+
+        launch {
+            var inputStream: InputStream? = null
+            val savingCsv = downloadedCSV != null
+            var saved = false
+
+            try {
+                context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                    inputStream = downloadedCSV?.byteStream() ?: downloadedBundle?.byteStream()
+                    inputStream?.copyTo(outputStream)
+                    outputStream.flush()
+                    saved = inputStream != null
+                }
+
+                if (saved) {
+                    setEffect(TransactionsContract.Effect.ShowMessage(resourceProvider.getString(R.string.file_saved, downloadedFileName)))
+                } else {
+                    setEffect(TransactionsContract.Effect.ShowMessage(resourceProvider.getString(R.string.file_save_failed)))
+                }
+            } catch (e: Exception) {
+                setEffect(TransactionsContract.Effect.ShowMessage(resourceProvider.getString(R.string.file_save_failed)))
+            } finally {
+                inputStream?.close()
+                if (savingCsv) {
+                    downloadedCSV = null
+                } else {
+                    downloadedBundle = null
+                }
+                setEffect(TransactionsContract.Effect.ToggleDownloadLoader(false))
+            }
+
+            if (savingCsv && downloadBundleAfterCsvSave) {
+                downloadBundleAfterCsvSave = false
+                if (saved) {
+                    downloadFarmGeolocations()
+                }
+            }
+        }
+    }
+
+    private fun clearDownloadedFiles() {
+        downloadedCSV?.close()
+        downloadedBundle?.close()
+        downloadedCSV = null
+        downloadedBundle = null
+        downloadedFileName = ""
+        downloadBundleAfterCsvSave = false
+    }
+
     private fun networkAvailabilityChanged(isAvailable: Boolean) {
         val wasAvailable = networkAvailable
         networkAvailable = isAvailable
@@ -344,6 +527,7 @@ class TransactionsViewModel(
             pendingTransactions[TransactionsTab.All] = pendingItems
             pendingTransactions[TransactionsTab.Bought] = pendingItems.filter { it.transactionModel.action == TransactionAction.Buying }
             pendingTransactions[TransactionsTab.Sold] = pendingItems.filter { it.transactionModel.action == TransactionAction.Selling }
+            pendingTransactions[TransactionsTab.Converted] = emptyList()
 
             delay(100)
             updateTabs()
@@ -376,6 +560,15 @@ class TransactionsViewModel(
     private fun updatePendingSyncProgress(progress: PendingTransactionsSyncProgress?) {
         updateBinding { b ->
             b.pendingSyncProgress = progress
+        }
+    }
+
+    private fun getInteractor(tab: TransactionsTab): TransactionsInteractor {
+        return when (tab) {
+            TransactionsTab.All -> allTabInteractor
+            TransactionsTab.Bought -> boughtTabInteractor
+            TransactionsTab.Sold -> soldTabInteractor
+            TransactionsTab.Converted -> convertedTabInteractor
         }
     }
 
@@ -418,4 +611,23 @@ private fun CommodityGroupModel?.sameGroupAs(other: CommodityGroupModel?): Boole
 
 private fun CommodityGroupModel?.refreshFrom(groups: List<CommodityGroupModel>): CommodityGroupModel? {
     return this?.let { selected -> groups.find { it.id == selected.id } ?: selected }
+}
+
+private fun TransactionsFilter.forTab(tab: TransactionsTab): TransactionsFilter {
+    return when (tab) {
+        TransactionsTab.All -> copy(groupConversions = true)
+        TransactionsTab.Bought -> copy(
+            action = TransactionAction.Buying,
+            groupConversions = true,
+        )
+        TransactionsTab.Sold -> copy(
+            action = TransactionAction.Selling,
+            groupConversions = true,
+        )
+        TransactionsTab.Converted -> copy(
+            action = null,
+            type = TransactionType.Conversion,
+            groupConversions = true,
+        )
+    }
 }

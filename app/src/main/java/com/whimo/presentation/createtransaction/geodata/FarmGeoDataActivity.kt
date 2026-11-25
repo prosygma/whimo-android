@@ -39,6 +39,7 @@ import androidx.navigation.compose.rememberNavController
 import com.mapbox.geojson.Point
 import com.whimo.base.BaseActivity
 import com.whimo.domain.createtransaction.models.CreateTransactionModel
+import com.whimo.domain.createtransaction.models.GeoDataMapGeometry
 import com.whimo.domain.createtransaction.models.LocationProvider
 import com.whimo.domain.createtransaction.models.MFile
 import com.whimo.domain.transactions.models.TransactionModel
@@ -115,6 +116,7 @@ class FarmGeoDataActivity : BaseActivity(), OnBackPressedDispatcherOwner {
     fun setResult(
         locationProvider: LocationProvider? = null,
         location: Point? = null,
+        mapGeometry: GeoDataMapGeometry? = null,
         qrData: String? = null,
         file: MFile? = null,
     ) {
@@ -126,6 +128,7 @@ class FarmGeoDataActivity : BaseActivity(), OnBackPressedDispatcherOwner {
                 // boundary as two primitives. NaN marks "no location".
                 .putExtra(RESULT_LOCATION_LNG, location?.longitude() ?: Double.NaN)
                 .putExtra(RESULT_LOCATION_LAT, location?.latitude() ?: Double.NaN)
+                .putExtra(RESULT_MAP_GEOMETRY, mapGeometry)
                 .putExtra(RESULT_QR_DATA, qrData)
                 .putExtra(RESULT_FILE, file)
         )
@@ -138,8 +141,12 @@ class FarmGeoDataActivity : BaseActivity(), OnBackPressedDispatcherOwner {
         const val RESULT_LOCATION_PROVIDER = "result_location_provider"
         const val RESULT_LOCATION_LNG = "result_location_lng"
         const val RESULT_LOCATION_LAT = "result_location_lat"
+        const val RESULT_MAP_GEOMETRY = "result_map_geometry"
         const val RESULT_QR_DATA = "result_qr_data"
         const val RESULT_FILE = "result_file"
+        const val QR_CONFIRMATION_QR_DATA = "qr_confirmation_qr_data"
+        const val QR_CONFIRMATION_LOCATION = "qr_confirmation_location"
+        const val QR_CONFIRMATION_MAP_GEOMETRY = "qr_confirmation_map_geometry"
 
         fun openFarmGeoData(
             context: Context,

@@ -132,7 +132,7 @@ class TransactionDetailsViewModelTest {
         assertFalse(binding.acceptBalanceLoading)
         assertEquals("Not enough available balance.", binding.commodityWarningText)
         assertEquals(
-            "Not enough available balance.\n\nAn automatic transaction will be created for the missing 400 kg. This amount will have incomplete traceability.",
+            "Not enough available balance.\n\nAn automatic transaction will be created for the missing 400kg. This amount will have incomplete traceability.",
             binding.acceptWarningText,
         )
         assertEquals(listOf("commodity-id" to activeSeason.id), commodityInteractor.balanceRequests)
@@ -169,7 +169,7 @@ class TransactionDetailsViewModelTest {
         assertEquals("Not enough available balance.", binding.commodityWarningText)
         assertNull(binding.acceptWarningText)
         assertEquals(
-            "You have 400 kg available from the 2025/26 Harvest Season, but the buyer requested 800 kg.\n\n" +
+            "You have 400kg available from the 2025/26 Harvest Season, but the buyer requested 800kg.\n\n" +
                     "You can't accept this transaction until you have enough balance available.\n\n" +
                     "Alternatively, reject this request and create a new sale for the available amount.",
             binding.acceptBlockedDialogText,
@@ -249,6 +249,10 @@ class TransactionDetailsViewModelTest {
         override suspend fun getTransactions(): List<TransactionModel> = emptyList()
 
         override suspend fun getTransactionDetails(transactionId: String): BaseResult<TransactionModel> {
+            return BaseResult.Success(remoteTransaction)
+        }
+
+        override suspend fun getConversionTransactionDetails(groupId: String): BaseResult<TransactionModel> {
             return BaseResult.Success(remoteTransaction)
         }
 

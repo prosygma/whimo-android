@@ -58,13 +58,15 @@ import com.whimo.domain.transactions.models.HarvestSeasonStatus
 import com.whimo.domain.transactions.models.TraceabilityStatus
 import com.whimo.domain.transactions.models.TransactionAction
 import com.whimo.domain.transactions.models.TransactionModel
-import com.whimo.domain.transactions.models.getCommodityVolumeText
+import com.whimo.domain.transactions.models.getCommodityName
+import com.whimo.domain.transactions.models.getCommodityVolumeTextWithSign
 import com.whimo.domain.transactions.models.getShortName
 import com.whimo.extensions.isNetworkAvailable
 import com.whimo.extensions.toFormattedDateString
+import com.whimo.extensions.toFormattedDateString2
 import com.whimo.navigation.Screens
-import com.whimo.presentation.main.components.TransactionItem
 import com.whimo.presentation.main.components.Toolbar2
+import com.whimo.presentation.main.components.TransactionItem
 import com.whimo.presentation.transactions.transactiondetails.components.HarvestSeasonInfoDialog
 import com.whimo.presentation.transactions.transactiondetails.components.SectionHeader
 import com.whimo.presentation.transactions.transactiondetails.components.TitleDescriptionView
@@ -199,7 +201,8 @@ private fun BalanceDetailsContent(
             item {
                 TitleDescriptionView(
                     title = stringResource(R.string.commodity_type),
-                    description = "${commodity.code} ${commodity.name} ${commodity.getBalanceText()}",
+                    description = "${commodity.code} ${commodity.name}",
+                    volume = commodity.getBalanceText()
                 )
             }
         }
@@ -276,23 +279,19 @@ private fun BalanceSourceTransactionItem(
     transaction: TransactionModel,
 ) {
     val icon = if (transaction.action == TransactionAction.Buying) {
-        R.drawable.ic_status_buy
+        R.drawable.ic_buy_28
     } else {
-        R.drawable.ic_status_sell
+        R.drawable.ic_sell_28
     }
 
     TransactionItem(
         iconRes = icon,
-        title = transaction.getBalanceSourceTitle(),
-        description = transaction.createdDate.toFormattedDateString(),
+        title = transaction.getCommodityName(),
+        volume = transaction.getCommodityVolumeTextWithSign(),
+        description = transaction.createdDate.toFormattedDateString2(),
         harvestSeasonText = transaction.harvestSeason?.getShortName(),
         status = transaction.status,
     )
-}
-
-private fun TransactionModel.getBalanceSourceTitle(): String {
-    val commodityName = commodity.group?.name ?: commodity.name
-    return "$commodityName, ${getCommodityVolumeText()}"
 }
 
 private sealed class BalanceDetailsDialog {

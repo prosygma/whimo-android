@@ -79,3 +79,7 @@ fun LocalDateTime.toRelativeFormattedDateString(): String {
 fun LocalDateTime.toFormattedDateString(): String {
     return format(DateTimeFormatter.ofPattern("MMMM dd, yyyy h:mma"))
 }
+
+fun LocalDateTime.toFormattedDateString2(): String {
+    return format(DateTimeFormatter.ofPattern("MMM dd, yyyy h:mma"))
+}

@@ -39,6 +39,7 @@ val AppLanguage.iconRes: Int?
         "en" -> R.drawable.ic_en
         "fr" -> R.drawable.ic_fr
         "es" -> R.drawable.ic_sp
+        "pt" -> R.drawable.ic_pt
         else -> null
     }
 

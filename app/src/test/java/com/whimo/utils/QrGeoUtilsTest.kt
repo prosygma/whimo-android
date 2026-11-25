@@ -37,6 +37,9 @@ class QrGeoUtilsTest {
 
         assertEquals(geoJson, result.geoJson)
         assertCoordinate(result.location, latitude = 52.52, longitude = 13.405)
+        assertEquals(1, result.mapGeometry?.polygons?.size)
+        assertEquals(4, result.mapGeometry?.polygons?.first()?.points?.size)
+        assertCoordinate(result.mapGeometry?.polygons?.first()?.points?.first(), latitude = 52.52, longitude = 13.405)
     }
 
     @Test
@@ -47,6 +50,7 @@ class QrGeoUtilsTest {
 
         assertEquals(geoJson, result.geoJson)
         assertCoordinate(result.location, latitude = 36.8219, longitude = -1.2921)
+        assertCoordinate(result.mapGeometry?.point, latitude = 36.8219, longitude = -1.2921)
     }
 
     @Test
