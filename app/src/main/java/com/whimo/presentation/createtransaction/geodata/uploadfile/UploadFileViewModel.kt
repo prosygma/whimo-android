@@ -97,7 +97,12 @@ class UploadFileViewModel(
                 return@launch
             }
 
-            val locations = file?.uri?.let { GeoFileParser.parse(context, it) }
+            // Only used for the preview location: a file the app can't read is still uploaded.
+            val locations = file?.uri?.let { uri ->
+                runCatching { GeoFileParser.parse(context, uri) }
+                    .onFailure { it.printStackTrace() }
+                    .getOrNull()
+            }
 
             if (transactionId != null) {
                 interactor.updateTransactionGeoData(
